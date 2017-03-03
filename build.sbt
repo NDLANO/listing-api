@@ -10,6 +10,7 @@ val ScalaTestVersion = "3.0.1"
 val MockitoVersion = "1.10.19"
 val Elastic4sVersion = "5.2.8"
 val ElasticsearchVersion = "5.1.1"
+val JacksonVersion = "2.7.4"
 
 val appProperties = settingKey[Properties]("The application properties")
 
@@ -33,6 +34,11 @@ lazy val utlisting_api = (project in file(".")).
     scalacOptions := Seq("-target:jvm-1.8"),
     libraryDependencies ++= Seq(
       "ndla" %% "network" % "0.16",
+      "com.typesafe.scala-logging" %% "scala-logging" % ScalaLoggingVersion,
+      "org.apache.logging.log4j" % "log4j-api" % Log4JVersion,
+      "org.apache.logging.log4j" % "log4j-core" % Log4JVersion,
+      "org.apache.logging.log4j" % "log4j-slf4j-impl" % Log4JVersion,
+      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % JacksonVersion,
       "joda-time" % "joda-time" % "2.8.2",
       "org.scalatra" %% "scalatra" % Scalatraversion,
       "org.eclipse.jetty" % "jetty-webapp" % Jettyversion % "container;compile",
@@ -40,11 +46,6 @@ lazy val utlisting_api = (project in file(".")).
       "org.json4s"   %% "json4s-native" % "3.5.0",
       "org.scalatra" %% "scalatra-json" % Scalatraversion,
       "org.scalatra" %% "scalatra-swagger"  % Scalatraversion,
-      "javax.servlet" % "javax.servlet-api" % "3.1.0" % "container;provided;test",
-      "com.typesafe.scala-logging" %% "scala-logging" % ScalaLoggingVersion,
-      "org.apache.logging.log4j" % "log4j-api" % Log4JVersion,
-      "org.apache.logging.log4j" % "log4j-core" % Log4JVersion,
-      "org.apache.logging.log4j" % "log4j-slf4j-impl" % Log4JVersion,
       "org.scalikejdbc" %% "scalikejdbc" % "2.5.0",
       "org.postgresql" % "postgresql" % "9.4-1201-jdbc4"
     )
