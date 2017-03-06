@@ -1,5 +1,5 @@
 /*
- * Part of NDLA utlisting_api.
+ * Part of NDLA listing_api.
  * Copyright (C) 2016 NDLA
  *
  * See LICENSE
@@ -7,11 +7,11 @@
  */
 
 
-package no.ndla.utlistingapi.model.api
+package no.ndla.listingapi.model.api
 
 import java.util.Date
 
-import no.ndla.utlistingapi.UtlistingApiProperties
+import no.ndla.listingapi.ListingApiProperties
 import org.scalatra.swagger.annotations.{ApiModel, ApiModelProperty}
 
 import scala.annotation.meta.field
@@ -23,7 +23,7 @@ case class Error(@(ApiModelProperty@field)(description = "Code stating the type 
 
 object Error {
   val GENERIC = "GENERIC"
-  val GENERIC_DESCRIPTION = s"Ooops. Something we didn't anticipate occured. We have logged the error, and will look into it. But feel free to contact ${UtlistingApiProperties.ContactEmail} if the error persists."
+  val GENERIC_DESCRIPTION = s"Ooops. Something we didn't anticipate occured. We have logged the error, and will look into it. But feel free to contact ${ListingApiProperties.ContactEmail} if the error persists."
 
   val GenericError = Error(GENERIC, GENERIC_DESCRIPTION)
 }

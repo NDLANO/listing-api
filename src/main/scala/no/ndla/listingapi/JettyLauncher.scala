@@ -1,12 +1,12 @@
 /*
- * Part of NDLA utlisting_api.
+ * Part of NDLA listing_api.
  * Copyright (C) 2016 NDLA
  *
  * See LICENSE
  *
  */
 
-package no.ndla.utlistingapi
+package no.ndla.listingapi
 
 import com.typesafe.scalalogging.LazyLogging
 import org.eclipse.jetty.server.Server
@@ -28,12 +28,12 @@ object JettyLauncher extends LazyLogging {
     context.addServlet(classOf[DefaultServlet], "/")
     context.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false")
 
-    val server = new Server(UtlistingApiProperties.ApplicationPort)
+    val server = new Server(ListingApiProperties.ApplicationPort)
     server.setHandler(context)
     server.start()
 
     val startTime = System.currentTimeMillis() - startMillis
-    logger.info(s"Started at port ${UtlistingApiProperties.ApplicationPort} in $startTime ms.")
+    logger.info(s"Started at port ${ListingApiProperties.ApplicationPort} in $startTime ms.")
 
     server.join()
   }

@@ -1,4 +1,4 @@
-# utlisting-api
+# listing-api
 
 API for NDLA "show and filter" service
 
@@ -11,7 +11,7 @@ API for NDLA "show and filter" service
     sbt test
 
 ## Package and run locally
-    ndla deploy local utlisting-api
+    ndla deploy local listing-api
 
 ## Create Docker Image
     ./build.sh

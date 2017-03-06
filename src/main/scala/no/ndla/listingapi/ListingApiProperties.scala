@@ -1,5 +1,5 @@
 /*
- * Part of NDLA utlisting_api.
+ * Part of NDLA listing_api.
  * Copyright (C) 2016 NDLA
  *
  * See LICENSE
@@ -7,7 +7,7 @@
  */
 
 
-package no.ndla.utlistingapi
+package no.ndla.listingapi
 
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.network.secrets.PropertyKeys
@@ -16,8 +16,8 @@ import no.ndla.network.secrets.Secrets.readSecrets
 import scala.util.Properties._
 import scala.util.{Failure, Success}
 
-object UtlistingApiProperties extends LazyLogging {
-  val SecretsFile = "utlisting-api.secrets"
+object ListingApiProperties extends LazyLogging {
+  val SecretsFile = "listing-api.secrets"
 
   val ApplicationPort = 80
   val ContactEmail = "christergundersen@ndla.no"

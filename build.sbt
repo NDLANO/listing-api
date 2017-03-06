@@ -26,10 +26,10 @@ lazy val commonSettings = Seq(
   scalaVersion := Scalaversion
 )
 
-lazy val utlisting_api = (project in file(".")).
+lazy val listing_api = (project in file(".")).
   settings(commonSettings: _*).
   settings(
-    name := "utlisting-api",
+    name := "listing-api",
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
     scalacOptions := Seq("-target:jvm-1.8"),
     libraryDependencies ++= Seq(
@@ -53,8 +53,8 @@ lazy val utlisting_api = (project in file(".")).
 
 unmanagedResourceDirectories in Compile <+= (baseDirectory) {_ / "src/main/webapp"}
 
-assemblyJarName in assembly := "utlisting-api.jar"
-mainClass in assembly := Some("no.ndla.utlistingapi.JettyLauncher")
+assemblyJarName in assembly := "listing-api.jar"
+mainClass in assembly := Some("no.ndla.listingapi.JettyLauncher")
 assemblyMergeStrategy in assembly := {
   case "mime.types" => MergeStrategy.filterDistinctLines
   case PathList("org", "joda", "convert", "ToString.class")  => MergeStrategy.first

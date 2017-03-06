@@ -1,5 +1,5 @@
 
-NDLA Utlisting-API. API for grouping content from NDLA.
+NDLA Listing-API. API for grouping content from NDLA.
 Copyright (C) 2017 NDLA
 
 This program is free software: you can redistribute it and/or modify

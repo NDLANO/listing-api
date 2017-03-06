@@ -1,12 +1,12 @@
 /*
- * Part of NDLA utlisting_api.
+ * Part of NDLA listing_api.
  * Copyright (C) 2016 NDLA
  *
  * See LICENSE
  *
  */
 
-package no.ndla.utlistingapi.controller
+package no.ndla.listingapi.controller
 
 import org.scalatra.{Ok, ScalatraServlet}
 
