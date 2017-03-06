@@ -28,5 +28,5 @@ object UtlistingApiInfo {
 }
 
 class UtlistingSwagger extends Swagger("2.0", "0.8", UtlistingApiInfo.apiInfo) {
-  addAuthorization(OAuth(List("utlisting:all"), List(ApplicationGrant(TokenEndpoint("/auth/tokens", "access_token"))))) // TODO: figure out what "utlisting:all" is
+  addAuthorization(OAuth(List("utlisting:all"), List(ApplicationGrant(TokenEndpoint("/auth/tokens", "access_token")))))
 }
