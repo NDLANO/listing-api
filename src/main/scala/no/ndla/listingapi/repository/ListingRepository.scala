@@ -13,8 +13,6 @@ trait ListingRepository {
   class ListingRepository {
     implicit val formats = org.json4s.DefaultFormats
 
-    ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
-
     def insertCard(card: Card)(implicit session: DBSession = AutoSession): Card = {
       val dataObject = new PGobject()
       dataObject.setType("jsonb")
@@ -26,6 +24,10 @@ trait ListingRepository {
 
     def getCard(cardId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Card] = {
       cardWhere(sqls"c.id = $cardId")
+    }
+
+    def deleteCard(cardId: Long)(implicit session: DBSession = AutoSession) = {
+      sql"delete from ${Card.table} where id = $cardId".update.apply
     }
 
     private def cardWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Option[Card] = {
