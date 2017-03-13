@@ -23,6 +23,7 @@ case class Error(@(ApiModelProperty@field)(description = "Code stating the type 
 
 object Error {
   val GENERIC = "GENERIC"
+  val NOT_FOUND = "NOT_FOUND"
   val GENERIC_DESCRIPTION = s"Ooops. Something we didn't anticipate occured. We have logged the error, and will look into it. But feel free to contact ${ListingApiProperties.ContactEmail} if the error persists."
 
   val GenericError = Error(GENERIC, GENERIC_DESCRIPTION)

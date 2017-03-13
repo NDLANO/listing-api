@@ -10,6 +10,7 @@
 package no.ndla.listingapi
 
 import com.typesafe.scalalogging.LazyLogging
+import no.ndla.network.Domains
 import no.ndla.network.secrets.PropertyKeys
 import no.ndla.network.secrets.Secrets.readSecrets
 
@@ -33,6 +34,9 @@ object ListingApiProperties extends LazyLogging {
 
   val CorrelationIdKey = "correlationID"
   val CorrelationIdHeader = "X-Correlation-ID"
+
+  val Environment = propOrElse("NDLA_ENVIRONMENT", "local")
+  val Domain = Domains.get(Environment)
 
   lazy val secrets = readSecrets(SecretsFile) match {
      case Success(values) => values

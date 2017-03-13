@@ -47,7 +47,11 @@ lazy val listing_api = (project in file(".")).
       "org.scalatra" %% "scalatra-json" % Scalatraversion,
       "org.scalatra" %% "scalatra-swagger"  % Scalatraversion,
       "org.scalikejdbc" %% "scalikejdbc" % "2.5.0",
-      "org.postgresql" % "postgresql" % "9.4-1201-jdbc4"
+      "org.postgresql" % "postgresql" % "9.4-1201-jdbc4",
+      "org.flywaydb" % "flyway-core" % "4.0",
+      "com.netaporter" %% "scala-uri" % "0.4.16",
+      "org.scalatest" %% "scalatest" % ScalaTestVersion % "test",
+      "org.mockito" % "mockito-all" % MockitoVersion % "test"
     )
   ).enablePlugins(DockerPlugin).enablePlugins(GitVersioning).enablePlugins(JettyPlugin)
 

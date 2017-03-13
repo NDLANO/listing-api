@@ -8,7 +8,6 @@
 
 package no.ndla.listingapi
 
-import no.ndla.listingapi.ListingApiProperties
 import org.scalatra.ScalatraServlet
 import org.scalatra.swagger._
 

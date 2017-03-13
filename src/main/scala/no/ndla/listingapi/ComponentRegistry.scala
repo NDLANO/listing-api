@@ -11,10 +11,15 @@ package no.ndla.listingapi
 
 import no.ndla.listingapi.controller.{HealthController, ListingController}
 import no.ndla.listingapi.integration.DataSource
+import no.ndla.listingapi.repository.ListingRepository
+import no.ndla.listingapi.service.{ConverterService, ReadService}
 import org.postgresql.ds.PGPoolingDataSource
 
 object ComponentRegistry
   extends DataSource
+  with ListingRepository
+  with ReadService
+  with ConverterService
   with ListingController
   with HealthController
 {
@@ -33,4 +38,7 @@ object ComponentRegistry
   lazy val listingController = new ListingController
   lazy val healthController = new HealthController
   lazy val resourcesApp = new ResourcesApp
+  lazy val listingRepository = new ListingRepository
+  lazy val readService = new ReadService
+  lazy val converterService = new ConverterService
 }
