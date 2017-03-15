@@ -9,16 +9,18 @@
 
 package no.ndla.listingapi.controller
 
+import javax.servlet.http.HttpServletRequest
+
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey}
-import no.ndla.listingapi.model.api.Error
+import no.ndla.listingapi.model.api.{Error, ValidationError, ValidationException}
 import no.ndla.listingapi.service.ReadService
 import no.ndla.network.{ApplicationUrl, CorrelationID}
 import org.apache.logging.log4j.ThreadContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.NativeJsonSupport
 import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
-import org.scalatra.{InternalServerError, NotFound, NotImplemented, ScalatraServlet}
+import org.scalatra._
 
 trait ListingController {
   this: ReadService =>
@@ -67,21 +69,27 @@ trait ListingController {
     }
 
     error {
+      case v: ValidationException => BadRequest(body=ValidationError(message=v.getMessage))
       case t: Throwable => {
         logger.error(Error.GenericError.toString, t)
         InternalServerError(body=Error.GenericError)
       }
     }
 
-    get("/", operation(filterCardsDoc)) {
-      NotImplemented(body=Error(Error.GENERIC, "TODO"))
-    }
+    get("/:card_id", operation(getCardDoc)) {
+      val cardId = long("card_id")
 
-    get("/:cardId", operation(getCardDoc)) {
-      val cardId = params("cardId").toLong
       readService.cardWithId(cardId) match {
         case Some(card) => card
         case None => NotFound(body = Error(Error.NOT_FOUND, s"No card with id $cardId found"))
+      }
+    }
+
+    def long(paramName: String)(implicit request: HttpServletRequest): Long = {
+      val paramValue = params(paramName)
+      paramValue.forall(_.isDigit) match {
+        case true => paramValue.toLong
+        case false => throw new ValidationException(s"Invalid value for $paramName. Only digits are allowed.")
       }
     }
 

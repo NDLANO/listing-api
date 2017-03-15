@@ -35,9 +35,6 @@ object ListingApiProperties extends LazyLogging {
   val CorrelationIdKey = "correlationID"
   val CorrelationIdHeader = "X-Correlation-ID"
 
-  val Environment = propOrElse("NDLA_ENVIRONMENT", "local")
-  val Domain = Domains.get(Environment)
-
   lazy val secrets = readSecrets(SecretsFile) match {
      case Success(values) => values
      case Failure(exception) => throw new RuntimeException(s"Unable to load remote secrets from $SecretsFile", exception)

@@ -22,6 +22,7 @@ trait TestEnvironment
   with ConverterService
   with ListingRepository
   with ListingController
+  with HealthController
 {
   val dataSource = mock[sql.DataSource]
   val listingRepository = mock[ListingRepository]
