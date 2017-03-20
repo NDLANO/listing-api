@@ -43,6 +43,7 @@ trait ListingController {
         parameters(
           queryParam[String]("filter").description("A comma separated string containin labels")
         )
+        authorizations "oauth2"
         responseMessages(response500))
 
     val getCardDoc =
@@ -50,8 +51,9 @@ trait ListingController {
         summary "Returns card meta data"
         notes "Returns a card"
         parameters(
-          pathParam[Long]("cardId").description("Id of the card that is to be returned")
+          pathParam[Long]("cardid").description("Id of the card that is to be returned")
         )
+        authorizations "oauth2"
         responseMessages(response404, response500))
 
     before() {
@@ -76,8 +78,8 @@ trait ListingController {
       }
     }
 
-    get("/:card_id", operation(getCardDoc)) {
-      val cardId = long("card_id")
+    get("/:cardid", operation(getCardDoc)) {
+      val cardId = long("cardid")
 
       readService.cardWithId(cardId) match {
         case Some(card) => card
