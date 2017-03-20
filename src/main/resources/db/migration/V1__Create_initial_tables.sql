@@ -1,5 +1,6 @@
 CREATE TABLE cards (
   id BIGSERIAL PRIMARY KEY,
-  document JSONB
+  document JSONB,
+  revision INTEGER NOT NULL DEFAULT 1
 );
 
