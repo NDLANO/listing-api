@@ -36,22 +36,22 @@ trait ListingController {
     val response404 = ResponseMessage(404, "Not found", Some("Error"))
     val response500 = ResponseMessage(500, "Unknown error", Some("Error"))
 
-    val filterCardsDoc =
-      (apiOperation[String]("filterCards")
-        summary "Returns cards matching a filter"
-        notes "Returns a list of cards"
+    val filterCoverDoc =
+      (apiOperation[String]("filterCovers")
+        summary "Returns covers matching a filter"
+        notes "Returns a list of covers"
         parameters(
-          queryParam[String]("filter").description("A comma separated string containin labels")
+          queryParam[String]("filter").description("A comma separated string containing labels")
         )
         authorizations "oauth2"
         responseMessages(response500))
 
-    val getCardDoc =
-      (apiOperation[String]("getCard")
-        summary "Returns card meta data"
-        notes "Returns a card"
+    val getCoverDoc =
+      (apiOperation[String]("getCover")
+        summary "Returns cover meta data"
+        notes "Returns a cover"
         parameters(
-          pathParam[Long]("cardid").description("Id of the card that is to be returned")
+          pathParam[Long]("coverid").description("Id of the cover that is to be returned")
         )
         authorizations "oauth2"
         responseMessages(response404, response500))
@@ -78,12 +78,12 @@ trait ListingController {
       }
     }
 
-    get("/:cardid", operation(getCardDoc)) {
-      val cardId = long("cardid")
+    get("/:coverid", operation(getCoverDoc)) {
+      val coverId = long("coverid")
 
-      readService.cardWithId(cardId) match {
-        case Some(card) => card
-        case None => NotFound(body = Error(Error.NOT_FOUND, s"No card with id $cardId found"))
+      readService.coverWithId(coverId) match {
+        case Some(cover) => cover
+        case None => NotFound(body = Error(Error.NOT_FOUND, s"No cover with id $coverId found"))
       }
     }
 

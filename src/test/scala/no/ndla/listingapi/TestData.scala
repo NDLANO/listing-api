@@ -5,7 +5,7 @@ import no.ndla.listingapi.model.{domain, api}
 
 object TestData {
 
-  val sampleCard = domain.Card(
+  val sampleCover = domain.Cover(
     Some(1),
     "https://image-api/image.jpg",
     "hammer",
@@ -14,7 +14,7 @@ object TestData {
     1122
   )
 
-  val sampleApiCard = api.Card(
+  val sampleApiCover = api.Cover(
     1,
     "https://image-api/image.jpg",
     "hammer",

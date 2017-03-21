@@ -14,12 +14,12 @@ import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
 class ConverterServiceTest extends UnitSuite with TestEnvironment {
   val service = new ConverterService
 
-  val sampleCard: domain.Card = TestData.sampleCard
+  val sampleCover: domain.Cover = TestData.sampleCover
 
-  test("That toApiCard converts a domain class to an api class") {
-    val expected = api.Card(sampleCard.id.get, sampleCard.coverPhotoUrl, sampleCard.title, sampleCard.description, sampleCard.articleId,
+  test("That toApiCover converts a domain class to an api class") {
+    val expected = api.Cover(sampleCover.id.get, sampleCover.coverPhotoUrl, sampleCover.title, sampleCover.description, sampleCover.articleId,
       Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))))
-    service.toApiCard(sampleCard) should equal (expected)
+    service.toApiCover(sampleCover) should equal (expected)
   }
 
 }

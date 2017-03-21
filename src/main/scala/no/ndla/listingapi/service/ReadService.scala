@@ -8,8 +8,8 @@ trait ReadService {
   val readService: ReadService
 
   class ReadService {
-    def cardWithId(id: Long): Option[api.Card] = {
-      listingRepository.getCard(id).map(converterService.toApiCard)
+    def coverWithId(id: Long): Option[api.Cover] = {
+      listingRepository.getCover(id).map(converterService.toApiCover)
     }
   }
 }

@@ -1,7 +1,7 @@
 package no.ndla.listingapi.repository
 
 import no.ndla.listingapi.integration.DataSource
-import no.ndla.listingapi.model.domain.{Card, Label}
+import no.ndla.listingapi.model.domain.{Cover, Label}
 import org.json4s.native.Serialization.write
 import org.postgresql.util.PGobject
 import scalikejdbc._
@@ -13,26 +13,26 @@ trait ListingRepository {
   class ListingRepository {
     implicit val formats = org.json4s.DefaultFormats
 
-    def insertCard(card: Card)(implicit session: DBSession = AutoSession): Card = {
+    def insertCover(cover: Cover)(implicit session: DBSession = AutoSession): Cover = {
       val dataObject = new PGobject()
       dataObject.setType("jsonb")
-      dataObject.setValue(write(card))
+      dataObject.setValue(write(cover))
 
-      val imageId = sql"insert into ${Card.table} (document) values (${dataObject})".updateAndReturnGeneratedKey.apply
-      card.copy(id=Some(imageId))
+      val imageId = sql"insert into ${Cover.table} (document) values (${dataObject})".updateAndReturnGeneratedKey.apply
+      cover.copy(id=Some(imageId))
     }
 
-    def getCard(cardId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Card] = {
-      cardWhere(sqls"c.id = $cardId")
+    def getCover(coverId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
+      coverWhere(sqls"c.id = $coverId")
     }
 
-    def deleteCard(cardId: Long)(implicit session: DBSession = AutoSession) = {
-      sql"delete from ${Card.table} where id = $cardId".update.apply
+    def deleteCover(coverId: Long)(implicit session: DBSession = AutoSession) = {
+      sql"delete from ${Cover.table} where id = $coverId".update.apply
     }
 
-    private def cardWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Option[Card] = {
-      val c = Card.syntax("c")
-      sql"select ${c.result.*} from ${Card.as(c)} where $whereClause".map(Card(c)).single.apply
+    private def coverWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
+      val c = Cover.syntax("c")
+      sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).single.apply
     }
 
   }

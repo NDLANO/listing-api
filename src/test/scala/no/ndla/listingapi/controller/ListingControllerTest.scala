@@ -11,25 +11,25 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   lazy val henrik = new ListingController
   addServlet(henrik, "/test")
 
-  val cardId = 123
+  val coverId = 123
 
-  test("/<card_id> should return 200 if the card was found") {
-    when(readService.cardWithId(cardId)).thenReturn(Some(TestData.sampleApiCard))
+  test("/<cover_id> should return 200 if the cover was found") {
+    when(readService.coverWithId(coverId)).thenReturn(Some(TestData.sampleApiCover))
 
-    get(s"/test/$cardId") {
+    get(s"/test/$coverId") {
       status should equal (200)
     }
   }
 
-  test("/<card_id> should return 404 if the card was not found") {
-    when(readService.cardWithId(cardId)).thenReturn(None)
+  test("/<cover_id> should return 404 if the cover was not found") {
+    when(readService.coverWithId(coverId)).thenReturn(None)
 
-    get(s"/test/$cardId") {
+    get(s"/test/$coverId") {
       status should equal (404)
     }
   }
 
-  test("/<card_id> should return 400 if the card_id is not an integer") {
+  test("/<cover_id> should return 400 if the cover_id is not an integer") {
     get(s"/test/one") {
       status should equal(400)
     }

@@ -6,8 +6,8 @@ trait ConverterService {
   val converterService: ConverterService
 
   class ConverterService {
-    def toApiCard(s: domain.Card): api.Card = {
-      api.Card(s.id.get, s.coverPhotoUrl, s.title, s.description, s.articleId, s.labels.map(toApiLabel))
+    def toApiCover(s: domain.Cover): api.Cover = {
+      api.Cover(s.id.get, s.coverPhotoUrl, s.title, s.description, s.articleId, s.labels.map(toApiLabel))
     }
 
     private def toApiLabel(label: domain.Label): api.Label = {

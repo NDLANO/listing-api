@@ -17,22 +17,22 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
     ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
   }
 
-  val sampleCard: domain.Card = TestData.sampleCard
+  val sampleCover: domain.Cover = TestData.sampleCover
 
-  test("inserting a new cards should return the new ID") {
-    val result = repository.insertCard(sampleCard)
+  test("inserting a new covers should return the new ID") {
+    val result = repository.insertCover(sampleCover)
     result.id.isDefined should be (true)
 
-    repository.deleteCard(result.id.get)
+    repository.deleteCover(result.id.get)
   }
 
-  test("getCard should return a card") {
-    val inserted = repository.insertCard(sampleCard)
+  test("getCover should return a cover") {
+    val inserted = repository.insertCover(sampleCover)
     inserted.id.isDefined should be (true)
 
-    repository.getCard(inserted.id.get) should equal (Some(inserted))
+    repository.getCover(inserted.id.get) should equal (Some(inserted))
 
-    repository.deleteCard(inserted.id.get)
+    repository.deleteCover(inserted.id.get)
   }
 
 }
