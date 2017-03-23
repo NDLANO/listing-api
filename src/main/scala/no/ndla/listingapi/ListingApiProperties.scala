@@ -23,6 +23,17 @@ object ListingApiProperties extends LazyLogging {
   val ApplicationPort = 80
   val ContactEmail = "christergundersen@ndla.no"
 
+  val SearchServer = propOrElse("SEARCH_SERVER", "http://search-listing-api.ndla-local")
+  val SearchRegion = propOrElse("SEARCH_REGION", "eu-central-1")
+  val RunWithSignedSearchRequests = propOrElse("RUN_WITH_SIGNED_SEARCH_REQUESTS", "true").toBoolean
+  val SearchIndex = propOrElse("SEARCH_INDEX_NAME", "listings")
+  val SearchDocument = "listing"
+  val DefaultPageSize = 10
+  val MaxPageSize = 100
+  val IndexBulkSize = 200
+
+  val DefaultLanguage = "nb"
+
   lazy val MetaUserName = prop(PropertyKeys.MetaUserNameKey)
   lazy val MetaPassword = prop(PropertyKeys.MetaPasswordKey)
   lazy val MetaResource = prop(PropertyKeys.MetaResourceKey)

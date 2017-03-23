@@ -26,3 +26,9 @@ case class Cover(@(ApiModelProperty@field)(description = "The unique id of the c
 case class Label(@(ApiModelProperty@field)(description = "The type of this label") `type`: Option[String],
                  @(ApiModelProperty@field)(description = "The label") labels: Seq[String]
                 )
+
+@ApiModel(description = "Information about search-results")
+case class SearchResult(@(ApiModelProperty@field)(description = "The total number of covers matching this query") totalCount: Long,
+                        @(ApiModelProperty@field)(description = "For which page results are shown from") page: Int,
+                        @(ApiModelProperty@field)(description = "The number of results per page") pageSize: Int,
+                        @(ApiModelProperty@field)(description = "The search results") results: Seq[Cover])

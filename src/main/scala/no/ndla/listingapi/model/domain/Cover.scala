@@ -7,12 +7,16 @@ import org.json4s.native.Serialization._
 import scalikejdbc._
 
 case class Label(`type`: Option[String], labels: Seq[String])
+case class LanguageLabels(labels: Seq[Label], language: Option[String]) extends LanguageField[Seq[Label]] { def data = labels }
+case class Title(title: String, language: Option[String]) extends LanguageField[String] { def data = title }
+case class Description(description: String, language: Option[String]) extends LanguageField[String] { def data = description }
+
 case class Cover(id: Option[Long],
                  coverPhotoUrl: String,
-                 title: String,
-                 description: String,
-                 labels: Seq[Label],
-                 articleId: Long
+                 title: Seq[Title],
+                 description: Seq[Description],
+                 labels: Seq[LanguageLabels],
+                 articleApiId: Long
                )
 
 object Cover extends SQLSyntaxSupport[Cover] {
@@ -23,7 +27,7 @@ object Cover extends SQLSyntaxSupport[Cover] {
   def apply(s: SyntaxProvider[Cover])(rs:WrappedResultSet): Cover = apply(s.resultName)(rs)
   def apply(s: ResultName[Cover])(rs: WrappedResultSet): Cover = {
     val meta = read[Cover](rs.string(s.c("document")))
-    Cover(Some(rs.long(s.c("id"))), meta.coverPhotoUrl, meta.title, meta.description, meta.labels, meta.articleId)
+    Cover(Some(rs.long(s.c("id"))), meta.coverPhotoUrl, meta.title, meta.description, meta.labels, meta.articleApiId)
   }
 
   val JSonSerializer = FieldSerializer[Cover](

@@ -11,20 +11,21 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   lazy val henrik = new ListingController
   addServlet(henrik, "/test")
 
+  val lang = "nb"
   val coverId = 123
 
   test("/<cover_id> should return 200 if the cover was found") {
-    when(readService.coverWithId(coverId)).thenReturn(Some(TestData.sampleApiCover))
+    when(readService.coverWithId(coverId, lang)).thenReturn(Some(TestData.sampleApiCover))
 
-    get(s"/test/$coverId") {
+    get(s"/test/$coverId?language=$lang") {
       status should equal (200)
     }
   }
 
   test("/<cover_id> should return 404 if the cover was not found") {
-    when(readService.coverWithId(coverId)).thenReturn(None)
+    when(readService.coverWithId(coverId, lang)).thenReturn(None)
 
-    get(s"/test/$coverId") {
+    get(s"/test/$coverId?language=$lang") {
       status should equal (404)
     }
   }

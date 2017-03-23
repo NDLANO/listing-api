@@ -52,7 +52,13 @@ lazy val listing_api = (project in file(".")).
       "org.flywaydb" % "flyway-core" % "4.0",
       "com.netaporter" %% "scala-uri" % "0.4.16",
       "org.scalatest" %% "scalatest" % ScalaTestVersion % "test",
-      "org.mockito" % "mockito-all" % MockitoVersion % "test"
+      "org.mockito" % "mockito-all" % MockitoVersion % "test",
+      "io.searchbox" % "jest" % "2.0.4",
+      "org.elasticsearch" % "elasticsearch" % ElasticsearchVersion,
+      "com.sksamuel.elastic4s" %% "elastic4s-core" % Elastic4sVersion,
+      "com.sksamuel.elastic4s" %% "elastic4s-http" % Elastic4sVersion,
+      "org.elasticsearch" % "elasticsearch" % ElasticsearchVersion % "test",
+      "vc.inreach.aws" % "aws-signing-request-interceptor" % "0.0.16"
     )
   ).enablePlugins(DockerPlugin).enablePlugins(GitVersioning).enablePlugins(JettyPlugin)
 

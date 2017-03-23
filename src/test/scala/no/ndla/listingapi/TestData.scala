@@ -1,16 +1,16 @@
 package no.ndla.listingapi
 
-import no.ndla.listingapi.model.domain.Label
-import no.ndla.listingapi.model.{domain, api}
+import no.ndla.listingapi.model.domain.{Label, LanguageLabels}
+import no.ndla.listingapi.model.{api, domain}
 
 object TestData {
 
   val sampleCover = domain.Cover(
     Some(1),
     "https://image-api/image.jpg",
-    "hammer",
-    "En hammer er et nyttig verktøy",
-    Seq(Label(Some("kategori"), Seq("personlig verktøy")), Label(None, Seq("bygg"))),
+    Seq(domain.Title("hammer", Some("nb"))),
+    Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
+    Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy")), Label(None, Seq("bygg"))), Some("nb"))),
     1122
   )
 
