@@ -18,7 +18,7 @@ class ConverterServiceTest extends UnitSuite with TestEnvironment {
 
   test("That toApiCover converts a domain class to an api class") {
     val expected = api.Cover(sampleCover.id.get, sampleCover.coverPhotoUrl, sampleCover.title.head.title, sampleCover.description.head.description, sampleCover.articleApiId,
-      Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))))
+      Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))), Seq("nb"))
     service.toApiCover(sampleCover, "nb") should equal (Some(expected))
   }
 

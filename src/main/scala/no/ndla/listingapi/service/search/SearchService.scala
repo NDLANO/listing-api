@@ -13,7 +13,7 @@ import com.google.gson.JsonObject
 import com.typesafe.scalalogging.LazyLogging
 import io.searchbox.core.{Count, Search, SearchResult => JestSearchResult}
 import io.searchbox.params.Parameters
-import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchDocument, SearchIndex}
+import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
 import no.ndla.listingapi.integration.ElasticClient
 import no.ndla.listingapi.model.api
 import no.ndla.listingapi.model.domain._
@@ -21,7 +21,7 @@ import no.ndla.listingapi.model.domain.search.Sort
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.ElasticsearchException
 import org.elasticsearch.index.IndexNotFoundException
-import org.elasticsearch.index.query.{BoolQueryBuilder, NestedQueryBuilder, Operator, QueryBuilders}
+import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilders, SortOrder}
 
@@ -44,7 +44,10 @@ trait SearchService {
           val resultArray = response.getJsonObject.get("hits").asInstanceOf[JsonObject].get("hits").getAsJsonArray
           val iterator = resultArray.iterator()
           while (iterator.hasNext) {
-            resultList = resultList :+ hitAsCard(iterator.next.asInstanceOf[JsonObject].get("_source").asInstanceOf[JsonObject], language)
+            val card = hitAsCard(iterator.next.asInstanceOf[JsonObject].get("_source").asInstanceOf[JsonObject], language)
+            if (card.isDefined) {
+              resultList = resultList :+ card.get
+            }
           }
           resultList
         }
@@ -52,23 +55,21 @@ trait SearchService {
       }
     }
 
-    def hitAsCard(hit: JsonObject, language: String): api.Cover = {
+    def hitAsCard(hit: JsonObject, language: String): Option[api.Cover] = {
       import scala.collection.JavaConverters._
+      val labelsOpt = Option(hit.get("labels").getAsJsonObject.get(language)).map(lang => lang.getAsJsonArray.asScala.map(_.getAsJsonObject))
 
-//    [{"lang":"nb","value":[{"type":"kategori","labels":["personlig verktøy"]},{"type":"subject","labels":["betongfaget","murerfaget","tømrerfaget"]}]}]
-      logger.info(s"Fetching card with language $language: ${hit.get("labels")}")
-      logger.info(s"title: ${hit.get("title")}")
-
-      val labels = hit.get("labels").getAsJsonObject.get(language).getAsJsonArray.asScala.map(_.getAsJsonObject)
-
-      api.Cover(
-        hit.get("id").getAsLong,
-        hit.get("coverPhotoUrl").getAsString,
-        hit.get("title").getAsJsonObject.get(language).getAsString,
-        hit.get("description").getAsJsonObject.get(language).getAsString,
-        hit.get("articleApiId").getAsLong,
-        labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq
-      )
+      labelsOpt.map(labels => {
+          api.Cover(
+            hit.get("id").getAsLong,
+            hit.get("coverPhotoUrl").getAsString,
+            hit.get("title").getAsJsonObject.get(language).getAsString,
+            hit.get("description").getAsJsonObject.get(language).getAsString,
+            hit.get("articleApiId").getAsLong,
+            labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq,
+            hit.get("supportedLanguages").getAsJsonArray.asScala.toSeq.map(_.getAsString)
+          )
+      })
     }
 
     def all(language: String, page: Int, pageSize: Int, sort: Sort.Value): api.SearchResult = {
@@ -95,7 +96,6 @@ trait SearchService {
     }
 
     private def executeSearch(language: String, sort: Sort.Value, page: Int, pageSize: Int, queryBuilder: BoolQueryBuilder): api.SearchResult = {
-      logger.info(s"executing query:\n$queryBuilder")
       val searchQuery = new SearchSourceBuilder().query(queryBuilder).sort(getSortDefinition(sort, language))
 
       val (startAt, numResults) = getStartAtAndNumResults(page, pageSize)

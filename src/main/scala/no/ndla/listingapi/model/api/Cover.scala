@@ -19,7 +19,8 @@ case class Cover(@(ApiModelProperty@field)(description = "The unique id of the c
                  @(ApiModelProperty@field)(description = "The title for this cover") title: String,
                  @(ApiModelProperty@field)(description = "The description for this cover") description: String,
                  @(ApiModelProperty@field)(description = "The link to the article") articleApiId: Long,
-                 @(ApiModelProperty@field)(description = "The labels associated with this cover") labels: Seq[Label]
+                 @(ApiModelProperty@field)(description = "The labels associated with this cover") labels: Seq[Label],
+                 @(ApiModelProperty@field)(description = "The languages this cover supports") supportedLanguages: Seq[String]
                )
 
 @ApiModel(description = "Meta information for a cover")

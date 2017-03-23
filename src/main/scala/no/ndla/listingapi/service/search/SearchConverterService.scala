@@ -12,18 +12,26 @@ import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.model.domain.Cover
 import no.ndla.listingapi.model.domain.search.{LanguageValue, SearchableCover, SearchableLanguageList, SearchableLanguageValues}
 
+import scala.util.{Failure, Success}
+
 trait SearchConverterService {
   val searchConverterService: SearchConverterService
 
   class SearchConverterService extends LazyLogging {
-    def asSearchableCard(c: Cover): SearchableCover = {
-      SearchableCover(
-        id = c.id.get,
-        title = SearchableLanguageValues(c.title.map(title => LanguageValue(title.language, title.title))),
-        description = SearchableLanguageValues(c.description.map(description => LanguageValue(description.language, description.description))),
-        c.articleApiId,
-        c.coverPhotoUrl,
-        labels = SearchableLanguageList(c.labels.map(label => LanguageValue(label.language, label.labels))))
+    def asSearchableCard(card: Cover): SearchableCover = {
+      card.getSupportedLanguages match {
+        case Failure(e) => throw e
+        case Success(supportedLanguages) =>
+          SearchableCover(
+            id = card.id.get,
+            title = SearchableLanguageValues(card.title.map(title => LanguageValue(title.language, title.title))),
+            description = SearchableLanguageValues(card.description.map(description => LanguageValue(description.language, description.description))),
+            card.articleApiId,
+            card.coverPhotoUrl,
+            SearchableLanguageList(card.labels.map(label => LanguageValue(label.language, label.labels))),
+            supportedLanguages
+          )
+      }
     }
   }
 }

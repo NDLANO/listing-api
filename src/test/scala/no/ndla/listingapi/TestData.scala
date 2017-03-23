@@ -20,7 +20,8 @@ object TestData {
     "hammer",
     "En hammer er et nyttig verktøy",
     1122,
-    Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg")))
+    Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))),
+    Seq("nb")
   )
 
 }

@@ -25,5 +25,6 @@ case class SearchableCover(
   description: SearchableLanguageValues,
   articleApiId: Long,
   coverPhotoUrl: String,
-  labels: SearchableLanguageList
+  labels: SearchableLanguageList,
+  supportedLanguages: Seq[String]
 )

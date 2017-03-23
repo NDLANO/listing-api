@@ -100,7 +100,8 @@ trait IndexService {
           languageSupportedField("description"),
           languageSupportedLabels("labels"),
           textField("coverPhotoUrl") index "not_analyzed",
-          intField("articleApiId") index "not_analyzed"
+          intField("articleApiId") index "not_analyzed",
+          textField("supportedLanguages") index "not_analyzed"
         ),
         ListingApiProperties.SearchDocument).string()
     }

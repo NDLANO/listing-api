@@ -12,14 +12,13 @@ package no.ndla.listingapi.controller
 import javax.servlet.http.HttpServletRequest
 
 import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey, DefaultLanguage, DefaultPageSize}
-import no.ndla.listingapi.model.api.{ValidationError, ValidationException}
+import no.ndla.listingapi.model.api.{Error, NotFoundException, ValidationError, ValidationException}
 import no.ndla.network.{ApplicationUrl, CorrelationID}
-import no.ndla.listingapi.model.api.{Error, ValidationError, ValidationException}
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.logging.log4j.ThreadContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.NativeJsonSupport
-import org.scalatra.{BadRequest, InternalServerError, ScalatraServlet}
+import org.scalatra.{BadRequest, InternalServerError, NotFound, ScalatraServlet}
 
 abstract class NdlaController extends ScalatraServlet with NativeJsonSupport with LazyLogging {
   protected implicit override val jsonFormats: Formats = DefaultFormats
@@ -40,6 +39,7 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
 
   error {
     case v: ValidationException => BadRequest(body=ValidationError(message=v.getMessage))
+    case n: NotFoundException => NotFound(body=Error(Error.NOT_FOUND, n.getMessage))
     case t: Throwable => {
       logger.error(Error.GenericError.toString, t)
       InternalServerError(body=Error.GenericError)
