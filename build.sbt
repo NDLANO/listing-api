@@ -1,7 +1,7 @@
 import java.util.Properties
 
 val Scalaversion = "2.12.1"
-val Scalatraversion = "2.5.1-NDLA-2"
+val Scalatraversion = "2.5.1-NDLA-3"
 val ScalaLoggingVersion = "3.5.0"
 val Log4JVersion = "2.7"
 val Jettyversion = "9.2.10.v20150310"
@@ -41,13 +41,18 @@ lazy val listing_api = (project in file(".")).
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % JacksonVersion,
       "joda-time" % "joda-time" % "2.8.2",
       "org.scalatra" %% "scalatra" % Scalatraversion,
+      "org.scalatra" %% "scalatra-json" % Scalatraversion,
+      "org.scalatra" %% "scalatra-swagger"  % Scalatraversion,
+      "org.scalatra" %% "scalatra-scalatest" % Scalatraversion % "test",
       "org.eclipse.jetty" % "jetty-webapp" % Jettyversion % "container;compile",
       "org.eclipse.jetty" % "jetty-plus" % Jettyversion % "container",
       "org.json4s"   %% "json4s-native" % "3.5.0",
-      "org.scalatra" %% "scalatra-json" % Scalatraversion,
-      "org.scalatra" %% "scalatra-swagger"  % Scalatraversion,
       "org.scalikejdbc" %% "scalikejdbc" % "2.5.0",
-      "org.postgresql" % "postgresql" % "9.4-1201-jdbc4"
+      "org.postgresql" % "postgresql" % "9.4-1201-jdbc4",
+      "org.flywaydb" % "flyway-core" % "4.0",
+      "com.netaporter" %% "scala-uri" % "0.4.16",
+      "org.scalatest" %% "scalatest" % ScalaTestVersion % "test",
+      "org.mockito" % "mockito-all" % MockitoVersion % "test"
     )
   ).enablePlugins(DockerPlugin).enablePlugins(GitVersioning).enablePlugins(JettyPlugin)
 

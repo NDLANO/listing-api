@@ -1,0 +1,6 @@
+CREATE TABLE covers (
+  id BIGSERIAL PRIMARY KEY,
+  document JSONB,
+  revision INTEGER NOT NULL DEFAULT 1
+);
+

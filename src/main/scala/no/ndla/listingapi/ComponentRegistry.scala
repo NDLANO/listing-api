@@ -11,10 +11,16 @@ package no.ndla.listingapi
 
 import no.ndla.listingapi.controller.{HealthController, ListingController}
 import no.ndla.listingapi.integration.DataSource
+import no.ndla.listingapi.repository.ListingRepository
+import no.ndla.listingapi.service.{ConverterService, ReadService}
 import org.postgresql.ds.PGPoolingDataSource
+import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
 object ComponentRegistry
   extends DataSource
+  with ListingRepository
+  with ReadService
+  with ConverterService
   with ListingController
   with HealthController
 {
@@ -29,8 +35,12 @@ object ComponentRegistry
   dataSource.setInitialConnections(ListingApiProperties.MetaInitialConnections)
   dataSource.setMaxConnections(ListingApiProperties.MetaMaxConnections)
   dataSource.setCurrentSchema(ListingApiProperties.MetaSchema)
+  ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
 
   lazy val listingController = new ListingController
   lazy val healthController = new HealthController
   lazy val resourcesApp = new ResourcesApp
+  lazy val listingRepository = new ListingRepository
+  lazy val readService = new ReadService
+  lazy val converterService = new ConverterService
 }
