@@ -22,4 +22,10 @@ class ConverterServiceTest extends UnitSuite with TestEnvironment {
     service.toApiCover(sampleCover, "nb") should equal (Some(expected))
   }
 
+  test("toApiCover should return None if the cover is incomplete for a given language") {
+    service.toApiCover(sampleCover.copy(title=Seq.empty), "nb") should equal (None)
+    service.toApiCover(sampleCover.copy(description=Seq.empty), "nb") should equal (None)
+    service.toApiCover(sampleCover.copy(description=Seq.empty), "junk") should equal (None)
+  }
+
 }

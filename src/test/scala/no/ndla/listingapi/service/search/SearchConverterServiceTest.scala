@@ -37,7 +37,7 @@ class SearchConverterServiceTest extends UnitSuite with TestEnvironment {
     searchConverterService.asSearchableCover(sampleCover) should equal (expected)
   }
 
-  test("asSearchableCard should throw an exception if cover contains incomplete data for a language") {
+  test("asSearchableCard should throw a NotFoundException if cover contains incomplete data for a language") {
     assertThrows[NotFoundException] {
       searchConverterService.asSearchableCover(sampleCover.copy(title=Seq.empty))
     }
