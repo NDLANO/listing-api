@@ -39,7 +39,7 @@ trait IndexService {
 
     private def createIndexRequest(card: Cover, indexName: String) = {
       implicit val formats = SearchableLanguageFormats.JSonFormats
-      val source = write(searchConverterService.asSearchableCard(card))
+      val source = write(searchConverterService.asSearchableCover(card))
       new Index.Builder(source).index(indexName).`type`(ListingApiProperties.SearchDocument).id(card.id.get.toString).build
     }
 
