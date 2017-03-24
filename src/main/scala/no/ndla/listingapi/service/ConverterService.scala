@@ -17,7 +17,7 @@ trait ConverterService {
         return None
       }
 
-      cover.getSupportedLanguages match {
+      cover.getAllCoverLanguages match {
         case Failure(e) => None
         case Success(langs) =>
           Some(api.Cover(

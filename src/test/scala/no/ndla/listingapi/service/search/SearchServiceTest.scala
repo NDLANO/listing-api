@@ -125,12 +125,11 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
 
   def blockUntil(predicate: () => Boolean): Unit = {
     0 to 16 foreach(backoff => {
-      if (backoff > 0)
-        Thread.sleep(200 * backoff)
+      Thread.sleep(200 * backoff)
 
       Try(predicate()) match {
         case Success(done) if done => return
-        case Failure(e) => println("problem while testing predicate", e)
+        case Failure(e) => println("Problem while testing predicate", e)
         case _ =>
       }
     })

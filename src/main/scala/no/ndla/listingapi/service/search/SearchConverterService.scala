@@ -19,7 +19,7 @@ trait SearchConverterService {
 
   class SearchConverterService extends LazyLogging {
     def asSearchableCover(card: Cover): SearchableCover = {
-      card.getSupportedLanguages match {
+      card.getAllCoverLanguages match {
         case Failure(e) => throw e
         case Success(supportedLanguages) =>
           SearchableCover(
