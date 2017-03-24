@@ -2,7 +2,6 @@ package no.ndla.listingapi.model.domain
 
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.model.api.NotFoundException
-import no.ndla.listingapi.model.domain
 import org.json4s.FieldSerializer
 import org.json4s.FieldSerializer._
 import org.json4s.native.Serialization._

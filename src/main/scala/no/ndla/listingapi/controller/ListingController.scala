@@ -58,7 +58,7 @@ trait ListingController {
     get("/", operation(filterCoverDoc)) {
       val filter = paramAsListOfString("filter")
       val language = paramOrDefault("language", DefaultLanguage)
-      val sort = Sort.valueOf(paramOrDefault("sort", "")).getOrElse(Sort.ByRelevanceDesc)
+      val sort = Sort.valueOf(paramOrDefault("sort", "")).getOrElse(Sort.ByIdAsc)
       val pageSize = longOrDefault("page-size", DefaultPageSize)
       val page = longOrDefault("page", 1)
 
