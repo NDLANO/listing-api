@@ -52,7 +52,13 @@ lazy val listing_api = (project in file(".")).
       "org.flywaydb" % "flyway-core" % "4.0",
       "com.netaporter" %% "scala-uri" % "0.4.16",
       "org.scalatest" %% "scalatest" % ScalaTestVersion % "test",
-      "org.mockito" % "mockito-all" % MockitoVersion % "test"
+      "org.mockito" % "mockito-all" % MockitoVersion % "test",
+      "io.searchbox" % "jest" % "2.0.4",
+      "org.elasticsearch" % "elasticsearch" % ElasticsearchVersion,
+      "com.sksamuel.elastic4s" %% "elastic4s-core" % Elastic4sVersion,
+      "com.sksamuel.elastic4s" %% "elastic4s-http" % Elastic4sVersion,
+      "org.elasticsearch" % "elasticsearch" % ElasticsearchVersion % "test",
+      "vc.inreach.aws" % "aws-signing-request-interceptor" % "0.0.16"
     )
   ).enablePlugins(DockerPlugin).enablePlugins(GitVersioning).enablePlugins(JettyPlugin)
 
@@ -69,6 +75,13 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+
+// Don't run Integration tests in default run on Travis as there is no elasticsearch localhost:9200 there yet.
+// NB this line will unfortunalty override runs on your local commandline so that
+// sbt "test-only -- -n no.ndla.tag.IntegrationTest"
+// will not run unless this line gets commented out or you remove the tag over the test class
+// This should be solved better!
+testOptions in Test += Tests.Argument("-l", "no.ndla.tag.IntegrationTest")
 
 // Make the docker task depend on the assembly task, which generates a fat JAR file
 docker <<= (docker dependsOn assembly)

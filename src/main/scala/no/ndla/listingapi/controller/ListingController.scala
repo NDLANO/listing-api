@@ -9,26 +9,25 @@
 
 package no.ndla.listingapi.controller
 
-import javax.servlet.http.HttpServletRequest
-
-import com.typesafe.scalalogging.LazyLogging
-import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey}
+import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey, DefaultLanguage, DefaultPageSize}
 import no.ndla.listingapi.model.api.{Error, ValidationError, ValidationException}
+import no.ndla.listingapi.model.domain
+import no.ndla.listingapi.model.domain.search.Sort
+import no.ndla.listingapi.model.domain.{Label, LanguageLabels}
+import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.ReadService
+import no.ndla.listingapi.service.search.SearchService
 import no.ndla.network.{ApplicationUrl, CorrelationID}
 import org.apache.logging.log4j.ThreadContext
-import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.json.NativeJsonSupport
-import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
 import org.scalatra._
+import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
 
 trait ListingController {
-  this: ReadService =>
+  this: ReadService with SearchService with ListingRepository =>
   val listingController: ListingController
 
-  class ListingController(implicit val swagger: Swagger) extends ScalatraServlet with SwaggerSupport with NativeJsonSupport with LazyLogging {
+  class ListingController(implicit val swagger: Swagger) extends NdlaController with SwaggerSupport {
     // Swagger-stuff
-    protected implicit override val jsonFormats: Formats = DefaultFormats
     protected val applicationDescription = "API for grouping content from ndla.no."
 
     registerModel[Error]
@@ -56,42 +55,23 @@ trait ListingController {
         authorizations "oauth2"
         responseMessages(response404, response500))
 
-    before() {
-      contentType = formats("json")
-      CorrelationID.set(Option(request.getHeader(CorrelationIdHeader)))
-      ThreadContext.put(CorrelationIdKey, CorrelationID.get.getOrElse(""))
-      ApplicationUrl.set(request)
-      logger.info("{} {}{}", request.getMethod, request.getRequestURI, Option(request.getQueryString).map(s => s"?$s").getOrElse(""))
-    }
+    get("/", operation(filterCoverDoc)) {
+      val filter = paramAsListOfString("filter")
+      val language = paramOrDefault("language", DefaultLanguage)
+      val sort = Sort.valueOf(paramOrDefault("sort", "")).getOrElse(Sort.ByIdAsc)
+      val pageSize = longOrDefault("page-size", DefaultPageSize)
+      val page = longOrDefault("page", 1)
 
-    after() {
-      CorrelationID.clear()
-      ThreadContext.remove(CorrelationIdKey)
-      ApplicationUrl.clear
-    }
-
-    error {
-      case v: ValidationException => BadRequest(body=ValidationError(message=v.getMessage))
-      case t: Throwable => {
-        logger.error(Error.GenericError.toString, t)
-        InternalServerError(body=Error.GenericError)
-      }
+      searchService.matchingQuery(filter, language, page.toInt, pageSize.toInt, sort)
     }
 
     get("/:coverid", operation(getCoverDoc)) {
       val coverId = long("coverid")
+      val language = params.get("language").getOrElse(DefaultLanguage)
 
-      readService.coverWithId(coverId) match {
+      readService.coverWithId(coverId, language) match {
         case Some(cover) => cover
         case None => NotFound(body = Error(Error.NOT_FOUND, s"No cover with id $coverId found"))
-      }
-    }
-
-    def long(paramName: String)(implicit request: HttpServletRequest): Long = {
-      val paramValue = params(paramName)
-      paramValue.forall(_.isDigit) match {
-        case true => paramValue.toLong
-        case false => throw new ValidationException(s"Invalid value for $paramName. Only digits are allowed.")
       }
     }
 

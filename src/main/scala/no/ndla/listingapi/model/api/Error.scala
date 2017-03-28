@@ -39,3 +39,4 @@ object Error {
 }
 
 class ValidationException(message: String) extends RuntimeException(message)
+class NotFoundException(message: String = "The cover was not found") extends RuntimeException(message)
