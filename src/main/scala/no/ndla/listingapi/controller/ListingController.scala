@@ -40,7 +40,7 @@ trait ListingController {
         summary "Returns covers matching a filter"
         notes "Returns a list of covers"
         parameters(
-          queryParam[String]("filter").description("A comma separated string containing labels")
+          queryParam[Option[String]]("filter").description("A comma separated string containing labels")
         )
         authorizations "oauth2"
         responseMessages(response500))
