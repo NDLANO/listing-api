@@ -26,10 +26,10 @@ trait CoverValidator {
     val MISSING_DESCRIPTION = "At least one description is required."
     val INVALID_COVER_PHOTO = "The url to the coverPhoto must point to an image in NDLA Image API."
 
-    def validate(newLearningPath: Cover): Try[Cover] = {
-      validateCover(newLearningPath) match {
+    def validate(cover: Cover): Try[Cover] = {
+      validateCover(cover) match {
         case head :: tail => Failure(new ValidationException(errors = head :: tail))
-        case _ => Success(newLearningPath)
+        case _ => Success(cover)
       }
     }
 

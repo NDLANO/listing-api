@@ -29,7 +29,7 @@ trait WriteService {
       .flatMap(updatedCover => converterService.toApiCover(updatedCover, cover.language))
     }
 
-    private def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
+    private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
       existing.copy(
         articleApiId = toMerge.articleApiId.getOrElse(existing.articleApiId),
         coverPhotoUrl = toMerge.coverPhotoUrl.getOrElse(existing.coverPhotoUrl),

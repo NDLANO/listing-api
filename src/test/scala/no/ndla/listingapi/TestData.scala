@@ -24,4 +24,22 @@ object TestData {
     Seq("nb")
   )
 
+  val sampleApiNewCover = api.NewCover(
+    language = "nb",
+    "https://image-api/image.jpg",
+    "hammer",
+    "En hammer er et nyttig verktøy",
+    1122,
+    Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg")))
+  )
+
+  val sampleApiUpdateCover = api.UpdateCover(
+    "nb",
+    None,
+    None,
+    "hammer",
+    "En hammer er et nyttig verktøy",
+    Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg")))
+  )
+
 }
