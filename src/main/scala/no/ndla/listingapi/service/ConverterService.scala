@@ -1,26 +1,27 @@
 package no.ndla.listingapi.service
 
+import no.ndla.listingapi.model.api.NotFoundException
 import no.ndla.listingapi.model.domain.{LanguageLabels, getByLanguage}
 import no.ndla.listingapi.model.{api, domain}
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 trait ConverterService {
   val converterService: ConverterService
 
   class ConverterService {
-    def toApiCover(cover: domain.Cover, language: String): Option[api.Cover] = {
+    def toApiCover(cover: domain.Cover, language: String): Try[api.Cover] = {
       val title = getByLanguage[String, domain.Title](cover.title, language)
       val description = getByLanguage[String, domain.Description](cover.description, language)
 
       if (title.isEmpty || description.isEmpty) {
-        return None
+        return Failure(new NotFoundException)
       }
 
       cover.getAllCoverLanguages match {
-        case Failure(e) => None
+        case Failure(e) => Failure(e)
         case Success(langs) =>
-          Some(api.Cover(
+          Success(api.Cover(
             cover.id.get,
             cover.coverPhotoUrl,
             title.get,
@@ -32,10 +33,20 @@ trait ConverterService {
       }
     }
 
+    private def toApiLabel(label: domain.Label): api.Label = api.Label(label.`type`, label.labels)
 
-    private def toApiLabel(label: domain.Label): api.Label = {
-      api.Label(label.`type`, label.labels)
+    def toDomainCover(cover: api.NewCover): domain.Cover = {
+      domain.Cover(
+        None,
+        cover.coverPhotoUrl,
+        Seq(domain.Title(cover.title, Option(cover.language))),
+        Seq(domain.Description(cover.description, Option(cover.language))),
+        Seq(LanguageLabels(cover.labels.map(toDomainLabel), Option(cover.language))),
+        cover.articleApiId
+      )
     }
+
+    def toDomainLabel(label: api.Label): domain.Label = domain.Label(label.`type`, label.labels)
 
   }
 }

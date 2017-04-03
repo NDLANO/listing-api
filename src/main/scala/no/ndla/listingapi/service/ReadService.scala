@@ -9,7 +9,7 @@ trait ReadService {
 
   class ReadService {
     def coverWithId(id: Long, language: String): Option[api.Cover] = {
-      listingRepository.getCover(id).flatMap(c => converterService.toApiCover(c, language))
+      listingRepository.getCover(id).flatMap(c => converterService.toApiCover(c, language).toOption)
     }
   }
 }

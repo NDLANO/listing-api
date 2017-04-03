@@ -11,10 +11,11 @@ package no.ndla.listingapi.controller
 
 import javax.servlet.http.HttpServletRequest
 
-import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey, DefaultLanguage, DefaultPageSize}
-import no.ndla.listingapi.model.api.{Error, NotFoundException, ValidationError, ValidationException}
-import no.ndla.network.{ApplicationUrl, CorrelationID}
 import com.typesafe.scalalogging.LazyLogging
+import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey}
+import no.ndla.listingapi.model.api.{Error, NotFoundException, ValidationError, ValidationMessage}
+import no.ndla.listingapi.model.domain.ValidationException
+import no.ndla.network.{ApplicationUrl, CorrelationID}
 import org.apache.logging.log4j.ThreadContext
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.NativeJsonSupport
@@ -38,7 +39,7 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
   }
 
   error {
-    case v: ValidationException => BadRequest(body=ValidationError(message=v.getMessage))
+    case v: ValidationException => BadRequest(body=ValidationError(messages=v.errors))
     case n: NotFoundException => NotFound(body=Error(Error.NOT_FOUND, n.getMessage))
     case t: Throwable => {
       logger.error(Error.GenericError.toString, t)
@@ -65,7 +66,7 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
       case None => List.empty
       case Some(_) =>
         if (!strings.forall(entry => entry.forall(_.isDigit))) {
-          throw new ValidationException(s"Invalid value for $paramName. Only (list of) digits are allowed.")
+          throw new ValidationException(errors=Seq(ValidationMessage(paramName, s"Invalid value for $paramName. Only (list of) digits are allowed.")))
         }
         strings.map(_.toLong)
     }
@@ -75,7 +76,7 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
     val paramValue = params(paramName)
     paramValue.forall(_.isDigit) match {
       case true => paramValue.toLong
-      case false => throw new ValidationException(s"Invalid value for $paramName. Only digits are allowed.")
+      case false => throw new ValidationException(errors=Seq(ValidationMessage(paramName, s"Invalid value for $paramName. Only digits are allowed.")))
     }
   }
 

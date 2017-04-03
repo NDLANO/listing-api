@@ -28,7 +28,7 @@ case class Cover(id: Option[Long],
 
     titleLangs == descriptionLangs && descriptionLangs == labelLangs match {
       case true => Success(titleLangs)
-      case false => Failure(new NotFoundException(message = "This cover contains incomplete lanugae-data"))
+      case false => Failure(new NotFoundException(message = "This cover contains incomplete language-data"))
     }
   }
 }

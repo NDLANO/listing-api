@@ -11,6 +11,7 @@ val MockitoVersion = "1.10.19"
 val Elastic4sVersion = "5.2.8"
 val ElasticsearchVersion = "5.1.1"
 val JacksonVersion = "2.7.4"
+val JsoupVersion =  "1.10.2"
 
 val appProperties = settingKey[Properties]("The application properties")
 
@@ -34,6 +35,7 @@ lazy val listing_api = (project in file(".")).
     scalacOptions := Seq("-target:jvm-1.8"),
     libraryDependencies ++= Seq(
       "ndla" %% "network" % "0.16",
+      "ndla" %% "mapping" % "0.4",
       "com.typesafe.scala-logging" %% "scala-logging" % ScalaLoggingVersion,
       "org.apache.logging.log4j" % "log4j-api" % Log4JVersion,
       "org.apache.logging.log4j" % "log4j-core" % Log4JVersion,
@@ -58,7 +60,8 @@ lazy val listing_api = (project in file(".")).
       "com.sksamuel.elastic4s" %% "elastic4s-core" % Elastic4sVersion,
       "com.sksamuel.elastic4s" %% "elastic4s-http" % Elastic4sVersion,
       "org.elasticsearch" % "elasticsearch" % ElasticsearchVersion % "test",
-      "vc.inreach.aws" % "aws-signing-request-interceptor" % "0.0.16"
+      "vc.inreach.aws" % "aws-signing-request-interceptor" % "0.0.16",
+      "org.jsoup" % "jsoup" % JsoupVersion
     )
   ).enablePlugins(DockerPlugin).enablePlugins(GitVersioning).enablePlugins(JettyPlugin)
 
