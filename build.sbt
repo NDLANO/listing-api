@@ -110,6 +110,5 @@ imageNames in docker := Seq(
     tag = Some(System.getProperty("docker.tag", "SNAPSHOT")))
 )
 
-parallelExecution in Test := false
 
 resolvers ++= scala.util.Properties.envOrNone("NDLA_RELEASES").map(repo => "Release Sonatype Nexus Repository Manager" at repo).toSeq

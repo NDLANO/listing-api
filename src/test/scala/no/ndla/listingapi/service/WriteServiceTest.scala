@@ -1,11 +1,11 @@
 package no.ndla.listingapi.service
 
-import no.ndla.listingapi.model.api.{Label, NewCover, UpdateCover}
+import no.ndla.listingapi.model.api.{Label, NewCover}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
-import org.mockito.Mockito._
 import org.mockito.Matchers._
+import org.mockito.Mockito._
 import scalikejdbc.DBSession
 
 import scala.util.{Failure, Success}
@@ -18,6 +18,10 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   val sampleCover = TestData.sampleCover
   val sampleApiUpdateCover = TestData.sampleApiUpdateCover
 
+  override def beforeEach = {
+    reset(listingRepository)
+  }
+
   test("newCover should return Failure if validation fails") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
     service.newCover(sampleNewCover).isFailure should be (true)
@@ -26,7 +30,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   test("newCover should return Failure on failure to store cover") {
     when(converterService.toDomainCover(any[NewCover])).thenReturn(sampleCover)
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
-    when(listingRepository.newCover(any[Cover])(any[DBSession])).thenThrow(mock[RuntimeException])
+    when(listingRepository.newCover(any[Cover])(any[DBSession])).thenThrow(new RuntimeException())
 
     service.newCover(sampleNewCover).isFailure should be (true)
   }
@@ -39,7 +43,6 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
 
     service.newCover(sampleNewCover).isSuccess should be (true)
   }
-
 
   test("updateCover Failure if cover was not found") {
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(None)
@@ -55,7 +58,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   test("updateCover should return Failure on failure to store cover") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(Some(sampleCover))
-    when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenThrow(mock[RuntimeException])
+    when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenThrow(new RuntimeException)
 
     service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
   }
