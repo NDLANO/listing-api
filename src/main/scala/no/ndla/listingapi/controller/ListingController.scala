@@ -10,8 +10,7 @@
 package no.ndla.listingapi.controller
 
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize}
-import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationMessage}
-import no.ndla.listingapi.model.domain.ValidationException
+import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationException, ValidationMessage}
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.SearchService

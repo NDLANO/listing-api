@@ -22,6 +22,7 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   val requestBody = """
                |{
                |    "language": "en",
+               |    "revision": 1,
                |    "title": "an english title",
                |    "labels": [
                |          {"type": "category", "labels": ["hurr", "durr", "i'm", "not", "english"]}

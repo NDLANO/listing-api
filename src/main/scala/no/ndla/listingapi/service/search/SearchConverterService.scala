@@ -24,6 +24,7 @@ trait SearchConverterService {
         case Success(supportedLanguages) =>
           SearchableCover(
             id = card.id.get,
+            revision = card.revision.get,
             title = SearchableLanguageValues(card.title.map(title => LanguageValue(title.language, title.title))),
             description = SearchableLanguageValues(card.description.map(description => LanguageValue(description.language, description.description))),
             card.articleApiId,

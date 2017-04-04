@@ -1,6 +1,6 @@
 package no.ndla.listingapi.service
 
-import no.ndla.listingapi.model.api.{Label, NewCover}
+import no.ndla.listingapi.model.api.{Label, NewCover, ValidationException}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
@@ -103,6 +103,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val domainLabel = domain.Label(Some("category"), Seq("interesting"))
     val expectedResult = Cover(
       Some(1),
+      Some(1),
       sampleCover.coverPhotoUrl,
       sampleCover.title ++ Seq(Title(toUpdate.title, Some(toUpdate.language))),
       sampleCover.description ++ Seq(Description(toUpdate.description, Some(toUpdate.language))),
@@ -125,6 +126,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     )
     val domainLabel = domain.Label(Some("category"), Seq("interesting"))
     val expectedResult = Cover(
+      Some(1),
       Some(1),
       sampleCover.coverPhotoUrl,
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
@@ -149,6 +151,32 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val domainLabel = domain.Label(Some("category"), Seq("interesting"))
     val expectedResult = Cover(
       Some(1),
+      Some(1),
+      toUpdate.coverPhotoUrl.get,
+      Seq(Title(toUpdate.title, Some(toUpdate.language))),
+      Seq(Description(toUpdate.description, Some(toUpdate.language))),
+      Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
+      toUpdate.articleApiId.get
+    )
+
+    when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
+    service.mergeCovers(sampleCover, toUpdate) should equal(expectedResult)
+  }
+
+  test("mergeCovers should always use toMerge's revision number") {
+    val toUpdate = sampleApiUpdateCover.copy(
+      language="nb",
+      revision=1000,
+      title = "titl",
+      description = "description",
+      labels = Seq(Label(Some("category"), Seq("interesting"))),
+      articleApiId = Some(987),
+      coverPhotoUrl = Some("https://updated-image.jpg")
+    )
+    val domainLabel = domain.Label(Some("category"), Seq("interesting"))
+    val expectedResult = Cover(
+      Some(1),
+      Some(1000),
       toUpdate.coverPhotoUrl.get,
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),

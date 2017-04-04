@@ -9,9 +9,9 @@
 package no.ndla.listingapi.service
 
 import com.netaporter.uri.Uri._
-import no.ndla.listingapi.model.api.ValidationMessage
+import no.ndla.listingapi.model.api.{ValidationException, ValidationMessage}
 import no.ndla.listingapi.model.domain
-import no.ndla.listingapi.model.domain.{Cover, ValidationException}
+import no.ndla.listingapi.model.domain.Cover
 import no.ndla.mapping.ISO639.{get6391CodeFor6392Code, get6391CodeFor6392CodeMappings}
 import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist

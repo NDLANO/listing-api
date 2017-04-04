@@ -21,6 +21,7 @@ case class SearchableLanguageList(languageValues: Seq[LanguageValue.LanguageValu
 
 case class SearchableCover(
   id: Long,
+  revision: Int,
   title: SearchableLanguageValues,
   description: SearchableLanguageValues,
   articleApiId: Long,

@@ -2,7 +2,7 @@ package no.ndla.listingapi.repository
 
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.integration.DataSource
-import no.ndla.listingapi.model.api.NotFoundException
+import no.ndla.listingapi.model.api.OptimisticLockException
 import no.ndla.listingapi.model.domain.Cover
 import org.json4s.native.Serialization.write
 import org.postgresql.util.PGobject
@@ -22,8 +22,9 @@ trait ListingRepository {
       dataObject.setType("jsonb")
       dataObject.setValue(write(cover))
 
-      val coverId = sql"insert into ${Cover.table} (document) values (${dataObject})".updateAndReturnGeneratedKey.apply
-      cover.copy(id=Some(coverId))
+      val startRevision = 1
+      val coverId = sql"insert into ${Cover.table} (document, revision) values (${dataObject}, $startRevision)".updateAndReturnGeneratedKey.apply
+      cover.copy(id=Some(coverId), revision=Some(startRevision))
     }
 
     def updateCover(cover: Cover)(implicit session: DBSession = AutoSession): Try[Cover] = {
@@ -31,14 +32,16 @@ trait ListingRepository {
       dataObject.setType("jsonb")
       dataObject.setValue(write(cover))
 
-      val count = sql"update ${Cover.table} set document=${dataObject} where id=${cover.id}".update.apply
+      val newRevision = cover.revision.getOrElse(0) + 1
+      val count = sql"update ${Cover.table} set document=${dataObject}, revision=$newRevision where id=${cover.id} and revision=${cover.revision}".update.apply
 
       if (count != 1) {
-        val message = s"Failed to update cover with ID ${cover.id}"
-        Failure(new NotFoundException(message))
+        val message = s"Found revision mismatch when attempting to update article ${cover.id}"
+        logger.info(message)
+        Failure(new OptimisticLockException)
       } else {
         logger.info(s"Updated cover ${cover.id}")
-        Success(cover)
+        Success(cover.copy(revision=Some(newRevision)))
       }
     }
 

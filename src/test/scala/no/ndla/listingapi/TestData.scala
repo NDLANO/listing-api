@@ -7,6 +7,7 @@ object TestData {
 
   val sampleCover = domain.Cover(
     Some(1),
+    Some(1),
     "https://i.ndla.no/image-api/v1/raw/image.jpg",
     Seq(domain.Title("hammer", Some("nb"))),
     Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
@@ -15,6 +16,7 @@ object TestData {
   )
 
   val sampleApiCover = api.Cover(
+    1,
     1,
     "https://i.ndla.no/image-api/v1/raw/image.jpg",
     "hammer",
@@ -35,6 +37,7 @@ object TestData {
 
   val sampleApiUpdateCover = api.UpdateCover(
     "nb",
+    1,
     None,
     None,
     "hammer",
