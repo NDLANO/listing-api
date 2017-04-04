@@ -9,9 +9,9 @@
 
 package no.ndla.listingapi.model.api
 
+import no.ndla.listingapi.ListingApiProperties
 import java.util.Date
 
-import no.ndla.listingapi.ListingApiProperties
 import org.scalatra.swagger.annotations.{ApiModel, ApiModelProperty}
 
 import scala.annotation.meta.field
@@ -31,11 +31,17 @@ object Error {
   val GENERIC = "GENERIC"
   val NOT_FOUND = "NOT_FOUND"
   val VALIDATION = "VALIDATION"
+  val INDEX_MISSING = "INDEX_MISSING"
+  val RESOURCE_OUTDATED = "RESOURCE_OUTDATED"
+  val ACCESS_DENIED = "ACCESS DENIED"
 
   val GENERIC_DESCRIPTION = s"Ooops. Something we didn't anticipate occured. We have logged the error, and will look into it. But feel free to contact ${ListingApiProperties.ContactEmail} if the error persists."
   val VALIDATION_DESCRIPTION = "Validation Error"
+  val INDEX_MISSING_DESCRIPTION = s"Ooops. Our search index is not available at the moment, but we are trying to recreate it. Please try again in a few minutes. Feel free to contact ${ListingApiProperties.ContactEmail} if the error persists."
+  val RESOURCE_OUTDATED_DESCRIPTION = "The resource is outdated. Please try fetching before submitting again."
 
   val GenericError = Error(GENERIC, GENERIC_DESCRIPTION)
+  val IndexMissingError = Error(INDEX_MISSING, INDEX_MISSING_DESCRIPTION)
 }
 
 class NotFoundException(message: String = "The cover was not found") extends RuntimeException(message)

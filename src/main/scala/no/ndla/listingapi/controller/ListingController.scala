@@ -9,19 +9,19 @@
 
 package no.ndla.listingapi.controller
 
-import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize}
-import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationMessage}
-import no.ndla.listingapi.model.domain.ValidationException
+import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize, RoleWithWriteAccess}
+import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover}
+import no.ndla.listingapi.model.domain.AccessDeniedException
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.SearchService
 import no.ndla.listingapi.service.{ReadService, WriteService}
-import org.json4s.native.Serialization.read
+import no.ndla.network.AuthUser
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 trait ListingController {
   this: ReadService with SearchService with ListingRepository with WriteService =>
@@ -81,6 +81,8 @@ trait ListingController {
         responseMessages(response403, response404, response500))
 
     post("/", operation(newCoverDoc)) {
+      assertHasRole(RoleWithWriteAccess)
+
       val newCover = extract[NewCover](request.body)
       writeService.newCover(newCover) match {
         case Failure(e) => throw e
@@ -99,6 +101,8 @@ trait ListingController {
     }
 
     put("/:coverid", operation(updateCoverDoc)) {
+      assertHasRole(RoleWithWriteAccess)
+
       val coverId = long("coverid")
       val updateCover = extract[UpdateCover](request.body)
       writeService.updateCover(coverId, updateCover) match {
@@ -117,14 +121,9 @@ trait ListingController {
       }
     }
 
-    def extract[T](json: String)(implicit mf: scala.reflect.Manifest[T]): T = {
-      Try(read[T](json)) match {
-        case Failure(e) => {
-          logger.error(e.getMessage, e)
-          throw new ValidationException(errors=Seq(ValidationMessage("body", e.getMessage)))
-        }
-        case Success(data) => data
-      }
+    def assertHasRole(role: String): Unit = {
+      if (!AuthUser.hasRole(role))
+        throw new AccessDeniedException("User is missing required role to perform this operation")
     }
 
   }
