@@ -61,7 +61,7 @@ trait CoverValidator {
 
       hostCorrect && pathCorrect match {
         case true => None
-        case false => Some(ValidationMessage("coverPhotoMetaUrl", INVALID_COVER_PHOTO))
+        case false => Some(ValidationMessage("coverPhotoMetaUrl", INVALID_COVER_PHOTO + " " + host.getOrElse("")))
       }
     }
 

@@ -7,7 +7,7 @@ object TestData {
 
   val sampleCover = domain.Cover(
     Some(1),
-    "https://image-api/image.jpg",
+    "https://i.ndla.no/image-api/v1/raw/image.jpg",
     Seq(domain.Title("hammer", Some("nb"))),
     Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
     Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy")), Label(None, Seq("bygg"))), Some("nb"))),
@@ -16,7 +16,7 @@ object TestData {
 
   val sampleApiCover = api.Cover(
     1,
-    "https://image-api/image.jpg",
+    "https://i.ndla.no/image-api/v1/raw/image.jpg",
     "hammer",
     "En hammer er et nyttig verktøy",
     1122,
@@ -26,7 +26,7 @@ object TestData {
 
   val sampleApiNewCover = api.NewCover(
     language = "nb",
-    "https://image-api/image.jpg",
+    "https://i.ndla.no/image-api/v1/raw/image.jpg",
     "hammer",
     "En hammer er et nyttig verktøy",
     1122,
