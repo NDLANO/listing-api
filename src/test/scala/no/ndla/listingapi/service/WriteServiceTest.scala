@@ -35,10 +35,20 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     service.newCover(sampleNewCover).isFailure should be (true)
   }
 
+  test("newCover should return Failure on failure to index cover") {
+    when(converterService.toDomainCover(any[NewCover])).thenReturn(sampleCover)
+    when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
+    when(listingRepository.newCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
+    when(indexService.indexDocument(sampleCover)).thenReturn(Failure(new RuntimeException()))
+
+    service.newCover(sampleNewCover).isFailure should be (true)
+  }
+
   test("newCover should return Success when everything is fine") {
     when(converterService.toDomainCover(any[NewCover])).thenReturn(sampleCover)
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
     when(listingRepository.newCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
+    when(indexService.indexDocument(sampleCover)).thenReturn(Success(sampleCover))
     when(converterService.toApiCover(sampleCover, "nb")).thenReturn(Success(sampleApiCover))
 
     service.newCover(sampleNewCover).isSuccess should be (true)
@@ -63,10 +73,20 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
   }
 
+  test("updateCover should return Failure on failure to index cover") {
+    when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
+    when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(Some(sampleCover))
+    when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenReturn(Success(sampleCover))
+    when(indexService.indexDocument(sampleCover)).thenReturn(Failure(new RuntimeException))
+
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
+  }
+
   test("updateCover should return Success if everything is fine") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(Some(sampleCover))
     when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenReturn(Success(sampleCover))
+    when(indexService.indexDocument(sampleCover)).thenReturn(Success(sampleCover))
 
     service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
   }

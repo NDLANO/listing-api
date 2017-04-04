@@ -4,17 +4,19 @@ import no.ndla.listingapi.model.api.NotFoundException
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.{api, domain}
 import no.ndla.listingapi.repository.ListingRepository
+import no.ndla.listingapi.service.search.IndexService
 
 import scala.util.{Failure, Success, Try}
 
 trait WriteService {
-  this: ConverterService with ListingRepository with CoverValidator =>
+  this: ConverterService with ListingRepository with CoverValidator with IndexService =>
   val writeService: WriteService
 
   class WriteService {
     def newCover(cover: api.NewCover): Try[api.Cover] = {
       coverValidator.validate(converterService.toDomainCover(cover))
         .flatMap(domainCover => Try(listingRepository.newCover(domainCover)))
+        .flatMap(indexService.indexDocument)
         .flatMap(insertedCover => converterService.toApiCover(insertedCover, cover.language))
     }
 
@@ -25,8 +27,9 @@ trait WriteService {
       }
 
       updateCover.flatMap(coverValidator.validate)
-      .flatMap(listingRepository.updateCover)
-      .flatMap(updatedCover => converterService.toApiCover(updatedCover, cover.language))
+        .flatMap(listingRepository.updateCover)
+        .flatMap(indexService.indexDocument)
+        .flatMap(updatedCover => converterService.toApiCover(updatedCover, cover.language))
     }
 
     private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
