@@ -56,6 +56,13 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
     }
   }
 
+  private val customRenderer: RenderPipeline = {
+    case Failure(e) => throw e
+    case Success(s) => s
+  }
+
+  override def renderPipeline = customRenderer orElse super.renderPipeline
+
   def paramOrDefault(paramName: String, default: String)(implicit request: HttpServletRequest): String =
     params.get(paramName).map(_.trim).filterNot(_.isEmpty()).getOrElse(default)
 

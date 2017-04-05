@@ -37,20 +37,11 @@ trait InternController {
     }
 
     post("/newcover") {
-      val newCover = extract[NewCover](request.body)
-      writeService.newCover(newCover) match {
-        case Failure(e) => throw e
-        case Success(cover) => cover
-      }
+      writeService.newCover(extract[NewCover](request.body))
     }
 
     put("/updatecover/:coverid") {
-      val coverId = long("coverid")
-      val updateCover = extract[UpdateCover](request.body)
-      writeService.updateCover(coverId, updateCover) match {
-        case Failure(e) => throw e
-        case Success(cover) => cover
-      }
+      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
     }
 
   }

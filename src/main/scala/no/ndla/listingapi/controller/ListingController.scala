@@ -82,12 +82,7 @@ trait ListingController {
 
     post("/", operation(newCoverDoc)) {
       assertHasRole(RoleWithWriteAccess)
-
-      val newCover = extract[NewCover](request.body)
-      writeService.newCover(newCover) match {
-        case Failure(e) => throw e
-        case Success(cover) => cover
-      }
+      writeService.newCover(extract[NewCover](request.body))
     }
 
     get("/", operation(filterCoverDoc)) {
@@ -102,13 +97,7 @@ trait ListingController {
 
     put("/:coverid", operation(updateCoverDoc)) {
       assertHasRole(RoleWithWriteAccess)
-
-      val coverId = long("coverid")
-      val updateCover = extract[UpdateCover](request.body)
-      writeService.updateCover(coverId, updateCover) match {
-        case Failure(e) => throw e
-        case Success(cover) => cover
-      }
+      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
     }
 
     get("/:coverid", operation(newCoverDoc)) {
