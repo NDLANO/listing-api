@@ -20,14 +20,14 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
   val sampleCover: domain.Cover = TestData.sampleCover
 
   test("inserting a new cover should return the new ID") {
-    val result = repository.newCover(sampleCover)
+    val result = repository.insertCover(sampleCover)
     result.id.isDefined should be (true)
 
     repository.deleteCover(result.id.get)
   }
 
   test("getCover should return a cover") {
-    val inserted = repository.newCover(sampleCover)
+    val inserted = repository.insertCover(sampleCover)
     inserted.id.isDefined should be (true)
 
     repository.getCover(inserted.id.get) should equal (Some(inserted))
@@ -36,7 +36,7 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
   }
 
   test("updateing a new cover should return the cover on success") {
-    val inserted = repository.newCover(sampleCover)
+    val inserted = repository.insertCover(sampleCover)
     val toUpdate = inserted.copy(articleApiId = inserted.articleApiId + 1)
 
     val result = repository.updateCover(toUpdate)

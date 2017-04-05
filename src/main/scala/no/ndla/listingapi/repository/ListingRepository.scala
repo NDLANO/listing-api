@@ -17,7 +17,7 @@ trait ListingRepository {
   class ListingRepository extends LazyLogging {
     implicit val formats = org.json4s.DefaultFormats + Cover.JSonSerializer
 
-    def newCover(cover: Cover)(implicit session: DBSession = AutoSession): Cover = {
+    def insertCover(cover: Cover)(implicit session: DBSession = AutoSession): Cover = {
       val dataObject = new PGobject()
       dataObject.setType("jsonb")
       dataObject.setValue(write(cover))

@@ -30,7 +30,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   test("newCover should return Failure on failure to store cover") {
     when(converterService.toDomainCover(any[NewCover])).thenReturn(sampleCover)
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
-    when(listingRepository.newCover(any[Cover])(any[DBSession])).thenThrow(new RuntimeException())
+    when(listingRepository.insertCover(any[Cover])(any[DBSession])).thenThrow(new RuntimeException())
 
     service.newCover(sampleNewCover).isFailure should be (true)
   }
@@ -38,7 +38,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   test("newCover should return Failure on failure to index cover") {
     when(converterService.toDomainCover(any[NewCover])).thenReturn(sampleCover)
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
-    when(listingRepository.newCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
+    when(listingRepository.insertCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
     when(indexService.indexDocument(sampleCover)).thenReturn(Failure(new RuntimeException()))
 
     service.newCover(sampleNewCover).isFailure should be (true)
@@ -47,7 +47,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   test("newCover should return Success when everything is fine") {
     when(converterService.toDomainCover(any[NewCover])).thenReturn(sampleCover)
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
-    when(listingRepository.newCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
+    when(listingRepository.insertCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
     when(indexService.indexDocument(sampleCover)).thenReturn(Success(sampleCover))
     when(converterService.toApiCover(sampleCover, "nb")).thenReturn(Success(sampleApiCover))
 
