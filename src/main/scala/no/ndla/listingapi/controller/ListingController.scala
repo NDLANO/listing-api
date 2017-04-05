@@ -10,7 +10,7 @@
 package no.ndla.listingapi.controller
 
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize, RoleWithWriteAccess}
-import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover}
+import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationError}
 import no.ndla.listingapi.model.domain.AccessDeniedException
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.repository.ListingRepository
@@ -21,7 +21,6 @@ import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
 
-import scala.util.{Failure, Success}
 
 trait ListingController {
   this: ReadService with SearchService with ListingRepository with WriteService =>
@@ -32,6 +31,7 @@ trait ListingController {
     protected val applicationDescription = "API for grouping content from ndla.no."
 
     registerModel[Error]
+    registerModel[ValidationError]
 
     val response400 = ResponseMessage(400, "Validation error", Some("ValidationError"))
     val response403 = ResponseMessage(403, "Access Denied", Some("Error"))
@@ -100,7 +100,7 @@ trait ListingController {
       writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
     }
 
-    get("/:coverid", operation(newCoverDoc)) {
+    get("/:coverid", operation(getCoverDoc)) {
       val coverId = long("coverid")
       val language = params.get("language").getOrElse(DefaultLanguage)
 
