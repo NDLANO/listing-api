@@ -61,14 +61,14 @@ trait ListingController {
           queryParam[Option[String]]("language").description(s"Return the cover on this language. Default is $DefaultLanguage")
         )
         authorizations "oauth2"
-        responseMessages(response404, response500))
+        responseMessages(response400, response404, response500))
 
     val newCoverDoc =
       (apiOperation[String]("newCover")
         summary "Create a new cover"
         notes "Create a new cover. Returns the a json-document with then resulting cover"
         authorizations "oauth2"
-        responseMessages(response403, response404, response500))
+        responseMessages(response400, response403, response404, response500))
 
     val updateCoverDoc =
       (apiOperation[String]("updateCover")
@@ -78,7 +78,7 @@ trait ListingController {
           pathParam[Long]("coverid").description("ID of the cover to update")
         )
         authorizations "oauth2"
-        responseMessages(response403, response404, response500))
+        responseMessages(response400, response403, response404, response500))
 
     post("/", operation(newCoverDoc)) {
       assertHasRole(RoleWithWriteAccess)
@@ -102,7 +102,7 @@ trait ListingController {
 
     get("/:coverid", operation(getCoverDoc)) {
       val coverId = long("coverid")
-      val language = params.get("language").getOrElse(DefaultLanguage)
+      val language = paramOrDefault("language", DefaultLanguage)
 
       readService.coverWithId(coverId, language) match {
         case Some(cover) => cover
