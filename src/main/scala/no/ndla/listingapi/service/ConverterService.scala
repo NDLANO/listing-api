@@ -15,21 +15,21 @@ trait ConverterService {
       val description = getByLanguage[String, domain.Description](cover.description, language)
 
       if (title.isEmpty || description.isEmpty) {
-        return Failure(new NotFoundException)
-      }
-
-      cover.getAllCoverLanguages match {
-        case Failure(e) => Failure(e)
-        case Success(langs) =>
-          Success(api.Cover(
-            cover.id.get,
-            cover.coverPhotoUrl,
-            title.get,
-            description.get,
-            cover.articleApiId,
-            getByLanguage[Seq[domain.Label], LanguageLabels](cover.labels, language).getOrElse(Seq.empty).map(toApiLabel),
-            langs
-          ))
+        Failure(new NotFoundException)
+      } else {
+        cover.getAllCoverLanguages match {
+          case Failure(e) => Failure(e)
+          case Success(langs) =>
+            Success(api.Cover(
+              cover.id.get,
+              cover.coverPhotoUrl,
+              title.get,
+              description.get,
+              cover.articleApiId,
+              getByLanguage[Seq[domain.Label], LanguageLabels](cover.labels, language).getOrElse(Seq.empty).map(toApiLabel),
+              langs
+            ))
+        }
       }
     }
 
