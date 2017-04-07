@@ -16,4 +16,4 @@ API for NDLA "show and filter" service
 
 ## Create Docker Image
     ./build.sh
-        
+       
