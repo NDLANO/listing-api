@@ -16,6 +16,16 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   lazy val henrik = new ListingController
   addServlet(henrik, "/test")
 
+  val jwtHeader = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9"
+
+  val jwtClaims = "eyJhcHBfbWV0YWRhdGEiOnsicm9sZXMiOlsibGlzdGluZzp3cml0ZSJdLCJuZGxhX2lkIjoiYWJjMTIzIn0sIm5hbWUiOiJEb25hbGQgRHVjayIsImlzcyI6Imh0dHBzOi8vc29tZS1kb21haW4vIiwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMjMiLCJhdWQiOiJhYmMiLCJleHAiOjE0ODYwNzAwNjMsImlhdCI6MTQ4NjAzNDA2M30"
+  val jwtClaimsNoRoles = "eyJhcHBfbWV0YWRhdGEiOnsicm9sZXMiOltdLCJuZGxhX2lkIjoiYWJjMTIzIn0sIm5hbWUiOiJEb25hbGQgRHVjayIsImlzcyI6Imh0dHBzOi8vc29tZS1kb21haW4vIiwic3ViIjoiZ29vZ2xlLW9hdXRoMnwxMjMiLCJhdWQiOiJhYmMiLCJleHAiOjE0ODYwNzAwNjMsImlhdCI6MTQ4NjAzNDA2M30"
+  val jwtClaimsWrongRole = "eyJhcHBfbWV0YWRhdGEiOnsicm9sZXMiOlsibGlzdGluZzpyZWFkIl0sIm5kbGFfaWQiOiJhYmMxMjMifSwibmFtZSI6IkRvbmFsZCBEdWNrIiwiaXNzIjoiaHR0cHM6Ly9zb21lLWRvbWFpbi8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDEyMyIsImF1ZCI6ImFiYyIsImV4cCI6MTQ4NjA3MDA2MywiaWF0IjoxNDg2MDM0MDYzfQ"
+
+  val authHeaderWithWriteRole = s"Bearer $jwtHeader.$jwtClaims.5_LMfZxYsyj-8iUKQsy-pZMOUD56jUIMMf6qeZFjdOc"
+  val authHeaderWithoutAnyRoles = s"Bearer $jwtHeader.$jwtClaimsNoRoles.3iwx0qpBiYGGCUbOyGjEBWM3MoxdJm9hFSlReEHc2cM"
+  val authHeaderWithWrongRole = s"Bearer $jwtHeader.$jwtClaimsWrongRole.DJBSNf0KYxTy3kqPAmWET8TU0awSqscAaPk0RgEiyvo"
+
   val lang = "nb"
   val coverId = 123
 
@@ -56,28 +66,64 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   }
 
   test("POST / should return 400 on failure to validate request") {
-    post("/test/", "{}") {
+    post("/test/", "{}", headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(400)
     }
   }
 
   test("POST / should return 200 on success") {
     when(writeService.newCover(any[NewCover])).thenReturn(Success(TestData.sampleApiCover))
-    post("/test/", requestBody) {
+    post("/test/", requestBody, headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(200)
     }
   }
 
   test("PUT /:cover-id should return 400 on failure to validate request") {
-    put("/test/1", "{}") {
+    put("/test/1", "{}", headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(400)
     }
   }
 
   test("PUT /:cover-id should return 200 on success") {
     when(writeService.updateCover(any[Long], any[UpdateCover])).thenReturn(Success(TestData.sampleApiCover))
-    put("/test/1", requestBody) {
+    put("/test/1", requestBody, headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(200)
+    }
+  }
+
+  test("That POST / returns 403 if no auth-header") {
+    post("/test/") {
+      status should equal (403)
+    }
+  }
+
+  test("That POST / returns 403 if auth header does not have expected role") {
+    post("/test/", headers = Map("Authorization" -> authHeaderWithWrongRole)) {
+      status should equal (403)
+    }
+  }
+
+  test("That POST / returns 403 if auth header does not have any roles") {
+    post("/test/", headers = Map("Authorization" -> authHeaderWithoutAnyRoles)) {
+      status should equal (403)
+    }
+  }
+
+  test("That PUT /:coverid returns 403 if no auth-header") {
+    put("/test/1") {
+      status should equal (403)
+    }
+  }
+
+  test("That PUT /:coverid returns 403 if auth header does not have expected role") {
+    put("/test/1", headers = Map("Authorization" -> authHeaderWithWrongRole)) {
+      status should equal (403)
+    }
+  }
+
+  test("That PUT /:coverid returns 403 if auth header does not have any roles") {
+    put("/test/1", headers = Map("Authorization" -> authHeaderWithoutAnyRoles)) {
+      status should equal (403)
     }
   }
 

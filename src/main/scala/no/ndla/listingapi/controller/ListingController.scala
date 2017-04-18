@@ -9,18 +9,16 @@
 
 package no.ndla.listingapi.controller
 
-import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize}
-import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationException, ValidationMessage}
+import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize, RoleWithWriteAccess}
+import no.ndla.listingapi.model.api.{AccessDeniedException, Error, NewCover, UpdateCover, ValidationError}
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.SearchService
 import no.ndla.listingapi.service.{ReadService, WriteService}
-import org.json4s.native.Serialization.read
+import no.ndla.network.AuthUser
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
-
-import scala.util.{Failure, Success, Try}
 
 trait ListingController {
   this: ReadService with SearchService with ListingRepository with WriteService =>
@@ -31,6 +29,7 @@ trait ListingController {
     protected val applicationDescription = "API for grouping content from ndla.no."
 
     registerModel[Error]
+    registerModel[ValidationError]
 
     val response400 = ResponseMessage(400, "Validation error", Some("ValidationError"))
     val response403 = ResponseMessage(403, "Access Denied", Some("Error"))
@@ -60,14 +59,14 @@ trait ListingController {
           queryParam[Option[String]]("language").description(s"Return the cover on this language. Default is $DefaultLanguage")
         )
         authorizations "oauth2"
-        responseMessages(response404, response500))
+        responseMessages(response400, response404, response500))
 
     val newCoverDoc =
       (apiOperation[String]("newCover")
         summary "Create a new cover"
         notes "Create a new cover. Returns the a json-document with then resulting cover"
         authorizations "oauth2"
-        responseMessages(response403, response404, response500))
+        responseMessages(response400, response403, response404, response500))
 
     val updateCoverDoc =
       (apiOperation[String]("updateCover")
@@ -77,14 +76,11 @@ trait ListingController {
           pathParam[Long]("coverid").description("ID of the cover to update")
         )
         authorizations "oauth2"
-        responseMessages(response403, response404, response500))
+        responseMessages(response400, response403, response404, response500))
 
     post("/", operation(newCoverDoc)) {
-      val newCover = extract[NewCover](request.body)
-      writeService.newCover(newCover) match {
-        case Failure(e) => throw e
-        case Success(cover) => cover
-      }
+      assertHasRole(RoleWithWriteAccess)
+      writeService.newCover(extract[NewCover](request.body))
     }
 
     get("/", operation(filterCoverDoc)) {
@@ -98,17 +94,13 @@ trait ListingController {
     }
 
     put("/:coverid", operation(updateCoverDoc)) {
-      val coverId = long("coverid")
-      val updateCover = extract[UpdateCover](request.body)
-      writeService.updateCover(coverId, updateCover) match {
-        case Failure(e) => throw e
-        case Success(cover) => cover
-      }
+      assertHasRole(RoleWithWriteAccess)
+      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
     }
 
-    get("/:coverid", operation(newCoverDoc)) {
+    get("/:coverid", operation(getCoverDoc)) {
       val coverId = long("coverid")
-      val language = params.get("language").getOrElse(DefaultLanguage)
+      val language = paramOrDefault("language", DefaultLanguage)
 
       readService.coverWithId(coverId, language) match {
         case Some(cover) => cover
@@ -116,14 +108,9 @@ trait ListingController {
       }
     }
 
-    def extract[T](json: String)(implicit mf: scala.reflect.Manifest[T]): T = {
-      Try(read[T](json)) match {
-        case Failure(e) => {
-          logger.error(e.getMessage, e)
-          throw new ValidationException(errors=Seq(ValidationMessage("body", e.getMessage)))
-        }
-        case Success(data) => data
-      }
+    def assertHasRole(role: String): Unit = {
+      if (!AuthUser.hasRole(role))
+        throw new AccessDeniedException("User is missing required role to perform this operation")
     }
 
   }

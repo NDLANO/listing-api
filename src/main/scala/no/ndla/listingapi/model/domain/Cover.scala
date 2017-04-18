@@ -9,11 +9,6 @@ import scalikejdbc._
 
 import scala.util.{Failure, Success, Try}
 
-case class Label(`type`: Option[String], labels: Seq[String])
-case class LanguageLabels(labels: Seq[Label], language: Option[String]) extends LanguageField[Seq[Label]] { def data = labels }
-case class Title(title: String, language: Option[String]) extends LanguageField[String] { def data = title }
-case class Description(description: String, language: Option[String]) extends LanguageField[String] { def data = description }
-
 case class Cover(id: Option[Long],
                  revision: Option[Int],
                  coverPhotoUrl: String,

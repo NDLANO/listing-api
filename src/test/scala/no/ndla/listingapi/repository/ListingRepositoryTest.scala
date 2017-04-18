@@ -20,14 +20,14 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
   val sampleCover: domain.Cover = TestData.sampleCover
 
   test("inserting a new cover should return the new ID") {
-    val result = repository.newCover(sampleCover)
+    val result = repository.insertCover(sampleCover)
     result.id.isDefined should be (true)
 
     repository.deleteCover(result.id.get)
   }
 
   test("getCover should return a cover") {
-    val inserted = repository.newCover(sampleCover)
+    val inserted = repository.insertCover(sampleCover)
     inserted.id.isDefined should be (true)
 
     repository.getCover(inserted.id.get) should equal (Some(inserted))
@@ -36,7 +36,7 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
   }
 
   test("updateing a new cover should return the cover on success") {
-    val inserted = repository.newCover(sampleCover)
+    val inserted = repository.insertCover(sampleCover)
     val toUpdate = inserted.copy(articleApiId = inserted.articleApiId + 1)
 
     val result = repository.updateCover(toUpdate)
@@ -52,7 +52,7 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
   }
 
   test("newCover should set revision number to 1") {
-    val result = repository.newCover(sampleCover.copy(revision=None))
+    val result = repository.insertCover(sampleCover.copy(revision=None))
     result.id.isDefined should be (true)
     result.revision should be (Some(1))
 
@@ -60,7 +60,7 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
   }
 
   test("updateCover should fail to update if revision number does not match current") {
-    val initial = repository.newCover(sampleCover.copy(revision=None))
+    val initial = repository.insertCover(sampleCover.copy(revision=None))
     repository.updateCover(initial.copy(revision = Some(initial.revision.get + 1))).isFailure should be (true)
     repository.updateCover(initial.copy(revision = Some(initial.revision.get - 1))).isFailure should be (true)
 
@@ -68,7 +68,7 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
   }
 
   test("updateCover should update current revision number") {
-    val initial = repository.newCover(sampleCover.copy(revision=None))
+    val initial = repository.insertCover(sampleCover.copy(revision=None))
     val firstUpdate = repository.updateCover(initial)
 
     firstUpdate.isSuccess should be (true)

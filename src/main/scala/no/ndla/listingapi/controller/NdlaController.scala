@@ -13,13 +13,16 @@ import javax.servlet.http.HttpServletRequest
 
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey}
-import no.ndla.listingapi.model.api.{Error, NotFoundException, OptimisticLockException, ValidationError, ValidationException, ValidationMessage}
-import no.ndla.network.{ApplicationUrl, CorrelationID}
+import no.ndla.listingapi.model.api.{AccessDeniedException, Error, NotFoundException, OptimisticLockException, ValidationError, ValidationException, ValidationMessage}
+import no.ndla.network.{ApplicationUrl, AuthUser, CorrelationID}
 import org.apache.logging.log4j.ThreadContext
 import org.elasticsearch.index.IndexNotFoundException
+import org.json4s.native.Serialization.read
 import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.json.NativeJsonSupport
 import org.scalatra._
+import org.scalatra.json.NativeJsonSupport
+
+import scala.util.{Failure, Success, Try}
 
 abstract class NdlaController extends ScalatraServlet with NativeJsonSupport with LazyLogging {
   protected implicit override val jsonFormats: Formats = DefaultFormats
@@ -29,16 +32,19 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
     CorrelationID.set(Option(request.getHeader(CorrelationIdHeader)))
     ThreadContext.put(CorrelationIdKey, CorrelationID.get.getOrElse(""))
     ApplicationUrl.set(request)
+    AuthUser.set(request)
     logger.info("{} {}{}", request.getMethod, request.getRequestURI, Option(request.getQueryString).map(s => s"?$s").getOrElse(""))
   }
 
   after() {
     CorrelationID.clear()
     ThreadContext.remove(CorrelationIdKey)
+    AuthUser.clear()
     ApplicationUrl.clear
   }
 
   error {
+    case a: AccessDeniedException => Forbidden(body = Error(Error.ACCESS_DENIED, a.getMessage))
     case v: ValidationException => BadRequest(body=ValidationError(messages=v.errors))
     case n: NotFoundException => NotFound(body=Error(Error.NOT_FOUND, n.getMessage))
     case e: IndexNotFoundException => InternalServerError(body=Error.IndexMissingError)
@@ -48,6 +54,13 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
       InternalServerError(body=Error.GenericError)
     }
   }
+
+  private val customRenderer: RenderPipeline = {
+    case Failure(e) => errorHandler(e)
+    case Success(s) => s
+  }
+
+  override def renderPipeline = customRenderer orElse super.renderPipeline
 
   def paramOrDefault(paramName: String, default: String)(implicit request: HttpServletRequest): String =
     params.get(paramName).map(_.trim).filterNot(_.isEmpty()).getOrElse(default)
@@ -79,6 +92,16 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
     paramValue.forall(_.isDigit) match {
       case true => paramValue.toLong
       case false => throw new ValidationException(errors=Seq(ValidationMessage(paramName, s"Invalid value for $paramName. Only digits are allowed.")))
+    }
+  }
+
+  def extract[T](json: String)(implicit mf: scala.reflect.Manifest[T]): T = {
+    Try(read[T](json)) match {
+      case Failure(e) => {
+        logger.error(e.getMessage, e)
+        throw new ValidationException(errors=Seq(ValidationMessage("body", e.getMessage)))
+      }
+      case Success(data) => data
     }
   }
 

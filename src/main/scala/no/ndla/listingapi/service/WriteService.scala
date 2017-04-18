@@ -15,7 +15,7 @@ trait WriteService {
   class WriteService {
     def newCover(cover: api.NewCover): Try[api.Cover] = {
       coverValidator.validate(converterService.toDomainCover(cover))
-        .flatMap(domainCover => Try(listingRepository.newCover(domainCover)))
+        .flatMap(domainCover => Try(listingRepository.insertCover(domainCover)))
         .flatMap(indexService.indexDocument)
         .flatMap(insertedCover => converterService.toApiCover(insertedCover, cover.language))
     }
