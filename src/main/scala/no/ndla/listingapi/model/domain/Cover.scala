@@ -9,11 +9,6 @@ import scalikejdbc._
 
 import scala.util.{Failure, Success, Try}
 
-case class Label(`type`: Option[String], labels: Seq[String])
-case class LanguageLabels(labels: Seq[Label], language: Option[String]) extends LanguageField[Seq[Label]] { def data = labels }
-case class Title(title: String, language: Option[String]) extends LanguageField[String] { def data = title }
-case class Description(description: String, language: Option[String]) extends LanguageField[String] { def data = description }
-
 case class Cover(id: Option[Long],
                  coverPhotoUrl: String,
                  title: Seq[Title],
@@ -28,7 +23,7 @@ case class Cover(id: Option[Long],
 
     titleLangs == descriptionLangs && descriptionLangs == labelLangs match {
       case true => Success(titleLangs)
-      case false => Failure(new NotFoundException(message = "This cover contains incomplete lanugae-data"))
+      case false => Failure(new NotFoundException(message = "This cover contains incomplete language-data"))
     }
   }
 }

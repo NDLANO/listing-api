@@ -13,7 +13,7 @@ import no.ndla.listingapi.controller.{HealthController, InternController, Listin
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, JestClientFactory}
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
-import no.ndla.listingapi.service.{ConverterService, ReadService}
+import no.ndla.listingapi.service.{ConverterService, CoverValidator, ReadService, WriteService}
 import org.postgresql.ds.PGPoolingDataSource
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
@@ -21,6 +21,8 @@ object ComponentRegistry
   extends DataSource
   with ListingRepository
   with ReadService
+  with WriteService
+  with CoverValidator
   with SearchService
   with ElasticClient
   with SearchIndexService
@@ -51,7 +53,9 @@ object ComponentRegistry
 
   lazy val listingRepository = new ListingRepository
   lazy val readService = new ReadService
+  lazy val writeService = new WriteService
   lazy val converterService = new ConverterService
+  lazy val coverValidator = new CoverValidator
 
   lazy val searchService = new SearchService
   lazy val jestClient = JestClientFactory.getClient()

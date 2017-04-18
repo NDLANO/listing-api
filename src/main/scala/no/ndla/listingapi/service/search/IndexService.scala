@@ -43,27 +43,27 @@ trait IndexService {
       new Index.Builder(source).index(indexName).`type`(ListingApiProperties.SearchDocument).id(card.id.get.toString).build
     }
 
-    def indexDocument(card: Cover): Try[Cover] = {
-      val result = jestClient.execute(createIndexRequest(card, ListingApiProperties.SearchIndex))
-      result.map(_ => card)
+    def indexDocument(cover: Cover): Try[Cover] = {
+      val result = jestClient.execute(createIndexRequest(cover, ListingApiProperties.SearchIndex))
+      result.map(_ => cover)
     }
 
-    def indexDocuments(cards: List[Cover], indexName: String): Try[Int] = {
+    def indexDocuments(covers: List[Cover], indexName: String): Try[Int] = {
       val bulkBuilder = new Bulk.Builder()
-      cards.foreach(article => bulkBuilder.addAction(createIndexRequest(article, indexName)))
+      covers.foreach(article => bulkBuilder.addAction(createIndexRequest(article, indexName)))
 
       val response = jestClient.execute(bulkBuilder.build())
       response.map(r => {
-        logger.info(s"Indexed ${cards.size} documents. No of failed items: ${r.getFailedItems.size()}")
-        cards.size
+        logger.info(s"Indexed ${covers.size} documents. No of failed items: ${r.getFailedItems.size()}")
+        covers.size
       })
     }
 
-    def deleteDocument(cardId: Long): Try[_] = {
+    def deleteDocument(coverId: Long): Try[_] = {
       if (indexService.aliasTarget.isEmpty) {
         createIndex.map(createAliasTarget)
       }
-      val deleteRequest = new Delete.Builder(s"$cardId")
+      val deleteRequest = new Delete.Builder(s"$coverId")
         .index(ListingApiProperties.SearchIndex)
         .`type`(ListingApiProperties.SearchDocument).build()
       jestClient.execute(deleteRequest)

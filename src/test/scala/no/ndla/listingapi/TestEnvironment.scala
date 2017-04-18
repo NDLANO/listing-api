@@ -14,12 +14,14 @@ import no.ndla.listingapi.controller.{HealthController, ListingController}
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, NdlaJestClient}
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
-import no.ndla.listingapi.service.{ConverterService, ReadService}
+import no.ndla.listingapi.service.{ConverterService, CoverValidator, ReadService, WriteService}
 import org.scalatest.mockito.MockitoSugar._
 
 trait TestEnvironment
   extends DataSource
   with ReadService
+  with WriteService
+  with CoverValidator
   with SearchService
   with ElasticClient
   with SearchIndexService
@@ -33,7 +35,9 @@ trait TestEnvironment
   val dataSource = mock[sql.DataSource]
   val listingRepository = mock[ListingRepository]
   val readService = mock[ReadService]
+  val writeService = mock[WriteService]
   val converterService = mock[ConverterService]
+  val coverValidator = mock[CoverValidator]
 
   val resourcesApp = mock[ResourcesApp]
   val healthController = mock[HealthController]

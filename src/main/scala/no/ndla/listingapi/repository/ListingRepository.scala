@@ -1,16 +1,20 @@
 package no.ndla.listingapi.repository
 
+import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.integration.DataSource
+import no.ndla.listingapi.model.api.NotFoundException
 import no.ndla.listingapi.model.domain.Cover
 import org.json4s.native.Serialization.write
 import org.postgresql.util.PGobject
 import scalikejdbc._
 
+import scala.util.{Failure, Success, Try}
+
 trait ListingRepository {
   this: DataSource =>
   val listingRepository: ListingRepository
 
-  class ListingRepository {
+  class ListingRepository extends LazyLogging {
     implicit val formats = org.json4s.DefaultFormats + Cover.JSonSerializer
 
     def insertCover(cover: Cover)(implicit session: DBSession = AutoSession): Cover = {
@@ -20,6 +24,22 @@ trait ListingRepository {
 
       val coverId = sql"insert into ${Cover.table} (document) values (${dataObject})".updateAndReturnGeneratedKey.apply
       cover.copy(id=Some(coverId))
+    }
+
+    def updateCover(cover: Cover)(implicit session: DBSession = AutoSession): Try[Cover] = {
+      val dataObject = new PGobject()
+      dataObject.setType("jsonb")
+      dataObject.setValue(write(cover))
+
+      val count = sql"update ${Cover.table} set document=${dataObject} where id=${cover.id}".update.apply
+
+      if (count != 1) {
+        val message = s"Failed to update cover with ID ${cover.id}"
+        Failure(new NotFoundException(message))
+      } else {
+        logger.info(s"Updated cover ${cover.id}")
+        Success(cover)
+      }
     }
 
     def getCover(coverId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
