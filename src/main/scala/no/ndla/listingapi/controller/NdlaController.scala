@@ -57,7 +57,7 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
   }
 
   private val customRenderer: RenderPipeline = {
-    case Failure(e) => throw e
+    case Failure(e) => errorHandler(e)
     case Success(s) => s
   }
 
