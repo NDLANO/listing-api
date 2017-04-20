@@ -62,14 +62,14 @@ trait ListingController {
         responseMessages(response400, response404, response500))
 
     val newCoverDoc =
-      (apiOperation[String]("newCover")
+      (apiOperation[NewCover]("newCover")
         summary "Create a new cover"
         notes "Create a new cover. Returns the a json-document with then resulting cover"
         authorizations "oauth2"
         responseMessages(response400, response403, response404, response500))
 
     val updateCoverDoc =
-      (apiOperation[String]("updateCover")
+      (apiOperation[UpdateCover]("updateCover")
         summary "Update a cover"
         notes "Update a cover with a new translation or update an existing translation"
         parameters(
@@ -80,6 +80,7 @@ trait ListingController {
 
     post("/", operation(newCoverDoc)) {
       assertHasRole(RoleWithWriteAccess)
+      println(s"data = '${request.body}'")
       writeService.newCover(extract[NewCover](request.body))
     }
 

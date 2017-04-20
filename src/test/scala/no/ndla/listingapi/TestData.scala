@@ -8,7 +8,7 @@ object TestData {
   val sampleCover = domain.Cover(
     Some(1),
     Some(1),
-    "https://i.ndla.no/image-api/v1/raw/image.jpg",
+    "https://test.api.ndla.no/image-api/v1/raw/image.jpg",
     Seq(domain.Title("hammer", Some("nb"))),
     Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
     Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy")), Label(None, Seq("bygg"))), Some("nb"))),

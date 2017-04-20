@@ -23,6 +23,8 @@ object ListingApiProperties extends LazyLogging {
 
   val ApplicationPort = 80
   val ContactEmail = "christergundersen@ndla.no"
+  val Environment = propOrElse("NDLA_ENVIRONMENT", "local")
+  lazy val Domain: String = Domains.get(Environment)
 
   val SearchServer = propOrElse("SEARCH_SERVER", "http://search-listing-api.ndla-local")
   val SearchRegion = propOrElse("SEARCH_REGION", "eu-central-1")
