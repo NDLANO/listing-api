@@ -80,7 +80,6 @@ trait ListingController {
 
     post("/", operation(newCoverDoc)) {
       assertHasRole(RoleWithWriteAccess)
-      println(s"data = '${request.body}'")
       writeService.newCover(extract[NewCover](request.body))
     }
 
