@@ -22,6 +22,7 @@ trait ConverterService {
           case Success(langs) =>
             Success(api.Cover(
               cover.id.get,
+              cover.revision.get,
               cover.coverPhotoUrl,
               title.get,
               description.get,
@@ -37,6 +38,7 @@ trait ConverterService {
 
     def toDomainCover(cover: api.NewCover): domain.Cover = {
       domain.Cover(
+        None,
         None,
         cover.coverPhotoUrl,
         Seq(domain.Title(cover.title, Option(cover.language))),

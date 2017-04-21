@@ -13,15 +13,14 @@ import javax.servlet.http.HttpServletRequest
 
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey}
-import no.ndla.listingapi.model.api.{Error, NotFoundException, ValidationError, ValidationMessage}
-import no.ndla.listingapi.model.domain.{AccessDeniedException, OptimisticLockException, ValidationException}
+import no.ndla.listingapi.model.api.{AccessDeniedException, Error, NotFoundException, OptimisticLockException, ValidationError, ValidationException, ValidationMessage}
 import no.ndla.network.{ApplicationUrl, AuthUser, CorrelationID}
 import org.apache.logging.log4j.ThreadContext
 import org.elasticsearch.index.IndexNotFoundException
 import org.json4s.native.Serialization.read
 import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.json.NativeJsonSupport
 import org.scalatra._
+import org.scalatra.json.NativeJsonSupport
 
 import scala.util.{Failure, Success, Try}
 

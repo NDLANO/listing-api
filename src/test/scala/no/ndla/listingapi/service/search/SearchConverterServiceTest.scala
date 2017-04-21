@@ -26,6 +26,7 @@ class SearchConverterServiceTest extends UnitSuite with TestEnvironment {
   test("asSearchableCard should convert to expected SearchableCover") {
     val expected = SearchableCover(
       sampleCover.id.get,
+      sampleCover.revision.get,
       SearchableLanguageValues(Seq(LanguageValue(Some("nb"), "title"))),
       SearchableLanguageValues(Seq(LanguageValue(Some("nb"), "description"))),
       sampleCover.articleApiId,

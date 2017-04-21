@@ -50,7 +50,7 @@ trait IndexService {
 
     def indexDocuments(covers: List[Cover], indexName: String): Try[Int] = {
       val bulkBuilder = new Bulk.Builder()
-      covers.foreach(article => bulkBuilder.addAction(createIndexRequest(article, indexName)))
+      covers.foreach(cover => bulkBuilder.addAction(createIndexRequest(cover, indexName)))
 
       val response = jestClient.execute(bulkBuilder.build())
       response.map(r => {
@@ -101,6 +101,7 @@ trait IndexService {
           languageSupportedLabels("labels"),
           textField("coverPhotoUrl") index "not_analyzed",
           intField("articleApiId") index "not_analyzed",
+          intField("revision") index "not_analyzed",
           textField("supportedLanguages") index "not_analyzed"
         ),
         ListingApiProperties.SearchDocument).string()

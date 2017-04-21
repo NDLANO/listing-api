@@ -9,10 +9,10 @@
 package no.ndla.listingapi.service
 
 import com.netaporter.uri.Uri._
-import no.ndla.listingapi.model.api.ValidationMessage
+import no.ndla.listingapi.model.api.{ValidationException, ValidationMessage}
 import no.ndla.listingapi.model.domain
-import no.ndla.listingapi.model.domain.{Cover, ValidationException}
-import no.ndla.mapping.ISO639.{get6391CodeFor6392Code, get6391CodeFor6392CodeMappings}
+import no.ndla.listingapi.model.domain.Cover
+import no.ndla.mapping.ISO639.get6391CodeFor6392CodeMappings
 import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist
 
@@ -54,14 +54,14 @@ trait CoverValidator {
 
     private def validateCoverPhoto(coverPhotoMetaUrl: String): Option[ValidationMessage] = {
       val parsedUrl = parse(coverPhotoMetaUrl)
-      val host = parsedUrl.host
+      val host = parsedUrl.host.getOrElse("")
 
-      val hostCorrect = host.getOrElse("").endsWith("ndla.no")
+      val hostCorrect = host.endsWith("ndla.no") || host.endsWith("ndla-local")
       val pathCorrect = parsedUrl.path.startsWith("/image-api/v")
 
       hostCorrect && pathCorrect match {
         case true => None
-        case false => Some(ValidationMessage("coverPhotoMetaUrl", INVALID_COVER_PHOTO + " " + host.getOrElse("")))
+        case false => Some(ValidationMessage("coverPhotoMetaUrl", INVALID_COVER_PHOTO + " " + host))
       }
     }
 

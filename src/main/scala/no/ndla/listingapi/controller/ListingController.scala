@@ -10,8 +10,7 @@
 package no.ndla.listingapi.controller
 
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize, RoleWithWriteAccess}
-import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationError}
-import no.ndla.listingapi.model.domain.AccessDeniedException
+import no.ndla.listingapi.model.api.{AccessDeniedException, Error, NewCover, UpdateCover, ValidationError}
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.SearchService
@@ -20,7 +19,6 @@ import no.ndla.network.AuthUser
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
-
 
 trait ListingController {
   this: ReadService with SearchService with ListingRepository with WriteService =>
@@ -64,14 +62,14 @@ trait ListingController {
         responseMessages(response400, response404, response500))
 
     val newCoverDoc =
-      (apiOperation[String]("newCover")
+      (apiOperation[NewCover]("newCover")
         summary "Create a new cover"
         notes "Create a new cover. Returns the a json-document with then resulting cover"
         authorizations "oauth2"
         responseMessages(response400, response403, response404, response500))
 
     val updateCoverDoc =
-      (apiOperation[String]("updateCover")
+      (apiOperation[UpdateCover]("updateCover")
         summary "Update a cover"
         notes "Update a cover with a new translation or update an existing translation"
         parameters(
@@ -82,6 +80,7 @@ trait ListingController {
 
     post("/", operation(newCoverDoc)) {
       assertHasRole(RoleWithWriteAccess)
+      println(s"data = '${request.body}'")
       writeService.newCover(extract[NewCover](request.body))
     }
 

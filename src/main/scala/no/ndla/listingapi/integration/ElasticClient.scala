@@ -17,7 +17,7 @@ import io.searchbox.action.Action
 import io.searchbox.client.config.HttpClientConfig
 import io.searchbox.client.{JestClient, JestResult}
 import no.ndla.listingapi.ListingApiProperties
-import no.ndla.listingapi.model.domain.NdlaSearchException
+import no.ndla.listingapi.model.api.NdlaSearchException
 import org.apache.http.impl.client.{DefaultHttpRequestRetryHandler, HttpClientBuilder}
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import vc.inreach.aws.request.{AWSSigner, AWSSigningRequestInterceptor}

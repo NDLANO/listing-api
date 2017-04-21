@@ -3,13 +3,14 @@ package no.ndla.listingapi.model.domain
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.model.api.NotFoundException
 import org.json4s.FieldSerializer
-import org.json4s.FieldSerializer._
+import org.json4s.FieldSerializer.{ignore, _}
 import org.json4s.native.Serialization._
 import scalikejdbc._
 
 import scala.util.{Failure, Success, Try}
 
 case class Cover(id: Option[Long],
+                 revision: Option[Int],
                  coverPhotoUrl: String,
                  title: Seq[Title],
                  description: Seq[Description],
@@ -36,10 +37,11 @@ object Cover extends SQLSyntaxSupport[Cover] {
   def apply(s: SyntaxProvider[Cover])(rs:WrappedResultSet): Cover = apply(s.resultName)(rs)
   def apply(s: ResultName[Cover])(rs: WrappedResultSet): Cover = {
     val meta = read[Cover](rs.string(s.c("document")))
-    Cover(Some(rs.long(s.c("id"))), meta.coverPhotoUrl, meta.title, meta.description, meta.labels, meta.articleApiId)
+    Cover(Some(rs.long(s.c("id"))), Some(rs.int(s.c("revision"))), meta.coverPhotoUrl, meta.title, meta.description, meta.labels, meta.articleApiId)
   }
 
   val JSonSerializer = FieldSerializer[Cover](
-    ignore("id")
+    ignore("id") orElse
+    ignore("revision")
   )
 }

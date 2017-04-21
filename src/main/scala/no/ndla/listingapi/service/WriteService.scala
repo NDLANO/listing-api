@@ -35,6 +35,7 @@ trait WriteService {
     private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
       existing.copy(
         articleApiId = toMerge.articleApiId.getOrElse(existing.articleApiId),
+        revision = Some(toMerge.revision),
         coverPhotoUrl = toMerge.coverPhotoUrl.getOrElse(existing.coverPhotoUrl),
         title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, Option(toMerge.language))),
         description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, Option(toMerge.language))),

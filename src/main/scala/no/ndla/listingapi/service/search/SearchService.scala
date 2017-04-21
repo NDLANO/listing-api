@@ -16,6 +16,7 @@ import io.searchbox.params.Parameters
 import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
 import no.ndla.listingapi.integration.ElasticClient
 import no.ndla.listingapi.model.api
+import no.ndla.listingapi.model.api.NdlaSearchException
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.domain.search.Sort
 import org.apache.lucene.search.join.ScoreMode
@@ -62,6 +63,7 @@ trait SearchService {
       labelsOpt.map(labels => {
           api.Cover(
             hit.get("id").getAsLong,
+            hit.get("revision").getAsInt,
             hit.get("coverPhotoUrl").getAsString,
             hit.get("title").getAsJsonObject.get(language).getAsString,
             hit.get("description").getAsJsonObject.get(language).getAsString,
@@ -105,8 +107,8 @@ trait SearchService {
         .setParameter("from", startAt)
 
         jestClient.execute(request.build()) match {
-        case Success(response) => api.SearchResult(response.getTotal.toLong, page, numResults, getHits(response, language))
-        case Failure(f) => errorHandler(Failure(f))
+          case Success(response) => api.SearchResult(response.getTotal.toLong, page, numResults, getHits(response, language))
+          case Failure(f) => errorHandler(Failure(f))
       }
     }
 

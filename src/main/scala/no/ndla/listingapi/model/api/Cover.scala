@@ -15,6 +15,7 @@ import scala.annotation.meta.field
 
 @ApiModel(description = "Meta information for a cover")
 case class Cover(@(ApiModelProperty@field)(description = "The unique id of the cover") id: Long,
+                 @(ApiModelProperty@field)(description = "The revision number of this cover") revision: Int,
                  @(ApiModelProperty@field)(description = "A cover photo for the cover") coverPhotoUrl: String,
                  @(ApiModelProperty@field)(description = "The title for this cover") title: String,
                  @(ApiModelProperty@field)(description = "The description for this cover") description: String,
