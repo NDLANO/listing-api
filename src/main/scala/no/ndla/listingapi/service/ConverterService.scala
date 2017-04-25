@@ -28,7 +28,8 @@ trait ConverterService {
               description.get,
               cover.articleApiId,
               getByLanguage[Seq[domain.Label], LanguageLabels](cover.labels, language).getOrElse(Seq.empty).map(toApiLabel),
-              langs
+              langs,
+              cover.userId
             ))
         }
       }
@@ -36,7 +37,7 @@ trait ConverterService {
 
     private def toApiLabel(label: domain.Label): api.Label = api.Label(label.`type`, label.labels)
 
-    def toDomainCover(cover: api.NewCover): domain.Cover = {
+    def toDomainCover(cover: api.NewCover, userId: String): domain.Cover = {
       domain.Cover(
         None,
         None,
@@ -44,7 +45,8 @@ trait ConverterService {
         Seq(domain.Title(cover.title, Option(cover.language))),
         Seq(domain.Description(cover.description, Option(cover.language))),
         Seq(LanguageLabels(cover.labels.map(toDomainLabel), Option(cover.language))),
-        cover.articleApiId
+        cover.articleApiId,
+        userId
       )
     }
 

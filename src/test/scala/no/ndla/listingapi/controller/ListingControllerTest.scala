@@ -72,7 +72,7 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   }
 
   test("POST / should return 200 on success") {
-    when(writeService.newCover(any[NewCover])).thenReturn(Success(TestData.sampleApiCover))
+    when(writeService.newCover(any[NewCover], any[String])).thenReturn(Success(TestData.sampleApiCover))
     post("/test/", requestBody, headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(200)
     }
@@ -85,7 +85,7 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   }
 
   test("PUT /:cover-id should return 200 on success") {
-    when(writeService.updateCover(any[Long], any[UpdateCover])).thenReturn(Success(TestData.sampleApiCover))
+    when(writeService.updateCover(any[Long], any[UpdateCover], any[String])).thenReturn(Success(TestData.sampleApiCover))
     put("/test/1", requestBody, headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(200)
     }

@@ -37,11 +37,11 @@ trait InternController {
     }
 
     post("/newcover") {
-      writeService.newCover(extract[NewCover](request.body))
+      writeService.newCover(extract[NewCover](request.body), "NDLA import script")
     }
 
     put("/updatecover/:coverid") {
-      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
+      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body), "NDLA import script")
     }
 
   }

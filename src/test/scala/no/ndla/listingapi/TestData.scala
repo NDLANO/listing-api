@@ -12,7 +12,8 @@ object TestData {
     Seq(domain.Title("hammer", Some("nb"))),
     Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
     Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy")), Label(None, Seq("bygg"))), Some("nb"))),
-    1122
+    1122,
+    "NDLA import script"
   )
 
   val sampleApiCover = api.Cover(
@@ -23,7 +24,8 @@ object TestData {
     "En hammer er et nyttig verktøy",
     1122,
     Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))),
-    Seq("nb")
+    Seq("nb"),
+    "NDLA import script"
   )
 
   val sampleApiNewCover = api.NewCover(

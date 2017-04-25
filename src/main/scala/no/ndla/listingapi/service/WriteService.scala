@@ -13,17 +13,17 @@ trait WriteService {
   val writeService: WriteService
 
   class WriteService {
-    def newCover(cover: api.NewCover): Try[api.Cover] = {
-      coverValidator.validate(converterService.toDomainCover(cover))
+    def newCover(cover: api.NewCover, userId: String): Try[api.Cover] = {
+      coverValidator.validate(converterService.toDomainCover(cover, userId))
         .flatMap(domainCover => Try(listingRepository.insertCover(domainCover)))
         .flatMap(indexService.indexDocument)
         .flatMap(insertedCover => converterService.toApiCover(insertedCover, cover.language))
     }
 
-    def updateCover(coverId: Long, cover: api.UpdateCover): Try[api.Cover] = {
+    def updateCover(coverId: Long, cover: api.UpdateCover, userId: String): Try[api.Cover] = {
       val updateCover = listingRepository.getCover(coverId) match {
         case None => Failure(new NotFoundException(s"No cover with id $coverId found"))
-        case Some(existing) => Success(mergeCovers(existing, cover))
+        case Some(existing) => Success(mergeCovers(existing, cover, userId))
       }
 
       updateCover.flatMap(coverValidator.validate)
@@ -32,14 +32,15 @@ trait WriteService {
         .flatMap(updatedCover => converterService.toApiCover(updatedCover, cover.language))
     }
 
-    private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
+    private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover, userId: String): domain.Cover = {
       existing.copy(
         articleApiId = toMerge.articleApiId.getOrElse(existing.articleApiId),
         revision = Some(toMerge.revision),
         coverPhotoUrl = toMerge.coverPhotoUrl.getOrElse(existing.coverPhotoUrl),
         title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, Option(toMerge.language))),
         description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, Option(toMerge.language))),
-        labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language)))
+        labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language))),
+        userId = userId
       )
     }
 
@@ -51,4 +52,5 @@ trait WriteService {
     }
 
   }
+
 }

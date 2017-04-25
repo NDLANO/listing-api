@@ -41,23 +41,23 @@ trait ListingController {
         summary "Returns covers matching a filter"
         notes "Returns a list of covers"
         parameters(
-          queryParam[Option[String]]("filter").description("A comma separated string containing labels"),
-          queryParam[Option[String]]("language").description(s"Only return results on the given language. Default is $DefaultLanguage"),
-          queryParam[Option[String]]("sort").description(s"Sort results. Valid options are ${Sort.values.mkString(", ")}"),
-          queryParam[Option[Int]]("page-size").description("Return this many results per page"),
-          queryParam[Option[Int]]("page").description("Return results for this page")
-        )
+        queryParam[Option[String]]("filter").description("A comma separated string containing labels"),
+        queryParam[Option[String]]("language").description(s"Only return results on the given language. Default is $DefaultLanguage"),
+        queryParam[Option[String]]("sort").description(s"Sort results. Valid options are ${Sort.values.mkString(", ")}"),
+        queryParam[Option[Int]]("page-size").description("Return this many results per page"),
+        queryParam[Option[Int]]("page").description("Return results for this page")
+      )
         authorizations "oauth2"
-        responseMessages(response500))
+        responseMessages (response500))
 
     val getCoverDoc =
       (apiOperation[String]("getCover")
         summary "Returns cover meta data"
         notes "Returns a cover"
         parameters(
-          pathParam[Long]("coverid").description("Id of the cover that is to be returned"),
-          queryParam[Option[String]]("language").description(s"Return the cover on this language. Default is $DefaultLanguage")
-        )
+        pathParam[Long]("coverid").description("Id of the cover that is to be returned"),
+        queryParam[Option[String]]("language").description(s"Return the cover on this language. Default is $DefaultLanguage")
+      )
         authorizations "oauth2"
         responseMessages(response400, response404, response500))
 
@@ -72,15 +72,17 @@ trait ListingController {
       (apiOperation[UpdateCover]("updateCover")
         summary "Update a cover"
         notes "Update a cover with a new translation or update an existing translation"
-        parameters(
-          pathParam[Long]("coverid").description("ID of the cover to update")
+        parameters (
+        pathParam[Long]("coverid").description("ID of the cover to update")
         )
         authorizations "oauth2"
         responseMessages(response400, response403, response404, response500))
 
     post("/", operation(newCoverDoc)) {
       assertHasRole(RoleWithWriteAccess)
-      writeService.newCover(extract[NewCover](request.body))
+      var userId = AuthUser.get
+      assertHasUserId(userId)
+      writeService.newCover(extract[NewCover](request.body), userId.get)
     }
 
     get("/", operation(filterCoverDoc)) {
@@ -95,7 +97,9 @@ trait ListingController {
 
     put("/:coverid", operation(updateCoverDoc)) {
       assertHasRole(RoleWithWriteAccess)
-      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
+      var userId = AuthUser.get
+      assertHasUserId(userId)
+      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body), userId.get)
     }
 
     get("/:coverid", operation(getCoverDoc)) {
@@ -113,5 +117,12 @@ trait ListingController {
         throw new AccessDeniedException("User is missing required role to perform this operation")
     }
 
+    def assertHasUserId(userId: Option[String]) = {
+      if (userId.isEmpty) {
+        throw new AccessDeniedException(("User id required to perform this operation"))
+      }
+    }
+
   }
+
 }

@@ -69,7 +69,8 @@ trait SearchService {
             hit.get("description").getAsJsonObject.get(language).getAsString,
             hit.get("articleApiId").getAsLong,
             labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq,
-            hit.get("supportedLanguages").getAsJsonArray.asScala.toSeq.map(_.getAsString)
+            hit.get("supportedLanguages").getAsJsonArray.asScala.toSeq.map(_.getAsString),
+            hit.get("userId").getAsString
           )
       })
     }
