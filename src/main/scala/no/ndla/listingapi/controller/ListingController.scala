@@ -117,8 +117,8 @@ trait ListingController {
         throw new AccessDeniedException("User is missing required role to perform this operation")
     }
 
-    def assertHasUserId(userId: Option[String]) = {
-      if (userId.isEmpty) {
+    def assertHasUserId(ndlaId: Option[String]) = {
+      if (ndlaId.isEmpty || ndlaId.get.isEmpty) {
         throw new AccessDeniedException(("User id required to perform this operation"))
       }
     }

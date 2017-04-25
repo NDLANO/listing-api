@@ -109,7 +109,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       sampleCover.description ++ Seq(Description(toUpdate.description, Some(toUpdate.language))),
       sampleCover.labels ++ Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       sampleCover.articleApiId,
-      sampleCover.userId
+      sampleCover.auditUserId
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
@@ -134,7 +134,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       sampleCover.articleApiId,
-      sampleCover.userId
+      sampleCover.auditUserId
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)

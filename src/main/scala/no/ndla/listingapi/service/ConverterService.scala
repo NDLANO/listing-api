@@ -29,7 +29,7 @@ trait ConverterService {
               cover.articleApiId,
               getByLanguage[Seq[domain.Label], LanguageLabels](cover.labels, language).getOrElse(Seq.empty).map(toApiLabel),
               langs,
-              cover.userId
+              cover.auditUserId
             ))
         }
       }

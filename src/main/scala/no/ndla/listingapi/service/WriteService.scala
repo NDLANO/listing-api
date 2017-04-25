@@ -40,7 +40,7 @@ trait WriteService {
         title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, Option(toMerge.language))),
         description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, Option(toMerge.language))),
         labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language))),
-        userId = userId
+        auditUserId = userId
       )
     }
 

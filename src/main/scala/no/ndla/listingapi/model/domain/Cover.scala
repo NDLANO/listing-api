@@ -17,7 +17,7 @@ case class Cover(
   description: Seq[Description],
   labels: Seq[LanguageLabels],
   articleApiId: Long,
-  userId: String
+  auditUserId: String
 ) {
   def getAllCoverLanguages: Try[Seq[String]] = {
     val titleLangs = title.flatMap(_.language)
@@ -47,7 +47,7 @@ object Cover extends SQLSyntaxSupport[Cover] {
       meta.description,
       meta.labels,
       meta.articleApiId,
-      meta.userId
+      meta.auditUserId
     )
   }
 
