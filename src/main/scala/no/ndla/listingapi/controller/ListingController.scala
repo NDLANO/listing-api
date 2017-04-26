@@ -19,6 +19,7 @@ import no.ndla.network.AuthUser
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
+import no.ndla.listingapi.auth.assertHasRole
 
 trait ListingController {
   this: ReadService with SearchService with ListingRepository with WriteService =>
@@ -79,10 +80,12 @@ trait ListingController {
         responseMessages(response400, response403, response404, response500))
 
     post("/", operation(newCoverDoc)) {
+      println("POST")
       assertHasRole(RoleWithWriteAccess)
-      var userId = AuthUser.get
-      assertHasUserId(userId)
-      writeService.newCover(extract[NewCover](request.body), userId.get)
+      println("hasRole")
+      val body = request.body
+      println(s"body $body")
+      writeService.newCover(extract[NewCover](body))
     }
 
     get("/", operation(filterCoverDoc)) {
@@ -97,9 +100,7 @@ trait ListingController {
 
     put("/:coverid", operation(updateCoverDoc)) {
       assertHasRole(RoleWithWriteAccess)
-      var userId = AuthUser.get
-      assertHasUserId(userId)
-      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body), userId.get)
+      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
     }
 
     get("/:coverid", operation(getCoverDoc)) {
@@ -112,16 +113,7 @@ trait ListingController {
       }
     }
 
-    def assertHasRole(role: String): Unit = {
-      if (!AuthUser.hasRole(role))
-        throw new AccessDeniedException("User is missing required role to perform this operation")
-    }
 
-    def assertHasUserId(userId: Option[String]) = {
-      if (userId.isEmpty) {
-        throw new AccessDeniedException(("User id required to perform this operation"))
-      }
-    }
 
   }
 

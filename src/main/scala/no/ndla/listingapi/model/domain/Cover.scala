@@ -1,4 +1,13 @@
+/*
+ * Part of NDLA listing_api.
+ * Copyright (C) 2017 NDLA
+ *
+ * See LICENSE
+ */
+
 package no.ndla.listingapi.model.domain
+
+import java.util.Date
 
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.model.api.NotFoundException
@@ -9,16 +18,16 @@ import scalikejdbc._
 
 import scala.util.{Failure, Success, Try}
 
-case class Cover(
-  id: Option[Long],
-  revision: Option[Int],
-  coverPhotoUrl: String,
-  title: Seq[Title],
-  description: Seq[Description],
-  labels: Seq[LanguageLabels],
-  articleApiId: Long,
-  userId: String
-) {
+case class Cover(id: Option[Long],
+                 revision: Option[Int],
+                 coverPhotoUrl: String,
+                 title: Seq[Title],
+                 description: Seq[Description],
+                 labels: Seq[LanguageLabels],
+                 articleApiId: Long,
+                 updatedBy: String,
+                 updated: Date
+                ) {
   def getAllCoverLanguages: Try[Seq[String]] = {
     val titleLangs = title.flatMap(_.language)
     val descriptionLangs = description.flatMap(_.language)
@@ -35,6 +44,10 @@ object Cover extends SQLSyntaxSupport[Cover] {
   implicit val formats = org.json4s.DefaultFormats
   override val tableName = "covers"
   override val schemaName = Some(ListingApiProperties.MetaSchema)
+  val JSonSerializer = FieldSerializer[Cover](
+    ignore("id") orElse
+      ignore("revision")
+  )
 
   def apply(s: SyntaxProvider[Cover])(rs: WrappedResultSet): Cover = apply(s.resultName)(rs)
 
@@ -47,12 +60,8 @@ object Cover extends SQLSyntaxSupport[Cover] {
       meta.description,
       meta.labels,
       meta.articleApiId,
-      meta.userId
+      meta.updatedBy,
+      meta.updated
     )
   }
-
-  val JSonSerializer = FieldSerializer[Cover](
-    ignore("id") orElse
-      ignore("revision")
-  )
 }

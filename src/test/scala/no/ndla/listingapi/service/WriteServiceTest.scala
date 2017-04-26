@@ -4,6 +4,7 @@ import no.ndla.listingapi.model.api.{Label, NewCover, ValidationException}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
+import no.ndla.network.AuthUser
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import scalikejdbc.DBSession
@@ -18,51 +19,55 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   val sampleCover = TestData.sampleCover
   val sampleApiUpdateCover = TestData.sampleApiUpdateCover
 
+  override def beforeAll()  = {
+    println("need to set fake auth or tests will fail...")
+    AuthUser.set(request = mock) //todo - how to do this????
+  }
   override def beforeEach = {
     reset(listingRepository)
   }
 
   test("newCover should return Failure if validation fails") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
-    service.newCover(sampleNewCover, "NDLA import script").isFailure should be (true)
+    service.newCover(sampleNewCover).isFailure should be (true)
   }
 
   test("newCover should return Failure on failure to store cover") {
-    when(converterService.toDomainCover(any[NewCover], any[String])).thenReturn(sampleCover)
+    when(converterService.toDomainCover(any[NewCover])).thenReturn(sampleCover)
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
     when(listingRepository.insertCover(any[Cover])(any[DBSession])).thenThrow(new RuntimeException())
 
-    service.newCover(sampleNewCover, "NDLA import script").isFailure should be (true)
+    service.newCover(sampleNewCover).isFailure should be (true)
   }
 
   test("newCover should return Failure on failure to index cover") {
-    when(converterService.toDomainCover(any[NewCover], any[String])).thenReturn(sampleCover)
+    when(converterService.toDomainCover(any[NewCover])).thenReturn(sampleCover)
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
     when(listingRepository.insertCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
     when(indexService.indexDocument(sampleCover)).thenReturn(Failure(new RuntimeException()))
 
-    service.newCover(sampleNewCover, "NDLA import script").isFailure should be (true)
+    service.newCover(sampleNewCover).isFailure should be (true)
   }
 
   test("newCover should return Success when everything is fine") {
-    when(converterService.toDomainCover(any[NewCover], any[String])).thenReturn(sampleCover)
+    when(converterService.toDomainCover(any[NewCover])).thenReturn(sampleCover)
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
     when(listingRepository.insertCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
     when(indexService.indexDocument(sampleCover)).thenReturn(Success(sampleCover))
     when(converterService.toApiCover(sampleCover, "nb")).thenReturn(Success(sampleApiCover))
 
-    service.newCover(sampleNewCover, "NDLA import script").isSuccess should be (true)
+    service.newCover(sampleNewCover).isSuccess should be (true)
   }
 
   test("updateCover Failure if cover was not found") {
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(None)
-    service.updateCover(1, sampleApiUpdateCover, "NDLA import script").isFailure should be (true)
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
   }
 
   test("updateCover should return Failure if validation fails") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(Some(sampleCover))
-    service.updateCover(1, sampleApiUpdateCover, "import script").isFailure should be (true)
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
   }
 
   test("updateCover should return Failure on failure to store cover") {
@@ -70,7 +75,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(Some(sampleCover))
     when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenThrow(new RuntimeException)
 
-    service.updateCover(1, sampleApiUpdateCover, "import script").isFailure should be (true)
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
   }
 
   test("updateCover should return Failure on failure to index cover") {
@@ -79,8 +84,8 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenReturn(Success(sampleCover))
     when(indexService.indexDocument(sampleCover)).thenReturn(Failure(new RuntimeException))
 
-    service.updateCover(1, sampleApiUpdateCover,"import script").isFailure should be (true)
-  }
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
+}
 
   test("updateCover should return Success if everything is fine") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
@@ -88,7 +93,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenReturn(Success(sampleCover))
     when(indexService.indexDocument(sampleCover)).thenReturn(Success(sampleCover))
 
-    service.updateCover(1, sampleApiUpdateCover, "import script").isFailure should be (true)
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
   }
 
   test("mergeCovers should append a new language if language not already exists") {
@@ -109,11 +114,12 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       sampleCover.description ++ Seq(Description(toUpdate.description, Some(toUpdate.language))),
       sampleCover.labels ++ Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       sampleCover.articleApiId,
-      sampleCover.userId
+      sampleCover.updatedBy,
+      sampleCover.updated
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
-    service.mergeCovers(sampleCover, toUpdate, "NDLA import script") should equal(expectedResult)
+    service.mergeCovers(sampleCover, toUpdate) should equal(expectedResult)
   }
 
   test("mergeCovers overwrite a langauge if specified language already exist in cover") {
@@ -134,11 +140,12 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       sampleCover.articleApiId,
-      sampleCover.userId
+      sampleCover.updatedBy,
+      sampleCover.updated
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
-    service.mergeCovers(sampleCover, toUpdate, "NDLA import script") should equal(expectedResult)
+    service.mergeCovers(sampleCover, toUpdate) should equal(expectedResult)
   }
 
   test("mergeCovers updates optional values if specified") {
@@ -159,11 +166,12 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       toUpdate.articleApiId.get,
-      "worker54321"
+      "worker54321",
+      sampleCover.updated
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
-    service.mergeCovers(sampleCover, toUpdate, "worker54321") should equal(expectedResult)
+    service.mergeCovers(sampleCover, toUpdate) should equal(expectedResult)
   }
 
   test("mergeCovers should always use toMerge's revision number") {
@@ -185,11 +193,12 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       toUpdate.articleApiId.get,
-      "worker54321"
+      "worker54321",
+      sampleCover.updated
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
-    service.mergeCovers(sampleCover, toUpdate, "worker54321") should equal(expectedResult)
+    service.mergeCovers(sampleCover, toUpdate) should equal(expectedResult)
   }
 
 }

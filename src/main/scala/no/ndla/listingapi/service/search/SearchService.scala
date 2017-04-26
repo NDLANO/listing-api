@@ -19,19 +19,22 @@ import no.ndla.listingapi.model.api
 import no.ndla.listingapi.model.api.NdlaSearchException
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.domain.search.Sort
+import no.ndla.listingapi.service.Clock
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.ElasticsearchException
 import org.elasticsearch.index.IndexNotFoundException
 import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilders, SortOrder}
+import org.joda.time.DateTime
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait SearchService {
-  this: ElasticClient with SearchIndexService with SearchConverterService =>
+  this: ElasticClient with SearchIndexService with SearchConverterService with Clock =>
   val searchService: SearchService
 
   class SearchService extends LazyLogging {
@@ -70,7 +73,8 @@ trait SearchService {
             hit.get("articleApiId").getAsLong,
             labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq,
             hit.get("supportedLanguages").getAsJsonArray.asScala.toSeq.map(_.getAsString),
-            hit.get("userId").getAsString
+            hit.get("updatedBy").getAsString,
+            clock.toDate(hit.get("update").getAsString)
           )
       })
     }

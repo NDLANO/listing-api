@@ -8,13 +8,14 @@
 
 package no.ndla.listingapi
 
+import javax.servlet.http.HttpServletRequest
 import javax.sql
 
 import no.ndla.listingapi.controller.{HealthController, ListingController}
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, NdlaJestClient}
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
-import no.ndla.listingapi.service.{ConverterService, CoverValidator, ReadService, WriteService}
+import no.ndla.listingapi.service._
 import org.scalatest.mockito.MockitoSugar._
 
 trait TestEnvironment
@@ -31,6 +32,7 @@ trait TestEnvironment
   with ListingRepository
   with ListingController
   with HealthController
+  with Clock
 {
   val dataSource = mock[sql.DataSource]
   val listingRepository = mock[ListingRepository]
@@ -48,4 +50,6 @@ trait TestEnvironment
   val searchIndexService = mock[SearchIndexService]
   val searchConverterService = mock[SearchConverterService]
   val indexService = mock[IndexService]
+
+  val clock = mock[SystemClock]
 }

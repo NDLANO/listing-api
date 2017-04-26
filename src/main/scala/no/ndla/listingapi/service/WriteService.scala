@@ -5,25 +5,27 @@ import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.{api, domain}
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.IndexService
+import no.ndla.listingapi.auth.{getUserId => authUserId}
+
 
 import scala.util.{Failure, Success, Try}
 
 trait WriteService {
-  this: ConverterService with ListingRepository with CoverValidator with IndexService =>
+  this: ConverterService with ListingRepository with CoverValidator with IndexService with Clock  =>
   val writeService: WriteService
 
   class WriteService {
-    def newCover(cover: api.NewCover, userId: String): Try[api.Cover] = {
-      coverValidator.validate(converterService.toDomainCover(cover, userId))
+    def newCover(cover: api.NewCover): Try[api.Cover] = {
+      coverValidator.validate(converterService.toDomainCover(cover))
         .flatMap(domainCover => Try(listingRepository.insertCover(domainCover)))
         .flatMap(indexService.indexDocument)
         .flatMap(insertedCover => converterService.toApiCover(insertedCover, cover.language))
     }
 
-    def updateCover(coverId: Long, cover: api.UpdateCover, userId: String): Try[api.Cover] = {
+    def updateCover(coverId: Long, cover: api.UpdateCover): Try[api.Cover] = {
       val updateCover = listingRepository.getCover(coverId) match {
         case None => Failure(new NotFoundException(s"No cover with id $coverId found"))
-        case Some(existing) => Success(mergeCovers(existing, cover, userId))
+        case Some(existing) => Success(mergeCovers(existing, cover))
       }
 
       updateCover.flatMap(coverValidator.validate)
@@ -32,7 +34,7 @@ trait WriteService {
         .flatMap(updatedCover => converterService.toApiCover(updatedCover, cover.language))
     }
 
-    private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover, userId: String): domain.Cover = {
+    private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
       existing.copy(
         articleApiId = toMerge.articleApiId.getOrElse(existing.articleApiId),
         revision = Some(toMerge.revision),
@@ -40,7 +42,8 @@ trait WriteService {
         title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, Option(toMerge.language))),
         description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, Option(toMerge.language))),
         labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language))),
-        userId = userId
+        updatedBy = authUserId,
+        updated = clock.now()
       )
     }
 
