@@ -4,7 +4,7 @@ import no.ndla.listingapi.model.api.{Label, NewCover, ValidationException}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
-import no.ndla.network.AuthUser
+import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import scalikejdbc.DBSession
@@ -20,9 +20,11 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   val sampleApiUpdateCover = TestData.sampleApiUpdateCover
 
   override def beforeAll()  = {
-    println("need to set fake auth or tests will fail...")
-    AuthUser.set(request = mock) //todo - how to do this????
+    when(authUser.id()).thenReturn("NDLA import script")
+    when(clock.now()).thenReturn((new DateTime(2017, 4, 1, 12, 15, 32, DateTimeZone.UTC)).toDate)
   }
+
+
   override def beforeEach = {
     reset(listingRepository)
   }
@@ -166,7 +168,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       toUpdate.articleApiId.get,
-      "worker54321",
+      "NDLA import script",
       sampleCover.updated
     )
 
@@ -193,7 +195,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       toUpdate.articleApiId.get,
-      "worker54321",
+      "NDLA import script",
       sampleCover.updated
     )
 

@@ -95,49 +95,57 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
 
   test("That POST / returns 403 if no auth-header") {
     post("/test/") {
+
       status should equal (403)
     }
   }
 
   test("That POST / returns 403 if auth header does not have expected role") {
     post("/test/", headers = Map("Authorization" -> authHeaderWithWrongRole)) {
+
       status should equal (403)
     }
   }
 
   test("That POST / returns 403 if auth header does not have any roles") {
     post("/test/", headers = Map("Authorization" -> authHeaderWithoutAnyRoles)) {
+
       status should equal (403)
     }
   }
 
   test("That POST / returns 403 if auth header does not have valid ndla_id") {
     post("/test/", headers = Map("Authorization" -> authHeaderWithEmptyNdlaId)) {
-      println(authHeaderWithoutAnyRoles)
+
+
       status should equal (403)
     }
   }
 
   test("That PUT /:coverid returns 403 if no auth-header") {
     put("/test/1") {
+
       status should equal (403)
     }
   }
 
   test("That PUT /:cover_id returns 403 if auth header does not have valid ndla_id") {
     put("/test/1", headers = Map("Authorization" -> authHeaderWithEmptyNdlaId)) {
+
       status should equal (403)
     }
   }
 
   test("That PUT /:coverid returns 403 if auth header does not have expected role") {
     put("/test/1", headers = Map("Authorization" -> authHeaderWithWrongRole)) {
+
       status should equal (403)
     }
   }
 
   test("That PUT /:coverid returns 403 if auth header does not have any roles") {
     put("/test/1", headers = Map("Authorization" -> authHeaderWithoutAnyRoles)) {
+
       status should equal (403)
     }
   }

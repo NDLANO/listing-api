@@ -14,18 +14,16 @@ import no.ndla.listingapi.model.api.{AccessDeniedException, Error, NewCover, Upd
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.SearchService
-import no.ndla.listingapi.service.{ReadService, WriteService}
-import no.ndla.network.AuthUser
+import no.ndla.listingapi.service._
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
 import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
-import no.ndla.listingapi.auth.assertHasRole
 
 trait ListingController {
-  this: ReadService with SearchService with ListingRepository with WriteService =>
+  this: ReadService with SearchService with ListingRepository with WriteService with AuthenticationRole =>
   val listingController: ListingController
 
-  class ListingController(implicit val swagger: Swagger) extends NdlaController with SwaggerSupport {
+  class ListingController(implicit val swagger: Swagger) extends NdlaController with SwaggerSupport{
     protected implicit override val jsonFormats: Formats = DefaultFormats
     protected val applicationDescription = "API for grouping content from ndla.no."
 
@@ -80,12 +78,8 @@ trait ListingController {
         responseMessages(response400, response403, response404, response500))
 
     post("/", operation(newCoverDoc)) {
-      println("POST")
-      assertHasRole(RoleWithWriteAccess)
-      println("hasRole")
-      val body = request.body
-      println(s"body $body")
-      writeService.newCover(extract[NewCover](body))
+      authRole.assertHasRole(RoleWithWriteAccess)
+      writeService.newCover(extract[NewCover](request.body))
     }
 
     get("/", operation(filterCoverDoc)) {
@@ -99,7 +93,7 @@ trait ListingController {
     }
 
     put("/:coverid", operation(updateCoverDoc)) {
-      assertHasRole(RoleWithWriteAccess)
+      authRole.assertHasRole(RoleWithWriteAccess)
       writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
     }
 
@@ -112,8 +106,6 @@ trait ListingController {
         case None => NotFound(body = Error(Error.NOT_FOUND, s"No cover with id $coverId found"))
       }
     }
-
-
 
   }
 

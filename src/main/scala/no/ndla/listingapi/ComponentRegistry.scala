@@ -32,7 +32,9 @@ object ComponentRegistry
     with ListingController
     with InternController
     with HealthController
-    with Clock {
+    with Clock
+    with AuthenticationRole
+    with AuthenticationUser {
   implicit val swagger = new ListingSwagger
 
   lazy val dataSource = new PGPoolingDataSource()
@@ -64,4 +66,6 @@ object ComponentRegistry
   lazy val searchConverterService = new SearchConverterService
 
   lazy val clock = new SystemClock
+  lazy val authRole = new AuthRole
+  lazy val authUser = new AuthUser
 }

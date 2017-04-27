@@ -5,13 +5,12 @@ import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.{api, domain}
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.IndexService
-import no.ndla.listingapi.auth.{getUserId => authUserId}
 
 
 import scala.util.{Failure, Success, Try}
 
 trait WriteService {
-  this: ConverterService with ListingRepository with CoverValidator with IndexService with Clock  =>
+  this: ConverterService with ListingRepository with CoverValidator with IndexService with Clock with AuthenticationUser =>
   val writeService: WriteService
 
   class WriteService {
@@ -35,6 +34,10 @@ trait WriteService {
     }
 
     private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
+      val id = authUser.id()
+
+      val now = clock.now()
+
       existing.copy(
         articleApiId = toMerge.articleApiId.getOrElse(existing.articleApiId),
         revision = Some(toMerge.revision),
@@ -42,8 +45,8 @@ trait WriteService {
         title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, Option(toMerge.language))),
         description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, Option(toMerge.language))),
         labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language))),
-        updatedBy = authUserId,
-        updated = clock.now()
+        updatedBy = id,
+        updated = now
       )
     }
 

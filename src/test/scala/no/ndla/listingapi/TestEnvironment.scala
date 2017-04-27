@@ -8,7 +8,6 @@
 
 package no.ndla.listingapi
 
-import javax.servlet.http.HttpServletRequest
 import javax.sql
 
 import no.ndla.listingapi.controller.{HealthController, ListingController}
@@ -33,6 +32,8 @@ trait TestEnvironment
   with ListingController
   with HealthController
   with Clock
+  with AuthenticationUser
+  with AuthenticationRole
 {
   val dataSource = mock[sql.DataSource]
   val listingRepository = mock[ListingRepository]
@@ -52,4 +53,7 @@ trait TestEnvironment
   val indexService = mock[IndexService]
 
   val clock = mock[SystemClock]
+  val authUser = mock[AuthUser]
+  val authRole = new AuthRole
+
 }
