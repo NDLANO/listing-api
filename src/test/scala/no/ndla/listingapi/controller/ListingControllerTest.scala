@@ -137,7 +137,6 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
 
   test("That PUT /:coverid returns 403 if auth header does not have any roles") {
     put("/test/1", headers = Map("Authorization" -> authHeaderWithoutAnyRoles)) {
-      println(body)
       status should equal (403)
     }
   }
