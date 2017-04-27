@@ -6,7 +6,6 @@ import no.ndla.listingapi.model.{api, domain}
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service.search.IndexService
 
-
 import scala.util.{Failure, Success, Try}
 
 trait WriteService {

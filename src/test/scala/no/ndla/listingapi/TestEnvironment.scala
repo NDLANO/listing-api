@@ -13,28 +13,28 @@ import javax.sql
 import no.ndla.listingapi.controller.{HealthController, ListingController}
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, NdlaJestClient}
 import no.ndla.listingapi.repository.ListingRepository
-import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
 import no.ndla.listingapi.service._
+import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
 import org.scalatest.mockito.MockitoSugar._
 
 trait TestEnvironment
   extends DataSource
-  with ReadService
-  with WriteService
-  with CoverValidator
-  with SearchService
-  with ElasticClient
-  with SearchIndexService
-  with SearchConverterService
-  with IndexService
-  with ConverterService
-  with ListingRepository
-  with ListingController
-  with HealthController
-  with Clock
-  with AuthenticationUser
-  with AuthenticationRole
-{
+    with ReadService
+    with WriteService
+    with CoverValidator
+    with SearchService
+    with ElasticClient
+    with SearchIndexService
+    with SearchConverterService
+    with IndexService
+    with ConverterService
+    with ListingRepository
+    with ListingController
+    with HealthController
+    with Clock
+    with AuthenticationUser
+    with AuthenticationRole {
+
   val dataSource = mock[sql.DataSource]
   val listingRepository = mock[ListingRepository]
   val readService = mock[ReadService]

@@ -6,8 +6,6 @@ import org.joda.time.{DateTime, DateTimeZone}
 
 object TestData {
 
-  var updated =  (new DateTime(2017, 4, 1, 12, 15, 32, DateTimeZone.UTC)).toDate
-
   val sampleCover = domain.Cover(
     Some(1),
     Some(1),
@@ -51,5 +49,7 @@ object TestData {
     "En hammer er et nyttig verktøy",
     Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg")))
   )
+
+  var updated = (new DateTime(2017, 4, 1, 12, 15, 32, DateTimeZone.UTC)).toDate
 
 }

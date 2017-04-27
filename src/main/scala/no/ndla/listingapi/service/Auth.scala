@@ -16,7 +16,6 @@ trait AuthenticationRole {
 
   class AuthRole {
     def assertHasRole(role: String): Unit = {
-
       if (!AuthUser.hasRole(role))
         throw new AccessDeniedException("User is missing required role to perform this operation")
     }
@@ -31,9 +30,6 @@ trait AuthenticationUser {
   class AuthUser {
 
     def id(): String = {
-
-
-
       if (AuthUser.get.isEmpty || AuthUser.get.get.isEmpty) {
         throw new AccessDeniedException(("User id required to perform this operation"))
       } else {
@@ -41,6 +37,7 @@ trait AuthenticationUser {
       }
 
     }
+
   }
 
 }

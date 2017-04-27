@@ -12,8 +12,8 @@ package no.ndla.listingapi
 import no.ndla.listingapi.controller.{HealthController, InternController, ListingController}
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, JestClientFactory}
 import no.ndla.listingapi.repository.ListingRepository
-import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
 import no.ndla.listingapi.service._
+import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
 import org.postgresql.ds.PGPoolingDataSource
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
