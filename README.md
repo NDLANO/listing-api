@@ -11,9 +11,8 @@ the original/one-off data import script.
 To interact with the api, you need valid security credentials; see [Access Tokens usage](https://github.com/NDLANO/auth/blob/master/README.md).
 To write data to the api, you need write role access.
 
-For a more detailed documentation of the API, please refer to the api documentation for the relevant environment: 
-* [API documentation stageing](https://staging.api.ndla.no)
-* [API documentation production](https://api.ndla.no)
+For a more detailed documentation of the API, please refer to the API documentation (Staging: API documentation).
+
 
 ## Developer documentation
 
