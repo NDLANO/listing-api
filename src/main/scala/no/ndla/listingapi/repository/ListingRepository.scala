@@ -49,6 +49,10 @@ trait ListingRepository {
       coverWhere(sqls"c.id = $coverId")
     }
 
+    def getCoverWithOldNodeId(oldNodeId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
+      coverWhere(sqls"c.document->>'oldNodeId' = ${oldNodeId.toString}")
+    }
+
     def cardsWithIdBetween(min: Long, max: Long): List[Cover] = coversWhere(sqls"c.id between $min and $max").toList
 
     def minMaxId(implicit session: DBSession = AutoSession): (Long, Long) = {

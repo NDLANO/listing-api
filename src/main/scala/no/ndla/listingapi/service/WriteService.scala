@@ -1,6 +1,6 @@
 package no.ndla.listingapi.service
 
-import no.ndla.listingapi.model.api.NotFoundException
+import no.ndla.listingapi.model.api.{CoverAlreadyExistsException, NotFoundException}
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.{api, domain}
 import no.ndla.listingapi.repository.ListingRepository
@@ -14,6 +14,11 @@ trait WriteService {
 
   class WriteService {
     def newCover(cover: api.NewCover): Try[api.Cover] = {
+      cover.oldNodeId.flatMap(listingRepository.getCoverWithOldNodeId) match {
+        case Some(existingCover) => throw new CoverAlreadyExistsException(id=existingCover.id.get)
+        case _ =>
+      }
+
       coverValidator.validate(converterService.toDomainCover(cover))
         .flatMap(domainCover => Try(listingRepository.insertCover(domainCover)))
         .flatMap(indexService.indexDocument)

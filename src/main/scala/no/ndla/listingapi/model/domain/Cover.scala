@@ -11,6 +11,7 @@ import scala.util.{Failure, Success, Try}
 
 case class Cover(id: Option[Long],
                  revision: Option[Int],
+                 oldNodeId: Option[Long],
                  coverPhotoUrl: String,
                  title: Seq[Title],
                  description: Seq[Description],
@@ -37,7 +38,7 @@ object Cover extends SQLSyntaxSupport[Cover] {
   def apply(s: SyntaxProvider[Cover])(rs:WrappedResultSet): Cover = apply(s.resultName)(rs)
   def apply(s: ResultName[Cover])(rs: WrappedResultSet): Cover = {
     val meta = read[Cover](rs.string(s.c("document")))
-    Cover(Some(rs.long(s.c("id"))), Some(rs.int(s.c("revision"))), meta.coverPhotoUrl, meta.title, meta.description, meta.labels, meta.articleApiId)
+    Cover(Some(rs.long(s.c("id"))), Some(rs.int(s.c("revision"))), meta.oldNodeId, meta.coverPhotoUrl, meta.title, meta.description, meta.labels, meta.articleApiId)
   }
 
   val JSonSerializer = FieldSerializer[Cover](

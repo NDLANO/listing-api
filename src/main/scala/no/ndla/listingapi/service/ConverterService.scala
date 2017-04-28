@@ -40,6 +40,7 @@ trait ConverterService {
       domain.Cover(
         None,
         None,
+        cover.oldNodeId,
         cover.coverPhotoUrl,
         Seq(domain.Title(cover.title, Option(cover.language))),
         Seq(domain.Description(cover.description, Option(cover.language))),
