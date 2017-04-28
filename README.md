@@ -13,17 +13,10 @@ the original/one-off data import script.
 To interact with the api, you need valid security credentials; see [Access Tokens usage](https://github.com/NDLANO/auth/blob/master/README.md).
 To write data to the api, you need write role access.
 
-## Developer spesific documentation
-This section is only relevant if you are developing on the project.
+## Developer documentation
 
-## Compile
-    sbt compile
+**Compile:** sbt compile
 
-## Run tests
-    sbt test
+**Run tests:** sbt test
 
-## Package and run locally
-    ndla deploy local listing-api
-
-## Create Docker Image
-    ./build.sh
+**Create Docker Image:**./build.sh
