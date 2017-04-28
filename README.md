@@ -14,8 +14,8 @@ To interact with the api, you need valid security credentials; see [Access Token
 To write data to the api, you need write role access.
 
 For a more detailed documentation of the API, please refer to the api documentation for the relevant environment: 
-[API documentation stageing](https://staging.api.ndla.no)
-[API documentation production](https://api.ndla.no)
+* [API documentation stageing](https://staging.api.ndla.no)
+* [API documentation production](https://api.ndla.no)
 
 ## Developer documentation
 
