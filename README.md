@@ -1,12 +1,11 @@
 # listing-api
 [![Build Status](https://travis-ci.org/NDLANO/listing-api.svg?branch=master)](https://travis-ci.org/NDLANO/listing-api)
 
-API for NDLA "show and filter" service
+API for NDLAs "show and filter" service for e.g. an overview of articles.
 
 ## Usage
 
-Creates, updates and returns a ```cover```, a short summary representation of a artcles "metadata". Is currently only used by the frontend [Utlisting](https://listing-frontend.test.api.ndla.no/listing/betongfaget), which _only_ gets and displays the data. It is possible to add new 
-or update covers through the use of this API, as of now this is not implementet by any service except 
+Creates, updates and returns a ```cover```, a short summary representation of an article's metadata. Is currently only used by the frontend [Utlisting](https://listing-frontend.test.api.ndla.no/listing/betongfaget), which _only_ gets and displays the data. It is possible to add new or update covers through the use of this API, as of now this is not implementet by any service except 
 the original/one-off data import script.
 
 
