@@ -1,5 +1,6 @@
 package no.ndla.listingapi.service
 
+import no.ndla.listingapi.auth.User
 import no.ndla.listingapi.model.api.NotFoundException
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.{api, domain}
@@ -9,7 +10,7 @@ import no.ndla.listingapi.service.search.IndexService
 import scala.util.{Failure, Success, Try}
 
 trait WriteService {
-  this: ConverterService with ListingRepository with CoverValidator with IndexService =>
+  this: ConverterService with ListingRepository with CoverValidator with IndexService with Clock with User =>
   val writeService: WriteService
 
   class WriteService {
@@ -33,13 +34,19 @@ trait WriteService {
     }
 
     private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
+      val id = authUser.id()
+
+      val now = clock.now()
+
       existing.copy(
         articleApiId = toMerge.articleApiId.getOrElse(existing.articleApiId),
         revision = Some(toMerge.revision),
         coverPhotoUrl = toMerge.coverPhotoUrl.getOrElse(existing.coverPhotoUrl),
         title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, Option(toMerge.language))),
         description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, Option(toMerge.language))),
-        labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language)))
+        labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language))),
+        updatedBy = id,
+        updated = now
       )
     }
 
@@ -51,4 +58,5 @@ trait WriteService {
     }
 
   }
+
 }

@@ -9,12 +9,11 @@
 
 package no.ndla.listingapi.service.search
 
-import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize}
-import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
 import no.ndla.listingapi.integration.JestClientFactory
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.model.domain.{Description, Label, LanguageLabels, Title}
+import no.ndla.listingapi.{ListingApiProperties, TestData, TestEnvironment, UnitSuite}
 import no.ndla.tag.IntegrationTest
 import org.joda.time.DateTime
 
@@ -23,14 +22,11 @@ import scala.util.{Failure, Success, Try}
 @IntegrationTest
 class SearchServiceTest extends UnitSuite with TestEnvironment {
 
-  val esPort = 9200
-
   override val jestClient = JestClientFactory.getClient(searchServer = s"http://localhost:$esPort")
-
   override val searchService = new SearchService
   override val indexService = new IndexService
   override val searchConverterService = new SearchConverterService
-
+  val esPort = 9200
   val today = DateTime.now()
 
   val cover1 = TestData.sampleCover.copy(
@@ -63,17 +59,27 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
     blockUntil(() => searchService.countDocuments() == 3)
   }
 
-  override def afterAll = {
-    indexService.deleteIndex(ListingApiProperties.SearchIndex)
+  def blockUntil(predicate: () => Boolean): Unit = {
+    0 to 16 foreach (backoff => {
+      Thread.sleep(200 * backoff)
+
+      Try(predicate()) match {
+        case Success(done) if done => return
+        case Failure(e) => println("Problem while testing predicate", e)
+        case _ =>
+      }
+    })
+
+    throw new IllegalArgumentException("Failed waiting for predicate")
   }
 
   test("matchingQuery should return only covers with labels contained in the filter") {
-    searchService.matchingQuery(Seq("hammer"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal (Seq(1))
-    searchService.matchingQuery(Seq("farlig"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal (Seq(2, 3))
-    searchService.matchingQuery(Seq("FARLIG", "hUFf"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal (Seq(3))
-    searchService.matchingQuery(Seq("FARLIG", "hUFf", "personlig verktøy"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal (Seq(3))
-    searchService.matchingQuery(Seq("FARLIG", "hUFf", "personlig"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal (Seq())
-    searchService.matchingQuery(Seq("farlig", "sag", "stop"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal (Seq())
+    searchService.matchingQuery(Seq("hammer"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal(Seq(1))
+    searchService.matchingQuery(Seq("farlig"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal(Seq(2, 3))
+    searchService.matchingQuery(Seq("FARLIG", "hUFf"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal(Seq(3))
+    searchService.matchingQuery(Seq("FARLIG", "hUFf", "personlig verktøy"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal(Seq(3))
+    searchService.matchingQuery(Seq("FARLIG", "hUFf", "personlig"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal(Seq())
+    searchService.matchingQuery(Seq("farlig", "sag", "stop"), "nb", 1, 10, Sort.ByIdAsc).results.map(_.id) should equal(Seq())
   }
 
   test("That getStartAtAndNumResults returns SEARCH_MAX_PAGE_SIZE for value greater than SEARCH_MAX_PAGE_SIZE") {
@@ -108,7 +114,7 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
   }
 
 
- test("That paging returns only hits on current page and not more than page-size") {
+  test("That paging returns only hits on current page and not more than page-size") {
     val page1 = searchService.all(DefaultLanguage, 1, 2, Sort.ByIdAsc)
     val page2 = searchService.all(DefaultLanguage, 2, 2, Sort.ByIdAsc)
     page1.totalCount should be(3)
@@ -122,18 +128,7 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
     page2.results.head.id should be(3)
   }
 
-
-  def blockUntil(predicate: () => Boolean): Unit = {
-    0 to 16 foreach(backoff => {
-      Thread.sleep(200 * backoff)
-
-      Try(predicate()) match {
-        case Success(done) if done => return
-        case Failure(e) => println("Problem while testing predicate", e)
-        case _ =>
-      }
-    })
-
-    throw new IllegalArgumentException("Failed waiting for predicate")
+  override def afterAll = {
+    indexService.deleteIndex(ListingApiProperties.SearchIndex)
   }
 }

@@ -4,6 +4,7 @@ import no.ndla.listingapi.model.api.{Label, NewCover, ValidationException}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
+import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import scalikejdbc.DBSession
@@ -17,6 +18,12 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   val sampleApiCover = TestData.sampleApiCover
   val sampleCover = TestData.sampleCover
   val sampleApiUpdateCover = TestData.sampleApiUpdateCover
+
+  override def beforeAll()  = {
+    when(authUser.id()).thenReturn("NDLA import script")
+    when(clock.now()).thenReturn((new DateTime(2017, 4, 1, 12, 15, 32, DateTimeZone.UTC)).toDate)
+  }
+
 
   override def beforeEach = {
     reset(listingRepository)
@@ -80,7 +87,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(indexService.indexDocument(sampleCover)).thenReturn(Failure(new RuntimeException))
 
     service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
-  }
+}
 
   test("updateCover should return Success if everything is fine") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
@@ -108,7 +115,9 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       sampleCover.title ++ Seq(Title(toUpdate.title, Some(toUpdate.language))),
       sampleCover.description ++ Seq(Description(toUpdate.description, Some(toUpdate.language))),
       sampleCover.labels ++ Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
-      sampleCover.articleApiId
+      sampleCover.articleApiId,
+      sampleCover.updatedBy,
+      sampleCover.updated
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
@@ -132,7 +141,9 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
-      sampleCover.articleApiId
+      sampleCover.articleApiId,
+      sampleCover.updatedBy,
+      sampleCover.updated
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
@@ -156,7 +167,9 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
-      toUpdate.articleApiId.get
+      toUpdate.articleApiId.get,
+      "NDLA import script",
+      sampleCover.updated
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
@@ -181,7 +194,9 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
-      toUpdate.articleApiId.get
+      toUpdate.articleApiId.get,
+      "NDLA import script",
+      sampleCover.updated
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
