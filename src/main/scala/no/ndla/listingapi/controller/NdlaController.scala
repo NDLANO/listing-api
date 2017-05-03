@@ -11,9 +11,10 @@ package no.ndla.listingapi.controller
 
 import javax.servlet.http.HttpServletRequest
 
+import com.amazonaws.services.kms.model.AlreadyExistsException
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey}
-import no.ndla.listingapi.model.api.{AccessDeniedException, Error, NotFoundException, OptimisticLockException, ValidationError, ValidationException, ValidationMessage}
+import no.ndla.listingapi.model.api.{AccessDeniedException, CoverAlreadyExistsException, Error, NotFoundException, OptimisticLockException, ValidationError, ValidationException, ValidationMessage}
 import no.ndla.network.{ApplicationUrl, AuthUser, CorrelationID}
 import org.apache.logging.log4j.ThreadContext
 import org.elasticsearch.index.IndexNotFoundException
@@ -49,6 +50,7 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
     case n: NotFoundException => NotFound(body=Error(Error.NOT_FOUND, n.getMessage))
     case e: IndexNotFoundException => InternalServerError(body=Error.IndexMissingError)
     case o: OptimisticLockException => Conflict(body=Error(Error.RESOURCE_OUTDATED, o.getMessage))
+    case e: CoverAlreadyExistsException => Conflict(body=Error(Error.ALREADY_EXISTS, e.getMessage, Some(e.id)))
     case t: Throwable => {
       logger.error(Error.GenericError.toString, t)
       InternalServerError(body=Error.GenericError)

@@ -9,6 +9,7 @@ object TestData {
   val sampleCover = domain.Cover(
     Some(1),
     Some(1),
+    None,
     "https://test.api.ndla.no/image-api/v1/raw/image.jpg",
     Seq(domain.Title("hammer", Some("nb"))),
     Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
@@ -37,6 +38,7 @@ object TestData {
     "hammer",
     "En hammer er et nyttig verktøy",
     1122,
+    None,
     Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg")))
   )
 

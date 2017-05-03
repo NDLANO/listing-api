@@ -20,8 +20,8 @@ trait Clock {
       new Date()
     }
 
-    def toDate(dateAsString :String): Date = {
-      var formatter :DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-DDThh:mm:ssZ");
+    def toDate(dateAsString: String): Date = {
+      val formatter: DateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-DD'T'HH:mm:ssZ")
       val changedIt = formatter.parseDateTime(dateAsString).toDate
 
       return changedIt

@@ -20,6 +20,7 @@ import io.searchbox.client.JestResult
 @ApiModel(description = "Information about an error")
 case class Error(@(ApiModelProperty@field)(description = "Code stating the type of error") code: String = Error.GENERIC,
                  @(ApiModelProperty@field)(description = "Description of the error") description: String = Error.GENERIC_DESCRIPTION,
+                 @(ApiModelProperty@field)(description = "An optional id referring to the cover") id: Option[Long] = None,
                  @(ApiModelProperty@field)(description = "When the error occured") occuredAt: Date = new Date())
 
 @ApiModel(description = "Information about validation errors")
@@ -35,6 +36,7 @@ object Error {
   val INDEX_MISSING = "INDEX_MISSING"
   val RESOURCE_OUTDATED = "RESOURCE_OUTDATED"
   val ACCESS_DENIED = "ACCESS DENIED"
+  val ALREADY_EXISTS = "ALREADY_EXISTS"
 
   val GENERIC_DESCRIPTION = s"Ooops. Something we didn't anticipate occured. We have logged the error, and will look into it. But feel free to contact ${ListingApiProperties.ContactEmail} if the error persists."
   val VALIDATION_DESCRIPTION = "Validation Error"
@@ -46,6 +48,7 @@ object Error {
 }
 
 class NotFoundException(message: String = "The cover was not found") extends RuntimeException(message)
+class CoverAlreadyExistsException(message: String = "This cover already exists", val id: Long) extends RuntimeException(message)
 class ValidationException(message: String = "Validation Error", val errors: Seq[ValidationMessage]) extends RuntimeException(message)
 class AccessDeniedException(message: String) extends RuntimeException(message)
 class OptimisticLockException(message: String = Error.RESOURCE_OUTDATED_DESCRIPTION) extends RuntimeException(message)

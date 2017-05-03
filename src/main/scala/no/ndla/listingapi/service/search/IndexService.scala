@@ -102,7 +102,9 @@ trait IndexService {
           textField("coverPhotoUrl") index "not_analyzed",
           intField("articleApiId") index "not_analyzed",
           intField("revision") index "not_analyzed",
-          textField("supportedLanguages") index "not_analyzed"
+          textField("supportedLanguages") index "not_analyzed",
+          textField("updatedBy") index "not_analyzed",
+          dateField("update") index "not_analyzed"
         ),
         ListingApiProperties.SearchDocument).string()
     }

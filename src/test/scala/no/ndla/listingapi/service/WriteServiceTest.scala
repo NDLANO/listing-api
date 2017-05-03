@@ -1,6 +1,6 @@
 package no.ndla.listingapi.service
 
-import no.ndla.listingapi.model.api.{Label, NewCover, ValidationException}
+import no.ndla.listingapi.model.api.{CoverAlreadyExistsException, Label, NewCover, ValidationException}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
@@ -61,6 +61,15 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     service.newCover(sampleNewCover).isSuccess should be (true)
   }
 
+  test("newCover should throw an exception if card already exists") {
+    val newCover = sampleNewCover.copy(oldNodeId = Some(1))
+    when(listingRepository.getCoverWithOldNodeId(1)).thenReturn(Some(sampleCover))
+
+    assertThrows[CoverAlreadyExistsException] {
+      service.newCover(newCover)
+    }
+  }
+
   test("updateCover Failure if cover was not found") {
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(None)
     service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
@@ -111,6 +120,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val expectedResult = Cover(
       Some(1),
       Some(1),
+      None,
       sampleCover.coverPhotoUrl,
       sampleCover.title ++ Seq(Title(toUpdate.title, Some(toUpdate.language))),
       sampleCover.description ++ Seq(Description(toUpdate.description, Some(toUpdate.language))),
@@ -137,6 +147,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val expectedResult = Cover(
       Some(1),
       Some(1),
+      None,
       sampleCover.coverPhotoUrl,
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
@@ -163,6 +174,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val expectedResult = Cover(
       Some(1),
       Some(1),
+      None,
       toUpdate.coverPhotoUrl.get,
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
@@ -190,6 +202,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val expectedResult = Cover(
       Some(1),
       Some(1000),
+      None,
       toUpdate.coverPhotoUrl.get,
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),

@@ -30,7 +30,9 @@ trait SearchConverterService {
             card.articleApiId,
             card.coverPhotoUrl,
             SearchableLanguageList(card.labels.map(label => LanguageValue(label.language, label.labels))),
-            supportedLanguages
+            supportedLanguages,
+            card.updatedBy,
+            card.updated
           )
       }
     }

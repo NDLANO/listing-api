@@ -9,7 +9,6 @@
 
 package no.ndla.listingapi.controller
 
-import no.ndla.listingapi.model.api.{NewCover, UpdateCover}
 import no.ndla.listingapi.service.WriteService
 import no.ndla.listingapi.service.search.SearchIndexService
 import org.scalatra.{InternalServerError, Ok}
@@ -34,14 +33,6 @@ trait InternController {
           InternalServerError(f.getMessage)
         }
       }
-    }
-
-    post("/newcover") {
-      writeService.newCover(extract[NewCover](request.body))
-    }
-
-    put("/updatecover/:coverid") {
-      writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
     }
 
   }
