@@ -2,6 +2,7 @@ package no.ndla.listingapi
 
 import no.ndla.listingapi.model.domain.{Label, LanguageLabels}
 import no.ndla.listingapi.model.{api, domain}
+import org.joda.time.{DateTime, DateTimeZone}
 
 object TestData {
 
@@ -13,7 +14,9 @@ object TestData {
     Seq(domain.Title("hammer", Some("nb"))),
     Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
     Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy")), Label(None, Seq("bygg"))), Some("nb"))),
-    1122
+    1122,
+    "NDLA import script",
+    updated
   )
 
   val sampleApiCover = api.Cover(
@@ -24,7 +27,9 @@ object TestData {
     "En hammer er et nyttig verktøy",
     1122,
     Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))),
-    Seq("nb")
+    Seq("nb"),
+    "NDLA import script",
+    updated
   )
 
   val sampleApiNewCover = api.NewCover(
@@ -46,5 +51,7 @@ object TestData {
     "En hammer er et nyttig verktøy",
     Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg")))
   )
+
+  def updated() = (new DateTime(2017, 4, 1, 12, 15, 32, DateTimeZone.UTC)).toDate
 
 }

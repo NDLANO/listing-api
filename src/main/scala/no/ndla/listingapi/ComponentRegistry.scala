@@ -9,30 +9,33 @@
 
 package no.ndla.listingapi
 
+import no.ndla.listingapi.auth.{Role, User}
 import no.ndla.listingapi.controller.{HealthController, InternController, ListingController}
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, JestClientFactory}
 import no.ndla.listingapi.repository.ListingRepository
+import no.ndla.listingapi.service._
 import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
-import no.ndla.listingapi.service.{ConverterService, CoverValidator, ReadService, WriteService}
 import org.postgresql.ds.PGPoolingDataSource
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
 object ComponentRegistry
   extends DataSource
-  with ListingRepository
-  with ReadService
-  with WriteService
-  with CoverValidator
-  with SearchService
-  with ElasticClient
-  with SearchIndexService
-  with IndexService
-  with SearchConverterService
-  with ConverterService
-  with ListingController
-  with InternController
-  with HealthController
-{
+    with ListingRepository
+    with ReadService
+    with WriteService
+    with CoverValidator
+    with SearchService
+    with ElasticClient
+    with SearchIndexService
+    with IndexService
+    with SearchConverterService
+    with ConverterService
+    with ListingController
+    with InternController
+    with HealthController
+    with Clock
+    with Role
+    with User {
   implicit val swagger = new ListingSwagger
 
   lazy val dataSource = new PGPoolingDataSource()
@@ -62,4 +65,8 @@ object ComponentRegistry
   lazy val searchIndexService = new SearchIndexService
   lazy val indexService = new IndexService
   lazy val searchConverterService = new SearchConverterService
+
+  lazy val clock = new SystemClock
+  lazy val authRole = new AuthRole
+  lazy val authUser = new AuthUser
 }

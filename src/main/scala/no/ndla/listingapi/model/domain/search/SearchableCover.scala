@@ -8,6 +8,8 @@
 
 package no.ndla.listingapi.model.domain.search
 
+import java.util.Date
+
 import no.ndla.listingapi.model.domain.{Label, emptySomeToNone}
 
 object LanguageValue {
@@ -27,5 +29,7 @@ case class SearchableCover(
   articleApiId: Long,
   coverPhotoUrl: String,
   labels: SearchableLanguageList,
-  supportedLanguages: Seq[String]
+  supportedLanguages: Seq[String],
+  updatedBy: String,
+  update: Date
 )
