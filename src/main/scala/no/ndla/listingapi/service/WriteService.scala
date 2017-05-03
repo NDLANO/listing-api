@@ -1,5 +1,6 @@
 package no.ndla.listingapi.service
 
+import no.ndla.listingapi.auth.User
 import no.ndla.listingapi.model.api.NotFoundException
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.{api, domain}
@@ -9,7 +10,7 @@ import no.ndla.listingapi.service.search.IndexService
 import scala.util.{Failure, Success, Try}
 
 trait WriteService {
-  this: ConverterService with ListingRepository with CoverValidator with IndexService with Clock with AuthenticationUser =>
+  this: ConverterService with ListingRepository with CoverValidator with IndexService with Clock with User =>
   val writeService: WriteService
 
   class WriteService {

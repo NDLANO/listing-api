@@ -10,6 +10,7 @@ package no.ndla.listingapi
 
 import javax.sql
 
+import no.ndla.listingapi.auth.{Role, User}
 import no.ndla.listingapi.controller.{HealthController, ListingController}
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, NdlaJestClient}
 import no.ndla.listingapi.repository.ListingRepository
@@ -32,8 +33,8 @@ trait TestEnvironment
     with ListingController
     with HealthController
     with Clock
-    with AuthenticationUser
-    with AuthenticationRole {
+    with User
+    with Role {
 
   val dataSource = mock[sql.DataSource]
   val listingRepository = mock[ListingRepository]

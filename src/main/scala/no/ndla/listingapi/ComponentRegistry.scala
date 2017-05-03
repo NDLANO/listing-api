@@ -9,6 +9,7 @@
 
 package no.ndla.listingapi
 
+import no.ndla.listingapi.auth.{Role, User}
 import no.ndla.listingapi.controller.{HealthController, InternController, ListingController}
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, JestClientFactory}
 import no.ndla.listingapi.repository.ListingRepository
@@ -33,8 +34,8 @@ object ComponentRegistry
     with InternController
     with HealthController
     with Clock
-    with AuthenticationRole
-    with AuthenticationUser {
+    with Role
+    with User {
   implicit val swagger = new ListingSwagger
 
   lazy val dataSource = new PGPoolingDataSource()

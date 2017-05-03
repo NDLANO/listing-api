@@ -1,5 +1,6 @@
 package no.ndla.listingapi.service
 
+import no.ndla.listingapi.auth.User
 import no.ndla.listingapi.model.api.NotFoundException
 import no.ndla.listingapi.model.domain.{LanguageLabels, getByLanguage}
 import no.ndla.listingapi.model.{api, domain}
@@ -7,7 +8,7 @@ import no.ndla.listingapi.model.{api, domain}
 import scala.util.{Failure, Success, Try}
 
 trait ConverterService {
-  this: Clock with AuthenticationUser =>
+  this: Clock with User =>
   val converterService: ConverterService
 
   class ConverterService {

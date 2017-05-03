@@ -10,6 +10,7 @@
 package no.ndla.listingapi.controller
 
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize, RoleWithWriteAccess}
+import no.ndla.listingapi.auth.Role
 import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationError}
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.repository.ListingRepository
@@ -20,7 +21,7 @@ import org.scalatra._
 import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
 
 trait ListingController {
-  this: ReadService with SearchService with ListingRepository with WriteService with AuthenticationRole =>
+  this: ReadService with SearchService with ListingRepository with WriteService with Role =>
   val listingController: ListingController
 
   class ListingController(implicit val swagger: Swagger) extends NdlaController with SwaggerSupport {
