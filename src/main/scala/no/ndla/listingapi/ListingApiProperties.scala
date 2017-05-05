@@ -31,7 +31,7 @@ object ListingApiProperties extends LazyLogging {
   val RunWithSignedSearchRequests = propOrElse("RUN_WITH_SIGNED_SEARCH_REQUESTS", "true").toBoolean
   val SearchIndex = propOrElse("SEARCH_INDEX_NAME", "listings")
   val SearchDocument = "listing"
-  val DefaultPageSize = 10
+  val DefaultPageSize = 50
   val MaxPageSize = 100
   val IndexBulkSize = 200
 
