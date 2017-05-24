@@ -12,12 +12,14 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
   }
 
   override def beforeAll = {
+    println("ListingRepositoryTest...")
     val dataSource = getDataSource
     DBMigrator.migrate(dataSource)
     ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
   }
 
   val sampleCover: domain.Cover = TestData.sampleCover
+  val sampleCover2: domain.Cover = TestData.sampleCover2
 
   test("inserting a new cover should return the new ID") {
     val result = repository.insertCover(sampleCover)
@@ -80,5 +82,20 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
 
     repository.deleteCover(initial.id.get)
   }
+
+  test("get map of uniqe labels in db"){
+    repository.insertCover(sampleCover)
+    repository.insertCover(sampleCover2)
+    repository.insertCover(sampleCover)
+    repository.insertCover(sampleCover2)
+    val allCovers = repository.allCovers()
+
+    val allLabels = repository.allUniqeLabelsByType("nb")
+
+    allLabels should be (Map("kategori"-> Set("personlig verktøy", "jobbe verktøy"), "other" -> Set("bygg", "byggherrer")))
+
+
+  }
+
 
 }

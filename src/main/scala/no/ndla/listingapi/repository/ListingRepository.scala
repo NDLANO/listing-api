@@ -24,7 +24,7 @@ trait ListingRepository {
 
       val startRevision = 1
       val coverId = sql"insert into ${Cover.table} (document, revision) values (${dataObject}, $startRevision)".updateAndReturnGeneratedKey.apply
-      cover.copy(id=Some(coverId), revision=Some(startRevision))
+      cover.copy(id = Some(coverId), revision = Some(startRevision))
     }
 
     def updateCover(cover: Cover)(implicit session: DBSession = AutoSession): Try[Cover] = {
@@ -41,7 +41,7 @@ trait ListingRepository {
         Failure(new OptimisticLockException)
       } else {
         logger.info(s"Updated cover ${cover.id}")
-        Success(cover.copy(revision=Some(newRevision)))
+        Success(cover.copy(revision = Some(newRevision)))
       }
     }
 
@@ -49,11 +49,21 @@ trait ListingRepository {
       coverWhere(sqls"c.id = $coverId")
     }
 
+    private def coverWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
+      val c = Cover.syntax("c")
+      sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).single.apply
+    }
+
     def getCoverWithOldNodeId(oldNodeId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
       coverWhere(sqls"c.document->>'oldNodeId' = ${oldNodeId.toString}")
     }
 
     def cardsWithIdBetween(min: Long, max: Long): List[Cover] = coversWhere(sqls"c.id between $min and $max").toList
+
+    private def coversWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
+      val c = Cover.syntax("c")
+      sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).list.apply
+    }
 
     def minMaxId(implicit session: DBSession = AutoSession): (Long, Long) = {
       sql"select coalesce(MIN(id),0) as mi, coalesce(MAX(id),0) as ma from ${Cover.table}".map(rs => {
@@ -68,15 +78,44 @@ trait ListingRepository {
       sql"delete from ${Cover.table} where id = $coverId".update.apply
     }
 
-    private def coverWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
+    def allCovers()(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
       val c = Cover.syntax("c")
-      sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).single.apply
+      sql"select ${c.result.*} from ${Cover.as(c)}".map(Cover(c)).list.apply
     }
 
-    private def coversWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
-      val c = Cover.syntax("c")
-      sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).list.apply
+    def allUniqeLabelsByType(lang: String): Map[String, Set[String]] = {
+      println(s"lang $lang")
+      var uniqeLabels: Map[String, Set[String]] = Map()
+
+      def mapHelper(key: String, labelSeq: Seq[String]) = {
+        if (uniqeLabels.contains(key)) {
+          val maybeSet = uniqeLabels.get(key)
+          val maybeStrings = maybeSet.map(s => s ++ labelSeq.toSet)
+          uniqeLabels += (key -> maybeStrings.getOrElse(Set()))
+        } else {
+          uniqeLabels += (key -> labelSeq.toSet)
+        }
+      }
+
+      val allLables = allCovers().map(_.labels)
+      val langLabels = allLables.map(al => al.filter(f => f.language.isDefined && f.language.get.equals(lang))).flatten
+
+      langLabels.map(
+        langLabel => {
+          langLabel.labels.map(l => {
+            l.`type` match {
+              case Some(theType) => mapHelper(theType, l.labels)
+              case None => mapHelper("other", l.labels)
+            }
+          })
+
+        }
+      )
+
+      uniqeLabels
     }
+
 
   }
+
 }

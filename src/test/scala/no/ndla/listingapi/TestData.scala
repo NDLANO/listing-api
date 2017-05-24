@@ -19,6 +19,27 @@ object TestData {
     updated
   )
 
+  val sampleCover2 = domain.Cover(
+    Some(1),
+    Some(1),
+    None,
+    "https://test.api.ndla.no/image-api/v1/raw/image.jpg",
+    Seq(domain.Title("hammer", Some("nb"))),
+    Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
+    Seq(
+      LanguageLabels(
+        Seq(Label(Some("kategori"), Seq("jobbe verktøy")), Label(None, Seq("byggherrer"))),
+        Some("nb")),
+      LanguageLabels(
+        Seq(Label(Some("kategori"), Seq("arbe verktøy")), Label(None, Seq("byggmenn"))),
+        Some("nn"))
+    ),
+    1122,
+    "NDLA import script",
+    updated
+  )
+
+
   val sampleApiCover = api.Cover(
     1,
     1,
