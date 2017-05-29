@@ -85,6 +85,7 @@ trait ListingRepository {
     }
 
     def allUniqeLabelsByType(lang: String): Map[String, Set[String]] = {
+      logger.info(s"ListingRepository allUniqeLabelsByType for lang $lang")
       var uniqeLabels: Map[String, Set[String]] = Map()
 
       def mapHelper(key: String, labelSeq: Seq[String]) = {
@@ -97,7 +98,9 @@ trait ListingRepository {
         }
       }
 
+      logger.info(s"allCovers in DB: ${allCovers()}")
       val allLables = allCovers().map(_.labels)
+      logger.info(s"allLabels in DB: $allLables")
       val langLabels = allLables.map(al => al.filter(f => f.language.isDefined && f.language.get.equals(lang))).flatten
 
       langLabels.map(

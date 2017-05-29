@@ -1,6 +1,21 @@
 Configuration:
-  status: fatal
+  status: warn
+
+  Appenders:
+    Console:
+      name: Console
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "[listing-api] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] (%X{correlationID}) %-5level %C.%M#%L: %msg%n"
 
   Loggers:
+    Logger:
+      name: "no.ndla"
+      level: debug
+      additivity: false
+      AppenderRef:
+        - ref: Console
     Root:
-      level: fatal
+      level: warn
+      AppenderRef:
+        - ref: Console
