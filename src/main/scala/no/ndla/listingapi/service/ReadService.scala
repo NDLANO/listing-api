@@ -11,5 +11,12 @@ trait ReadService {
     def coverWithId(id: Long, language: String): Option[api.Cover] = {
       listingRepository.getCover(id).flatMap(c => converterService.toApiCover(c, language).toOption)
     }
+
+    def uniqeLabelsMap(language: String): Map[String, Set[String]] = {
+      println("read service uniq labels map")
+      val uniqeLabelsByType = listingRepository.allUniqeLabelsByType(language)
+      println(uniqeLabelsByType)
+      uniqeLabelsByType
+    }
   }
 }

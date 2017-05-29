@@ -16,6 +16,10 @@ object DBMigrator {
   def migrate(datasource: DataSource) = {
     val flyway = new Flyway()
     flyway.setDataSource(datasource)
+    flyway.clean()
+    println(flyway.info)
     flyway.migrate()
+    flyway.setValidateOnMigrate(false)
+    println(flyway.info.current().getDescription)
   }
 }

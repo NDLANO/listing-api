@@ -1,6 +1,7 @@
 package no.ndla.listingapi.repository
 
 import com.typesafe.scalalogging.LazyLogging
+import no.ndla.listingapi.ListingApiProperties.{ DefaultLanguage => nb}
 import no.ndla.listingapi.integration.DataSource
 import no.ndla.listingapi.model.api.OptimisticLockException
 import no.ndla.listingapi.model.domain.Cover
