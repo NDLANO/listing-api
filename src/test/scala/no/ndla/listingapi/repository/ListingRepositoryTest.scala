@@ -90,11 +90,13 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
     repository.insertCover(sampleCover2)
     val allCovers = repository.allCovers()
 
-    val allLabels = repository.allUniqeLabelsByType("nb")
+    val allLabelsNB = repository.allUniqeLabelsByType("nb")
+    val allLabelsNN = repository.allUniqeLabelsByType("nn")
+    val allLabelsEN = repository.allUniqeLabelsByType("en")
 
-    allLabels should be (Map("kategori"-> Set("personlig verktøy", "jobbe verktøy"), "other" -> Set("bygg", "byggherrer")))
-
-
+    allLabelsNB should be (Map("kategori"-> Set("personlig verktøy", "jobbe verktøy"), "other" -> Set("bygg", "byggherrer")))
+    allLabelsNN should be (Map("kategori" -> Set("arbe verktøy"), "other" -> Set("byggmenn")))
+    allLabelsEN should be (Map())
   }
 
 

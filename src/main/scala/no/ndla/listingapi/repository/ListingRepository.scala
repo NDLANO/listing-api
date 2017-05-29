@@ -84,7 +84,6 @@ trait ListingRepository {
     }
 
     def allUniqeLabelsByType(lang: String): Map[String, Set[String]] = {
-      println(s"lang $lang")
       var uniqeLabels: Map[String, Set[String]] = Map()
 
       def mapHelper(key: String, labelSeq: Seq[String]) = {
