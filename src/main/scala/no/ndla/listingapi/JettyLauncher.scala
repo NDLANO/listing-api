@@ -17,6 +17,12 @@ import scala.io.Source
 
 
 object JettyLauncher extends LazyLogging {
+  def buildLabelsCache = {
+    ComponentRegistry.readService.uniqeLabelsMap("nb")
+    ComponentRegistry.readService.uniqeLabelsMap("nn")
+    ComponentRegistry.readService.uniqeLabelsMap("en")
+  }
+
   def main(args: Array[String]) {
     logger.info(Source.fromInputStream(getClass.getResourceAsStream("/log-license.txt")).mkString)
 
@@ -25,6 +31,9 @@ object JettyLauncher extends LazyLogging {
     DBMigrator.migrate(source)
 
     val startMillis = System.currentTimeMillis()
+
+    buildLabelsCache
+    logger.info(s"Built tags cache in ${System.currentTimeMillis() - startMillis} ms.")
 
     val context = new ServletContextHandler()
     context setContextPath "/"

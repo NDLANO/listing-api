@@ -1,7 +1,7 @@
 package no.ndla.listingapi.repository
 
 import com.typesafe.scalalogging.LazyLogging
-import no.ndla.listingapi.ListingApiProperties.{ DefaultLanguage => nb}
+import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage => nb}
 import no.ndla.listingapi.integration.DataSource
 import no.ndla.listingapi.model.api.OptimisticLockException
 import no.ndla.listingapi.model.domain.Cover
@@ -47,16 +47,19 @@ trait ListingRepository {
     }
 
     def getCover(coverId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
-      coverWhere(sqls"c.id = $coverId")
+      logger.info(s"getting cover $coverId from repo")
+      val maybeCover = coverWhere(sqls"c.id = $coverId")
+      logger.info(s"maybeCover $maybeCover")
+      maybeCover
+    }
+
+    def getCoverWithOldNodeId(oldNodeId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
+      coverWhere(sqls"c.document->>'oldNodeId' = ${oldNodeId.toString}")
     }
 
     private def coverWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
       val c = Cover.syntax("c")
       sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).single.apply
-    }
-
-    def getCoverWithOldNodeId(oldNodeId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
-      coverWhere(sqls"c.document->>'oldNodeId' = ${oldNodeId.toString}")
     }
 
     def cardsWithIdBetween(min: Long, max: Long): List[Cover] = coversWhere(sqls"c.id between $min and $max").toList
@@ -79,11 +82,6 @@ trait ListingRepository {
       sql"delete from ${Cover.table} where id = $coverId".update.apply
     }
 
-    def allCovers()(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
-      val c = Cover.syntax("c")
-      sql"select ${c.result.*} from ${Cover.as(c)}".map(Cover(c)).list.apply
-    }
-
     def allUniqeLabelsByType(lang: String): Map[String, Set[String]] = {
       logger.info(s"ListingRepository allUniqeLabelsByType for lang $lang")
       var uniqeLabels: Map[String, Set[String]] = Map()
@@ -91,16 +89,14 @@ trait ListingRepository {
       def mapHelper(key: String, labelSeq: Seq[String]) = {
         if (uniqeLabels.contains(key)) {
           val maybeSet = uniqeLabels.get(key)
-          val maybeStrings = maybeSet.map(s => s ++ labelSeq.toSet)
+          val maybeStrings = maybeSet.map(s => (s ++ labelSeq.toSet).toList.sorted.toSet)
           uniqeLabels += (key -> maybeStrings.getOrElse(Set()))
         } else {
           uniqeLabels += (key -> labelSeq.toSet)
         }
       }
 
-      logger.info(s"allCovers in DB: ${allCovers()}")
       val allLables = allCovers().map(_.labels)
-      logger.info(s"allLabels in DB: $allLables")
       val langLabels = allLables.map(al => al.filter(f => f.language.isDefined && f.language.get.equals(lang))).flatten
 
       langLabels.map(
@@ -115,7 +111,13 @@ trait ListingRepository {
         }
       )
 
+
       uniqeLabels
+    }
+
+    def allCovers()(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
+      val c = Cover.syntax("c")
+      sql"select ${c.result.*} from ${Cover.as(c)}".map(Cover(c)).list.apply
     }
 
 
