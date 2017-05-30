@@ -8,6 +8,10 @@
 package no.ndla.listingapi.model
 
 package object domain {
+  type Lang = String
+  type LabelType = String
+  type LabelName = String
+
   def emptySomeToNone(lang: Option[String]): Option[String] = lang.filter(_.nonEmpty)
 
   trait LanguageField[T] {

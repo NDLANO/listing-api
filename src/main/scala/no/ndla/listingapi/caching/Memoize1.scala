@@ -11,9 +11,10 @@ package no.ndla.listingapi.caching
 
 import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
 
+import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.ApiClientsCacheAgeInMs
 
-class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean) extends (() => R) {
+class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean) extends (() => R) with LazyLogging {
   case class CacheValue(value: R, lastUpdated: Long) {
     def isExpired: Boolean = lastUpdated + maxCacheAgeMs <= System.currentTimeMillis()
   }
@@ -34,9 +35,17 @@ class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean) ext
 
   def apply(): R = {
     cache match {
-      case Some(cachedValue) if autoRefreshCache => cachedValue.value
-      case Some(cachedValue) if !cachedValue.isExpired => cachedValue.value
-      case _ =>
+      case Some(cachedValue) if autoRefreshCache => {
+        logger.debug(s"cached if autoRefreshCached ${cachedValue.value}")
+        cachedValue.value
+      }
+      case Some(cachedValue) if !cachedValue.isExpired => {
+        logger.debug(s"cached if  !cachedValue.isExpired  ${cachedValue.value}")
+        cachedValue.value
+      }
+      case _ => {
+        logger.debug(s"case _ renewingCache")
+      }
         renewCache
         cache.get.value
     }

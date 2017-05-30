@@ -1,6 +1,7 @@
 package no.ndla.listingapi.controller
 
 import no.ndla.listingapi.model.api.{NewCover, UpdateCover}
+import no.ndla.listingapi.model.domain.UniqeLabels
 import no.ndla.listingapi.{ListingApiProperties, ListingSwagger, TestData, TestEnvironment, UnitSuite}
 import org.mockito.Mockito._
 import org.mockito.Matchers._
@@ -142,7 +143,7 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   }
 
   test("That GET /labels/ returns 200 and map of all uniqe labels"){
-    when(readService.uniqeLabelsMap(ListingApiProperties.DefaultLanguage)).thenReturn(Map("kategori" -> Set("personlig verktøy", "jobbe verktøy"), "other" -> Set("bygg", "byggherrer")))
+    when(readService.allLabelsMap()).thenReturn(Map("x" -> UniqeLabels(Map())))
     get("/test/labels/") {
       println(body)
       status should equal (200)

@@ -129,16 +129,22 @@ trait ListingController {
     }
 
     private def getLabels(language: String, labelType: String) = {
-      val labelsMap = readService.uniqeLabelsMap(language)
-      if (labelsMap.isEmpty || !labelsMap.contains(labelType)) {
-        Ok(Nil)
-      } else {
-        logger.info(s"labelsMap $labelsMap")
-        logger.info(s"lang $language type $labelType")
-        labelType match {
-          case labelType if labelType.equalsIgnoreCase("all") => labelsMap
-          case labelType => labelsMap.get(labelType)
+      logger.info(s"getLabels $language $labelType")
+      val allLabels = readService.allLabelsMap()
+      logger.info(s"allLabels $allLabels")
+      val theLangueLabels = allLabels.get(language)
+      logger.info(s"theLangueLabels $theLangueLabels")
+
+
+      theLangueLabels match {
+        case Some(uniqeLabels) => {
+          if (labelType.equalsIgnoreCase("all")) {
+            Ok(uniqeLabels.labelsByType)
+          } else {
+            Ok(uniqeLabels.labelsByType.get(labelType))
+          }
         }
+        case None => Ok(Nil)
       }
     }
 

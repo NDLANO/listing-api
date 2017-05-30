@@ -1,10 +1,12 @@
 package no.ndla.listingapi.repository
 
+import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.{DBMigrator, IntegrationSuite, TestData, TestEnvironment}
+import org.flywaydb.core.Flyway
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
-class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
+class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with LazyLogging{
   var repository: ListingRepository = _
 
   override def beforeEach = {
@@ -12,10 +14,17 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
   }
 
   override def beforeAll = {
-    println("ListingRepositoryTest...")
     val dataSource = getDataSource
+    println("ListingRepositoryTest...")
     DBMigrator.migrate(dataSource)
     ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
+  }
+
+  override def afterAll() = {
+    //Simplest way of just dumping the content of the DB for cleaner sweeter tests next time
+    val flyway = new Flyway()
+    flyway.setDataSource(getDataSource)
+    flyway.clean()
   }
 
   val sampleCover: domain.Cover = TestData.sampleCover
@@ -83,21 +92,21 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
     repository.deleteCover(initial.id.get)
   }
 
-  test("get map of uniqe labels in db"){
+  test("get allLabels"){
     repository.insertCover(sampleCover)
     repository.insertCover(sampleCover2)
     repository.insertCover(sampleCover)
     repository.insertCover(sampleCover2)
     val allCovers = repository.allCovers()
 
-    val allLabelsNB = repository.allUniqeLabelsByType("nb")
-    val allLabelsNN = repository.allUniqeLabelsByType("nn")
-    val allLabelsEN = repository.allUniqeLabelsByType("en")
+    val allLabelsMap = repository.allLabelsMap()
+    val allLabelsNB = allLabelsMap("nb")
+    val allLabelsNN = allLabelsMap("nn")
+    val allLabelsEN = allLabelsMap("en")
 
-    allLabelsNB should be (Map("kategori"-> Set("personlig verktøy", "jobbe verktøy"), "other" -> Set("bygg", "byggherrer")))
-    allLabelsNN should be (Map("kategori" -> Set("arbe verktøy"), "other" -> Set("byggmenn")))
-    allLabelsEN should be (Map())
+    allLabelsNB.labelsByType should be (Map("kategori"-> Set("bygg verktøy", "jobbe verktøy", "mer label", "personlig verktøy"), "other" -> Set("bygg", "byggherrer")))
+    allLabelsNN.labelsByType should be (Map("kategori" -> Set("arbeids verktøy"), "other" -> Set("byggkarer")))
+    allLabelsEN.labelsByType should be (Map("category" -> Set("work tools"), "other" -> Set("workmen")))
   }
-
 
 }
