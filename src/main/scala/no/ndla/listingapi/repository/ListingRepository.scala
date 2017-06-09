@@ -82,7 +82,7 @@ trait ListingRepository {
     }
 
     /* Group the labels by language in a Map, for each language there is a Map of labels by type.
-      This is to go in the cache...
+      This is to go in the cache.
     */
     def allLabelsMap(): Map[Lang, UniqeLabels] = {
       logger.info(s"get allLabels from db")
@@ -96,7 +96,7 @@ trait ListingRepository {
 
       labelsByLanguage.keys.foreach(languageKey => {
 
-        // ----x Helper method for locally manipulating the Map of labels. Make sure a flattend sorted list of the labels as value and type of label as key x---
+        // ----x Helper method for locally manipulating the Map uniqeLabels of labels. Makes a flattend sorted list of the labels as value and type of label as key x---
         var uniqeLabels: Map[LabelType, Set[LabelName]] = Map()
         def mapHelper(key: LabelType, labelSeq: Seq[LabelName]) = {
           if (uniqeLabels.contains(key)) {
@@ -131,38 +131,6 @@ trait ListingRepository {
       logger.info(s"Done aggregating labels - tok ${System.currentTimeMillis() - starttime} ms")
       uniqeLanguageLabels
     }
-
-//    def allUniqeLabelsByType(lang: Lang): Map[String, Set[String]] = {
-//      logger.info(s"ListingRepository allUniqeLabelsByType for lang $lang")
-//      var uniqeLabels: Map[String, Set[String]] = Map()
-//
-//      def mapHelper(key: String, labelSeq: Seq[String]) = {
-//        if (uniqeLabels.contains(key)) {
-//          val maybeSet = uniqeLabels.get(key)
-//          val maybeStrings = maybeSet.map(s => (s ++ labelSeq.toSet).toList.sorted.toSet)
-//          uniqeLabels += (key -> maybeStrings.getOrElse(Set()))
-//        } else {
-//          uniqeLabels += (key -> labelSeq.toSet)
-//        }
-//      }
-//
-//      val allLables = allCovers().map(_.labels)
-//      val langLabels = allLables.map(al => al.filter(f => f.language.isDefined && f.language.get.equals(lang))).flatten
-//
-//      langLabels.map(
-//        langLabel => {
-//          langLabel.labels.map(l => {
-//            l.`type` match {
-//              case Some(theType) => mapHelper(theType, l.labels)
-//              case None => mapHelper("other", l.labels)
-//            }
-//          })
-//
-//        }
-//      )
-//      logger.info(s"uniqelabesl map from DB $uniqeLabels")
-//      uniqeLabels
-//    }
 
     def allCovers()(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
       val c = Cover.syntax("c")

@@ -15,11 +15,18 @@ import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.ApiClientsCacheAgeInMs
 
 class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean) extends (() => R) with LazyLogging {
-  case class CacheValue(value: R, lastUpdated: Long) {
-    def isExpired: Boolean = lastUpdated + maxCacheAgeMs <= System.currentTimeMillis()
-  }
 
-  private[this] var cache :Option[CacheValue] = None
+  private[this] var cache: Option[CacheValue] = None
+
+  def apply(): R = {
+    cache match {
+      case Some(cachedValue) if autoRefreshCache => cachedValue.value
+      case Some(cachedValue) if !cachedValue.isExpired => cachedValue.value
+      case _ =>
+        renewCache
+        cache.get.value
+    }
+  }
 
   private def renewCache = {
     cache = Some(CacheValue(f(), System.currentTimeMillis()))
@@ -33,22 +40,8 @@ class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean) ext
     ex.scheduleAtFixedRate(task, 20, maxCacheAgeMs, TimeUnit.MILLISECONDS)
   }
 
-  def apply(): R = {
-    cache match {
-      case Some(cachedValue) if autoRefreshCache => {
-        logger.debug(s"cached if autoRefreshCached ${cachedValue.value}")
-        cachedValue.value
-      }
-      case Some(cachedValue) if !cachedValue.isExpired => {
-        logger.debug(s"cached if  !cachedValue.isExpired  ${cachedValue.value}")
-        cachedValue.value
-      }
-      case _ => {
-        logger.debug(s"case _ renewingCache")
-      }
-        renewCache
-        cache.get.value
-    }
+  case class CacheValue(value: R, lastUpdated: Long) {
+    def isExpired: Boolean = lastUpdated + maxCacheAgeMs <= System.currentTimeMillis()
   }
 
 }
