@@ -106,7 +106,6 @@ trait ListingController {
 
     get("/:coverid", operation(getCoverDoc)) {
       val coverId = long("coverid")
-      logger.info(s"GET coverid $coverId")
       val language = paramOrDefault("language", DefaultLanguage)
 
       readService.coverWithId(coverId, language) match {
@@ -121,20 +120,14 @@ trait ListingController {
     }
 
     get("/labels/:type", operation(getLabelsDoc)) {
-      println("controller GET labels/:type")
       val language = paramOrDefault("language", DefaultLanguage)
       val labelType: String = paramOrDefault("type", "all")
-      logger.info(s"controller GET labels/$labelType")
       getLabels(language, labelType)
     }
 
     private def getLabels(language: String, labelType: String) = {
-      logger.info(s"getLabels $language $labelType")
       val allLabels = readService.allLabelsMap()
-      logger.info(s"allLabels $allLabels")
       val theLangueLabels = allLabels.get(language)
-      logger.info(s"theLangueLabels $theLangueLabels")
-
 
       theLangueLabels match {
         case Some(uniqeLabels) => {

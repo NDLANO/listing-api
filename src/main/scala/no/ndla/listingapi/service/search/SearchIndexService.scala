@@ -24,7 +24,6 @@ trait SearchIndexService {
   class SearchIndexService extends LazyLogging {
 
     def indexDocument(cover: Cover): Try[_] = {
-      logger.info(s"indexDocument $cover")
       if (indexService.aliasTarget.isEmpty) {
         indexService.createIndex.map(newIndex => indexService.createAliasTarget(newIndex))
       }

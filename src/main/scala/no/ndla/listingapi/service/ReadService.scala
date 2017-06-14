@@ -16,7 +16,6 @@ trait ReadService {
     }
 
     def allLabelsMap(): Map[Lang, UniqeLabels] = {
-      logger.info("HELLO! all labels for all languages")
       getAllLabelsMap().apply()
     }
 

@@ -46,10 +46,7 @@ trait ListingRepository {
     }
 
     def getCover(coverId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
-      logger.info(s"getting cover $coverId from repo")
-      val maybeCover = coverWhere(sqls"c.id = $coverId")
-      logger.info(s"maybeCover $maybeCover")
-      maybeCover
+      coverWhere(sqls"c.id = $coverId")
     }
 
     def getCoverWithOldNodeId(oldNodeId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
@@ -85,7 +82,6 @@ trait ListingRepository {
       This is to go in the cache.
     */
     def allLabelsMap(): Map[Lang, UniqeLabels] = {
-      logger.info(s"get allLabels from db")
       val starttime = System.currentTimeMillis()
 
       //Get all labels and put them in a map where the key is the language.
@@ -128,7 +124,7 @@ trait ListingRepository {
         uniqeLabels
       })
 
-      logger.info(s"Done aggregating labels - tok ${System.currentTimeMillis() - starttime} ms")
+      logger.debug(s"Done aggregating labels - tok ${System.currentTimeMillis() - starttime} ms")
       uniqeLanguageLabels
     }
 
