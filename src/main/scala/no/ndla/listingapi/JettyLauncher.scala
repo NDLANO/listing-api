@@ -18,7 +18,6 @@ import scala.io.Source
 
 object JettyLauncher extends LazyLogging {
   def buildLabelsCache = {
-    logger.info("Bulding Cache for uniqeLabelsMap at startup")
     ComponentRegistry.readService.allLabelsMap()
   }
 

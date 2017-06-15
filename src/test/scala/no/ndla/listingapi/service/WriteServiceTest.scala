@@ -1,5 +1,6 @@
 package no.ndla.listingapi.service
 
+import no.ndla.listingapi.caching.Memoize
 import no.ndla.listingapi.model.api.{CoverAlreadyExistsException, Label, NewCover, ValidationException}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain._
@@ -19,19 +20,25 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   val sampleCover = TestData.sampleCover
   val sampleApiUpdateCover = TestData.sampleApiUpdateCover
 
-  override def beforeAll()  = {
+  override def beforeAll() = {
     when(authUser.id()).thenReturn("NDLA import script")
     when(clock.now()).thenReturn((new DateTime(2017, 4, 1, 12, 15, 32, DateTimeZone.UTC)).toDate)
+    val targetMock = mock[Target]
+    val memoizedTarget = new Memoize[Map[Lang, UniqeLabels]](Long.MaxValue, targetMock.targetMethod, false)
+    when(readService.getAllLabelsMap).thenReturn(memoizedTarget)
   }
-
 
   override def beforeEach = {
     reset(listingRepository)
   }
 
+  class Target {
+    def targetMethod(): Map[Lang, UniqeLabels] = Map()
+  }
+
   test("newCover should return Failure if validation fails") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
-    service.newCover(sampleNewCover).isFailure should be (true)
+    service.newCover(sampleNewCover).isFailure should be(true)
   }
 
   test("newCover should return Failure on failure to store cover") {
@@ -39,7 +46,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
     when(listingRepository.insertCover(any[Cover])(any[DBSession])).thenThrow(new RuntimeException())
 
-    service.newCover(sampleNewCover).isFailure should be (true)
+    service.newCover(sampleNewCover).isFailure should be(true)
   }
 
   test("newCover should return Failure on failure to index cover") {
@@ -48,7 +55,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(listingRepository.insertCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
     when(indexService.indexDocument(sampleCover)).thenReturn(Failure(new RuntimeException()))
 
-    service.newCover(sampleNewCover).isFailure should be (true)
+    service.newCover(sampleNewCover).isFailure should be(true)
   }
 
   test("newCover should return Success when everything is fine") {
@@ -58,7 +65,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(indexService.indexDocument(sampleCover)).thenReturn(Success(sampleCover))
     when(converterService.toApiCover(sampleCover, "nb")).thenReturn(Success(sampleApiCover))
 
-    service.newCover(sampleNewCover).isSuccess should be (true)
+    service.newCover(sampleNewCover).isSuccess should be(true)
   }
 
   test("newCover should throw an exception if card already exists") {
@@ -72,13 +79,13 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
 
   test("updateCover Failure if cover was not found") {
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(None)
-    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be(true)
   }
 
   test("updateCover should return Failure if validation fails") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(Some(sampleCover))
-    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be(true)
   }
 
   test("updateCover should return Failure on failure to store cover") {
@@ -86,7 +93,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(listingRepository.getCover(any[Long])(any[DBSession])).thenReturn(Some(sampleCover))
     when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenThrow(new RuntimeException)
 
-    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be(true)
   }
 
   test("updateCover should return Failure on failure to index cover") {
@@ -95,8 +102,8 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenReturn(Success(sampleCover))
     when(indexService.indexDocument(sampleCover)).thenReturn(Failure(new RuntimeException))
 
-    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
-}
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be(true)
+  }
 
   test("updateCover should return Success if everything is fine") {
     when(coverValidator.validate(any[Cover])).thenReturn(Failure(mock[ValidationException]))
@@ -104,12 +111,12 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(listingRepository.updateCover(any[Cover])(any[DBSession])).thenReturn(Success(sampleCover))
     when(indexService.indexDocument(sampleCover)).thenReturn(Success(sampleCover))
 
-    service.updateCover(1, sampleApiUpdateCover).isFailure should be (true)
+    service.updateCover(1, sampleApiUpdateCover).isFailure should be(true)
   }
 
   test("mergeCovers should append a new language if language not already exists") {
     val toUpdate = sampleApiUpdateCover.copy(
-      language="en",
+      language = "en",
       title = "titl",
       description = "description",
       labels = Seq(Label(Some("category"), Seq("interesting"))),
@@ -136,7 +143,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
 
   test("mergeCovers overwrite a langauge if specified language already exist in cover") {
     val toUpdate = sampleApiUpdateCover.copy(
-      language="nb",
+      language = "nb",
       title = "titl",
       description = "description",
       labels = Seq(Label(Some("category"), Seq("interesting"))),
@@ -163,7 +170,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
 
   test("mergeCovers updates optional values if specified") {
     val toUpdate = sampleApiUpdateCover.copy(
-      language="nb",
+      language = "nb",
       title = "titl",
       description = "description",
       labels = Seq(Label(Some("category"), Seq("interesting"))),
@@ -190,8 +197,8 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
 
   test("mergeCovers should always use toMerge's revision number") {
     val toUpdate = sampleApiUpdateCover.copy(
-      language="nb",
-      revision=1000,
+      language = "nb",
+      revision = 1000,
       title = "titl",
       description = "description",
       labels = Seq(Label(Some("category"), Seq("interesting"))),

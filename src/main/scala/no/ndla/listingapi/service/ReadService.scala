@@ -16,10 +16,10 @@ trait ReadService {
     }
 
     def allLabelsMap(): Map[Lang, UniqeLabels] = {
-      getAllLabelsMap().apply()
+      getAllLabelsMap()
     }
 
-    def getAllLabelsMap() = MemoizeAutoRenew(() => {
+    val getAllLabelsMap = MemoizeAutoRenew(() => {
       listingRepository.allLabelsMap()
     })
 

@@ -94,6 +94,7 @@ trait ListingRepository {
 
         // ----x Helper method for locally manipulating the Map uniqeLabels of labels. Makes a flattend sorted list of the labels as value and type of label as key x---
         var uniqeLabels: Map[LabelType, Set[LabelName]] = Map()
+
         def mapHelper(key: LabelType, labelSeq: Seq[LabelName]) = {
           if (uniqeLabels.contains(key)) {
             val maybeSet = uniqeLabels.get(key)
@@ -103,6 +104,7 @@ trait ListingRepository {
             uniqeLabels += (key -> labelSeq.toSet)
           }
         }
+
         // ----xxx---
 
         val maybeLabelses = labelsByLanguage.get(languageKey)
@@ -111,7 +113,7 @@ trait ListingRepository {
           case Some(labels) => {
             val res = labels.map(l => {
               val labelsByType = l.labels.groupBy(x => x.`type`.getOrElse("other"))
-             labelsByType.keys.map(k => {
+              labelsByType.keys.map(k => {
                 val theLabels = labelsByType.get(k).getOrElse(Seq()).map(_.labels).flatten
                 mapHelper(k, theLabels)
                 uniqeLanguageLabels += (languageKey -> UniqeLabels(uniqeLabels))

@@ -28,8 +28,9 @@ class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean) ext
     }
   }
 
-  private def renewCache = {
+  def renewCache :Unit =  {
     cache = Some(CacheValue(f(), System.currentTimeMillis()))
+    logger.debug(s"cache renewd ${cache.get}")
   }
 
   if (autoRefreshCache) {
