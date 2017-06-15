@@ -145,7 +145,6 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   test("That GET /labels/ returns 200 and map of all uniqe labels"){
     when(readService.allLabelsMap()).thenReturn(Map("x" -> UniqeLabels(Map())))
     get("/test/labels/") {
-      println(body)
       status should equal (200)
     }
   }

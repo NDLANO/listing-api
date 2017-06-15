@@ -25,10 +25,6 @@ trait WriteService {
         .flatMap(indexService.indexDocument)
         .flatMap(insertedCover => converterService.toApiCover(insertedCover, cover.language))
 
-println(s"#1 .... before renew")
-println(s"#1a .... before renew $readService")
-println(s"#1b .... before renew ${readService.getAllLabelsMap}")
-println(s"#1c .... before renew ${readService.allLabelsMap()}")
       readService.getAllLabelsMap.renewCache
       validCover
     }
@@ -43,12 +39,8 @@ println(s"#1c .... before renew ${readService.allLabelsMap()}")
         .flatMap(listingRepository.updateCover)
         .flatMap(indexService.indexDocument)
         .flatMap(updatedCover => converterService.toApiCover(updatedCover, cover.language))
-println(s"#1a")
-      val service = readService
-println(s"#1b")
-      val map = service.getAllLabelsMap
-println(s"#1c")
-      map.renewCache
+
+      readService.getAllLabelsMap.renewCache
       updatedCover
     }
 

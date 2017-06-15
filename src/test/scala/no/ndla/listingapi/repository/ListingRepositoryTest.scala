@@ -15,7 +15,6 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with L
 
   override def beforeAll = {
     val dataSource = getDataSource
-    println("ListingRepositoryTest...")
     DBMigrator.migrate(dataSource)
     ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
   }
