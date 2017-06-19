@@ -13,11 +13,35 @@ object TestData {
     "https://test.api.ndla.no/image-api/v1/raw/image.jpg",
     Seq(domain.Title("hammer", Some("nb"))),
     Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
-    Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy")), Label(None, Seq("bygg"))), Some("nb"))),
+    Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy", "bygg verktøy")), Label(None, Seq("bygg"))), Some("nb"))),
     1122,
     "NDLA import script",
     updated
   )
+
+  val sampleCover2 = domain.Cover(
+    Some(1),
+    Some(1),
+    None,
+    "https://test.api.ndla.no/image-api/v1/raw/image.jpg",
+    Seq(domain.Title("hammer2", Some("nb"))),
+    Seq(domain.Description("En hammer2 er et nyttig verktøy", Some("nb"))),
+    Seq(
+      LanguageLabels(
+        Seq(Label(Some("kategori"), Seq("jobbe verktøy", "mer label")), Label(None, Seq("byggherrer"))),
+        Some("nb")),
+      LanguageLabels(
+        Seq(Label(Some("kategori"), Seq("arbeids verktøy")), Label(None, Seq("byggkarer"))),
+        Some("nn")),
+      LanguageLabels(
+        Seq(Label(Some("category"), Seq("work tools")), Label(None, Seq("workmen"))),
+        Some("en"))
+    ),
+    1122,
+    "NDLA import script",
+    updated
+  )
+
 
   val sampleApiCover = api.Cover(
     1,

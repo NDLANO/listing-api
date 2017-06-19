@@ -1,10 +1,12 @@
 package no.ndla.listingapi.repository
 
+import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.{DBMigrator, IntegrationSuite, TestData, TestEnvironment}
+import org.flywaydb.core.Flyway
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
-class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
+class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with LazyLogging{
   var repository: ListingRepository = _
 
   override def beforeEach = {
@@ -17,7 +19,15 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
     ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
   }
 
+  override def afterAll() = {
+    //Simplest way of just dumping the content of the DB for cleaner sweeter tests next time
+    val flyway = new Flyway()
+    flyway.setDataSource(getDataSource)
+    flyway.clean()
+  }
+
   val sampleCover: domain.Cover = TestData.sampleCover
+  val sampleCover2: domain.Cover = TestData.sampleCover2
 
   test("inserting a new cover should return the new ID") {
     val result = repository.insertCover(sampleCover)
@@ -79,6 +89,23 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment {
     secondUpdate.get.revision.get should be (initial.revision.get + 2)
 
     repository.deleteCover(initial.id.get)
+  }
+
+  test("get allLabels"){
+    repository.insertCover(sampleCover)
+    repository.insertCover(sampleCover2)
+    repository.insertCover(sampleCover)
+    repository.insertCover(sampleCover2)
+    val allCovers = repository.allCovers()
+
+    val allLabelsMap = repository.allLabelsMap()
+    val allLabelsNB = allLabelsMap("nb")
+    val allLabelsNN = allLabelsMap("nn")
+    val allLabelsEN = allLabelsMap("en")
+
+    allLabelsNB.labelsByType should be (Map("kategori"-> Set("bygg verktøy", "jobbe verktøy", "mer label", "personlig verktøy"), "other" -> Set("bygg", "byggherrer")))
+    allLabelsNN.labelsByType should be (Map("kategori" -> Set("arbeids verktøy"), "other" -> Set("byggkarer")))
+    allLabelsEN.labelsByType should be (Map("category" -> Set("work tools"), "other" -> Set("workmen")))
   }
 
 }

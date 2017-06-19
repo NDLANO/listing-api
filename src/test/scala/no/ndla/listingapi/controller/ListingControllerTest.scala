@@ -1,7 +1,8 @@
 package no.ndla.listingapi.controller
 
 import no.ndla.listingapi.model.api.{NewCover, UpdateCover}
-import no.ndla.listingapi.{ListingSwagger, TestData, TestEnvironment, UnitSuite}
+import no.ndla.listingapi.model.domain.UniqeLabels
+import no.ndla.listingapi.{ListingApiProperties, ListingSwagger, TestData, TestEnvironment, UnitSuite}
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import org.scalatra.test.scalatest.ScalatraFunSuite
@@ -138,6 +139,19 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   test("That PUT /:coverid returns 403 if auth header does not have any roles") {
     put("/test/1", headers = Map("Authorization" -> authHeaderWithoutAnyRoles)) {
       status should equal (403)
+    }
+  }
+
+  test("That GET /labels/ returns 200 and map of all uniqe labels"){
+    when(readService.allLabelsMap()).thenReturn(Map("x" -> UniqeLabels(Map())))
+    get("/test/labels/") {
+      status should equal (200)
+    }
+  }
+
+  test("That GET /labels/subjects returns 200 and map of all uniqe labels"){
+    get("/test/labels/subjects") {
+      status should equal (200)
     }
   }
 

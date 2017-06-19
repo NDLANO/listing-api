@@ -3,7 +3,7 @@ package no.ndla.listingapi.repository
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.integration.DataSource
 import no.ndla.listingapi.model.api.OptimisticLockException
-import no.ndla.listingapi.model.domain.Cover
+import no.ndla.listingapi.model.domain._
 import org.json4s.native.Serialization.write
 import org.postgresql.util.PGobject
 import scalikejdbc._
@@ -24,7 +24,7 @@ trait ListingRepository {
 
       val startRevision = 1
       val coverId = sql"insert into ${Cover.table} (document, revision) values (${dataObject}, $startRevision)".updateAndReturnGeneratedKey.apply
-      cover.copy(id=Some(coverId), revision=Some(startRevision))
+      cover.copy(id = Some(coverId), revision = Some(startRevision))
     }
 
     def updateCover(cover: Cover)(implicit session: DBSession = AutoSession): Try[Cover] = {
@@ -41,7 +41,7 @@ trait ListingRepository {
         Failure(new OptimisticLockException)
       } else {
         logger.info(s"Updated cover ${cover.id}")
-        Success(cover.copy(revision=Some(newRevision)))
+        Success(cover.copy(revision = Some(newRevision)))
       }
     }
 
@@ -53,7 +53,17 @@ trait ListingRepository {
       coverWhere(sqls"c.document->>'oldNodeId' = ${oldNodeId.toString}")
     }
 
+    private def coverWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
+      val c = Cover.syntax("c")
+      sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).single.apply
+    }
+
     def cardsWithIdBetween(min: Long, max: Long): List[Cover] = coversWhere(sqls"c.id between $min and $max").toList
+
+    private def coversWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
+      val c = Cover.syntax("c")
+      sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).list.apply
+    }
 
     def minMaxId(implicit session: DBSession = AutoSession): (Long, Long) = {
       sql"select coalesce(MIN(id),0) as mi, coalesce(MAX(id),0) as ma from ${Cover.table}".map(rs => {
@@ -68,15 +78,64 @@ trait ListingRepository {
       sql"delete from ${Cover.table} where id = $coverId".update.apply
     }
 
-    private def coverWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
-      val c = Cover.syntax("c")
-      sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).single.apply
+    /* Group the labels by language in a Map, for each language there is a Map of labels by type.
+      This is to go in the cache.
+    */
+    def allLabelsMap(): Map[Lang, UniqeLabels] = {
+      val starttime = System.currentTimeMillis()
+
+      //Get all labels and put them in a map where the key is the language.
+      var uniqeLanguageLabels: Map[Lang, UniqeLabels] = Map()
+      val allLables = allCovers().map(_.labels).flatten
+      val labelsByLanguage = allLables.groupBy(ll => ll.language.getOrElse(""))
+
+
+      labelsByLanguage.keys.foreach(languageKey => {
+
+        // ----x Helper method for locally manipulating the Map uniqeLabels of labels. Makes a flattend sorted list of the labels as value and type of label as key x---
+        var uniqeLabels: Map[LabelType, Set[LabelName]] = Map()
+
+        def mapHelper(key: LabelType, labelSeq: Seq[LabelName]) = {
+          if (uniqeLabels.contains(key)) {
+            val maybeSet = uniqeLabels.get(key)
+            val maybeStrings = maybeSet.map(s => (s ++ labelSeq.toSet).toList.sorted.toSet)
+            uniqeLabels += (key -> maybeStrings.getOrElse(Set()))
+          } else {
+            uniqeLabels += (key -> labelSeq.toSet)
+          }
+        }
+
+        // ----xxx---
+
+        val maybeLabelses = labelsByLanguage.get(languageKey)
+
+        maybeLabelses match {
+          case Some(labels) => {
+            val res = labels.map(l => {
+              val labelsByType = l.labels.groupBy(x => x.`type`.getOrElse("other"))
+              labelsByType.keys.map(k => {
+                val theLabels = labelsByType.get(k).getOrElse(Seq()).map(_.labels).flatten
+                mapHelper(k, theLabels)
+                uniqeLanguageLabels += (languageKey -> UniqeLabels(uniqeLabels))
+              })
+            })
+          }
+          case None =>
+        }
+
+        uniqeLabels
+      })
+
+      logger.debug(s"Done aggregating labels - tok ${System.currentTimeMillis() - starttime} ms")
+      uniqeLanguageLabels
     }
 
-    private def coversWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
+    def allCovers()(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
       val c = Cover.syntax("c")
-      sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause".map(Cover(c)).list.apply
+      sql"select ${c.result.*} from ${Cover.as(c)}".map(Cover(c)).list.apply
     }
+
 
   }
+
 }

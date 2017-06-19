@@ -9,6 +9,7 @@
 
 package no.ndla.listingapi.controller
 
+import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize, RoleWithWriteAccess}
 import no.ndla.listingapi.auth.Role
 import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationError}
@@ -24,7 +25,7 @@ trait ListingController {
   this: ReadService with SearchService with ListingRepository with WriteService with Role =>
   val listingController: ListingController
 
-  class ListingController(implicit val swagger: Swagger) extends NdlaController with SwaggerSupport {
+  class ListingController(implicit val swagger: Swagger) extends NdlaController with SwaggerSupport with LazyLogging {
     protected implicit override val jsonFormats: Formats = DefaultFormats
     val response400 = ResponseMessage(400, "Validation error", Some("ValidationError"))
 
@@ -71,6 +72,16 @@ trait ListingController {
         )
         authorizations "oauth2"
         responseMessages(response400, response403, response404, response500))
+    val getLabelsDoc =
+      (apiOperation[String]("getLabels")
+        summary "Returns a map of all uniqe labels"
+        notes s"Returns a map of all labels given the current language. Default is $DefaultLanguage"
+        parameter (
+        queryParam[Option[String]]("language").description(s"Return the labels on this language. Default is $DefaultLanguage")
+        )
+        authorizations "oauth2"
+        responseMessages(response400, response403, response404, response500))
+
     protected val applicationDescription = "API for grouping content from ndla.no."
 
     post("/", operation(newCoverDoc)) {
@@ -102,6 +113,34 @@ trait ListingController {
         case None => NotFound(body = Error(Error.NOT_FOUND, s"No cover with id $coverId found"))
       }
     }
+
+    get("/labels/", operation(getLabelsDoc)) {
+      val language = paramOrDefault("language", DefaultLanguage)
+      getLabels(language, "all")
+    }
+
+    get("/labels/:type", operation(getLabelsDoc)) {
+      val language = paramOrDefault("language", DefaultLanguage)
+      val labelType: String = paramOrDefault("type", "all")
+      getLabels(language, labelType)
+    }
+
+    private def getLabels(language: String, labelType: String) = {
+      val allLabels = readService.allLabelsMap()
+      val theLangueLabels = allLabels.get(language)
+
+      theLangueLabels match {
+        case Some(uniqeLabels) => {
+          if (labelType.equalsIgnoreCase("all")) {
+            Ok(uniqeLabels.labelsByType)
+          } else {
+            Ok(uniqeLabels.labelsByType.get(labelType))
+          }
+        }
+        case None => Ok(Nil)
+      }
+    }
+
 
   }
 

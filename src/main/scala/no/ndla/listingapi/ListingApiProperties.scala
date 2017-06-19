@@ -49,6 +49,8 @@ object ListingApiProperties extends LazyLogging {
   val CorrelationIdKey = "correlationID"
   val CorrelationIdHeader = "X-Correlation-ID"
 
+  val ApiClientsCacheAgeInMs: Long = 1000 * 60 * 60 // 1 hour caching
+
   lazy val secrets = readSecrets(SecretsFile) match {
      case Success(values) => values
      case Failure(exception) => throw new RuntimeException(s"Unable to load remote secrets from $SecretsFile", exception)

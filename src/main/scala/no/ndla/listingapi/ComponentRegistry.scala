@@ -9,6 +9,7 @@
 
 package no.ndla.listingapi
 
+import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.auth.{Role, User}
 import no.ndla.listingapi.controller.{HealthController, InternController, ListingController}
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, JestClientFactory}
