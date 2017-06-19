@@ -11,7 +11,7 @@ Configuration:
   Loggers:
     Logger:
       name: "no.ndla"
-      level: debug
+      level: info
       additivity: false
       AppenderRef:
         - ref: Console
