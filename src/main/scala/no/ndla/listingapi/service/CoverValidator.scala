@@ -57,7 +57,7 @@ trait CoverValidator {
       val host = parsedUrl.host.getOrElse("")
 
       val hostCorrect = host.endsWith("ndla.no") || host.endsWith("ndla-local")
-      val pathCorrect = parsedUrl.path.startsWith("/image-api/v")
+      val pathCorrect = parsedUrl.path.startsWith("/image-api/")
 
       hostCorrect && pathCorrect match {
         case true => None
