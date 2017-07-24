@@ -134,7 +134,8 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       sampleCover.labels ++ Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       sampleCover.articleApiId,
       sampleCover.updatedBy,
-      sampleCover.updated
+      sampleCover.updated,
+      sampleCover.theme
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
@@ -161,7 +162,8 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       sampleCover.articleApiId,
       sampleCover.updatedBy,
-      sampleCover.updated
+      sampleCover.updated,
+      sampleCover.theme
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
@@ -188,7 +190,8 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       toUpdate.articleApiId.get,
       "NDLA import script",
-      sampleCover.updated
+      sampleCover.updated,
+      sampleCover.theme
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)
@@ -216,7 +219,8 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
       toUpdate.articleApiId.get,
       "NDLA import script",
-      sampleCover.updated
+      sampleCover.updated,
+      sampleCover.theme
     )
 
     when(converterService.toDomainLabel(any[Label])).thenReturn(domainLabel)

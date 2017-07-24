@@ -41,6 +41,10 @@ class CoverValidatorTest extends UnitSuite with TestEnvironment {
     service.validate(sampleCover.copy(articleApiId = -1)).isFailure should be(true)
   }
 
+  test("validate returns a failure if theme is not one of the allowed themes"){
+    service.validate(sampleCover.copy(theme = "not")).isFailure should be(true)
+  }
+
   test("validate returns success if cover is valid") {
     service.validate(sampleCover).isSuccess should be (true)
   }

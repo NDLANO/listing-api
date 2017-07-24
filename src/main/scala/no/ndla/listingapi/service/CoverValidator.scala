@@ -12,6 +12,7 @@ import com.netaporter.uri.Uri._
 import no.ndla.listingapi.model.api.{ValidationException, ValidationMessage}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain.Cover
+import no.ndla.listingapi.model.meta.Theme
 import no.ndla.mapping.ISO639.get6391CodeFor6392CodeMappings
 import org.jsoup.Jsoup
 import org.jsoup.safety.Whitelist
@@ -39,7 +40,8 @@ trait CoverValidator {
         cover.labels.flatMap(validateLanguageLabels) ++
         validateCoverPhoto(cover.coverPhotoUrl) ++
         cover.id.flatMap(id => validateId("id", id)) ++
-        validateId("articleApiId", cover.articleApiId)
+        validateId("articleApiId", cover.articleApiId) ++
+        validateTheme(cover.theme)
     }
 
     private def validateDescription(description: domain.Description): Seq[ValidationMessage] = {
@@ -96,6 +98,13 @@ trait CoverValidator {
       languageCodeSupported6391(languageCode) match {
         case true => None
         case false => Some(ValidationMessage(fieldPath, s"Language '$languageCode' is not a supported value."))
+      }
+    }
+
+    private def validateTheme(name: domain.ThemeName): Option[ValidationMessage] = {
+      Theme.allowedThemes.contains(name.toLowerCase) match {
+        case true => None
+        case false => Some(ValidationMessage(name, s"Theme name '$name' is not a supportet theme."))
       }
     }
 

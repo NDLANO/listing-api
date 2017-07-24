@@ -42,7 +42,8 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
                |    ],
                |    "articleApiId": 1234,
                |    "description": "dogs and cats",
-               |    "coverPhotoUrl": "https://image.imgs/catdog.jpg"
+               |    "coverPhotoUrl": "https://image.imgs/catdog.jpg",
+               |    "theme": "verktoy"
                |}
              """.stripMargin
 

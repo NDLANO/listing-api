@@ -11,6 +11,7 @@ import java.util.Date
 
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.model.api.NotFoundException
+import no.ndla.listingapi.model.meta.Theme
 import org.json4s.FieldSerializer
 import org.json4s.FieldSerializer.ignore
 import org.json4s.native.Serialization._
@@ -27,7 +28,8 @@ case class Cover(id: Option[Long],
                  labels: Seq[LanguageLabels],
                  articleApiId: Long,
                  updatedBy: String,
-                 updated: Date
+                 updated: Date,
+                 theme: ThemeName
                 ) {
   def getAllCoverLanguages: Try[Seq[String]] = {
     val titleLangs = title.flatMap(_.language)
@@ -60,7 +62,8 @@ object Cover extends SQLSyntaxSupport[Cover] {
       meta.labels,
       meta.articleApiId,
       meta.updatedBy,
-      meta.updated
+      meta.updated,
+      meta.theme
     )
   }
 
