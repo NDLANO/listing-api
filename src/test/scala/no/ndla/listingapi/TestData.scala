@@ -1,7 +1,6 @@
 package no.ndla.listingapi
 
 import no.ndla.listingapi.model.domain.{Label, LanguageLabels}
-import no.ndla.listingapi.model.meta.Theme
 import no.ndla.listingapi.model.{api, domain}
 import org.joda.time.{DateTime, DateTimeZone}
 

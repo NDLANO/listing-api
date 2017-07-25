@@ -36,7 +36,8 @@ class SearchConverterServiceTest extends UnitSuite with TestEnvironment {
       SearchableLanguageList(Seq(LanguageValue(Some("nb"), sampleCover.labels.head.labels))),
       Seq("nb"),
       sampleCover.updatedBy,
-      TestData.updated()
+      TestData.updated(),
+      sampleCover.theme
     )
 
     searchConverterService.asSearchableCover(sampleCover) should equal (expected)

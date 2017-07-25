@@ -3,7 +3,7 @@ package no.ndla.listingapi.service
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.caching.MemoizeAutoRenew
 import no.ndla.listingapi.model.api
-import no.ndla.listingapi.model.domain.{Lang, UniqeLabels}
+import no.ndla.listingapi.model.domain.{Lang, ThemeName, UniqeLabels}
 import no.ndla.listingapi.repository.ListingRepository
 
 trait ReadService {
@@ -11,6 +11,10 @@ trait ReadService {
   val readService: ReadService
 
   class ReadService extends LazyLogging {
+    val getAllLabelsMap = MemoizeAutoRenew(() => {
+      listingRepository.allLabelsMap()
+    })
+
     def coverWithId(id: Long, language: String): Option[api.Cover] = {
       listingRepository.getCover(id).flatMap(c => converterService.toApiCover(c, language).toOption)
     }
@@ -19,9 +23,10 @@ trait ReadService {
       getAllLabelsMap()
     }
 
-    val getAllLabelsMap = MemoizeAutoRenew(() => {
-      listingRepository.allLabelsMap()
-    })
+    def getTheme(theme: ThemeName, language: String): Seq[api.Cover] = {
+      listingRepository.getTheme(theme).flatMap(t => converterService.toApiCover(t, language).toOption)
+    }
 
   }
+
 }

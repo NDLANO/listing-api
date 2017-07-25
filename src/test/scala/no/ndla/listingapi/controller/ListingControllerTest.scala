@@ -156,4 +156,17 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
     }
   }
 
+
+  test("That GET /theme/:theme returns 200 and sequence of covers of that theme"){
+    get("/test/theme/verktoy") {
+      status should equal (200)
+    }
+  }
+
+  test("That GET /theme/:theme returns 400 on non valid theme"){
+    get("/test/theme/notValid") {
+      status should equal (404)
+    }
+  }
+
 }

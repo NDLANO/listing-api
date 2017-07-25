@@ -60,4 +60,5 @@ trait ConverterService {
     def toDomainLabel(label: api.Label): domain.Label = domain.Label(label.`type`, label.labels)
 
   }
+
 }

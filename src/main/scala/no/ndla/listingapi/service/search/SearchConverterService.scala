@@ -32,7 +32,8 @@ trait SearchConverterService {
             SearchableLanguageList(card.labels.map(label => LanguageValue(label.language, label.labels))),
             supportedLanguages,
             card.updatedBy,
-            card.updated
+            card.updated,
+            card.theme
           )
       }
     }

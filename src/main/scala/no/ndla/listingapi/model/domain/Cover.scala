@@ -11,7 +11,6 @@ import java.util.Date
 
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.model.api.NotFoundException
-import no.ndla.listingapi.model.meta.Theme
 import org.json4s.FieldSerializer
 import org.json4s.FieldSerializer.ignore
 import org.json4s.native.Serialization._
@@ -20,17 +19,17 @@ import scalikejdbc._
 import scala.util.{Failure, Success, Try}
 
 case class Cover(id: Option[Long],
-                 revision: Option[Int],
-                 oldNodeId: Option[Long],
-                 coverPhotoUrl: String,
-                 title: Seq[Title],
-                 description: Seq[Description],
-                 labels: Seq[LanguageLabels],
-                 articleApiId: Long,
-                 updatedBy: String,
-                 updated: Date,
-                 theme: ThemeName
-                ) {
+  revision: Option[Int],
+  oldNodeId: Option[Long],
+  coverPhotoUrl: String,
+  title: Seq[Title],
+  description: Seq[Description],
+  labels: Seq[LanguageLabels],
+  articleApiId: Long,
+  updatedBy: String,
+  updated: Date,
+  theme: ThemeName
+) {
   def getAllCoverLanguages: Try[Seq[String]] = {
     val titleLangs = title.flatMap(_.language)
     val descriptionLangs = description.flatMap(_.language)
@@ -47,7 +46,10 @@ object Cover extends SQLSyntaxSupport[Cover] {
   implicit val formats = org.json4s.DefaultFormats
   override val tableName = "covers"
   override val schemaName = Some(ListingApiProperties.MetaSchema)
-
+  val JSonSerializer = FieldSerializer[Cover](
+    ignore("id") orElse
+      ignore("revision")
+  )
 
   def apply(s: SyntaxProvider[Cover])(rs: WrappedResultSet): Cover = apply(s.resultName)(rs)
 
@@ -66,9 +68,4 @@ object Cover extends SQLSyntaxSupport[Cover] {
       meta.theme
     )
   }
-
-  val JSonSerializer = FieldSerializer[Cover](
-    ignore("id") orElse
-      ignore("revision")
-  )
 }

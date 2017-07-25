@@ -31,5 +31,6 @@ case class SearchableCover(
   labels: SearchableLanguageList,
   supportedLanguages: Seq[String],
   updatedBy: String,
-  update: Date
+  update: Date,
+  theme: String
 )
