@@ -82,6 +82,15 @@ trait ListingController {
         )
         authorizations "oauth2"
         responseMessages(response400, response403, response404, response500))
+    val getThemeDoc =
+      (apiOperation[String]("getTheme")
+        summary "Returns a sequence of covers with a named theme. Themes are predefined and should be known to the caller. "
+        notes s"Returns  a sequence of covers with a named theme given the current language. Default is $DefaultLanguage."
+        parameter (
+        queryParam[Option[String]]("language").description(s"Return the covers of the theme in this language. Default is $DefaultLanguage")
+        )
+        authorizations "oauth2"
+        responseMessages(response400, response403, response404, response500))
 
     protected val applicationDescription = "API for grouping content from ndla.no."
 
@@ -101,7 +110,7 @@ trait ListingController {
     }
 
 
-    get("/theme/:theme") {
+    get("/theme/:theme", operation(getThemeDoc)) {
       val theme = params("theme")
       val language = paramOrDefault("language", DefaultLanguage)
       theme match {
