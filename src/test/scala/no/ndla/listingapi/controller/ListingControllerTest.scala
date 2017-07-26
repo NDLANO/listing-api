@@ -165,7 +165,7 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
 
   test("That GET /theme/:theme returns 400 on non valid theme"){
     get("/test/theme/notValid") {
-      status should equal (404)
+      status should equal (400)
     }
   }
 

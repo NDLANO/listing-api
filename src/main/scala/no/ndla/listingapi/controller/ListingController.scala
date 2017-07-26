@@ -12,7 +12,7 @@ package no.ndla.listingapi.controller
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize, RoleWithWriteAccess}
 import no.ndla.listingapi.auth.Role
-import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationError}
+import no.ndla.listingapi.model.api.{Error, NewCover, ThemeResult, UpdateCover, ValidationError}
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.model.meta.Theme
 import no.ndla.listingapi.repository.ListingRepository
@@ -83,7 +83,7 @@ trait ListingController {
         authorizations "oauth2"
         responseMessages(response400, response403, response404, response500))
     val getThemeDoc =
-      (apiOperation[String]("getTheme")
+      (apiOperation[ThemeResult]("getTheme")
         summary "Returns a sequence of covers with a named theme. Themes are predefined and should be known to the caller. "
         notes s"Returns  a sequence of covers with a named theme given the current language. Default is $DefaultLanguage."
         parameter (
@@ -115,7 +115,7 @@ trait ListingController {
       val language = paramOrDefault("language", DefaultLanguage)
       theme match {
         case theme if Theme.allowedThemes.contains(theme) => readService.getTheme(theme, language)
-        case _ => NotFound(body = Error(Error.NOT_FOUND, s"No theme with name '$theme' is configured."))
+        case _ => BadRequest(body = Error(Error.VALIDATION, s"No theme with name '$theme' is configured."))
       }
     }
 

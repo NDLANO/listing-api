@@ -4,8 +4,8 @@ package no.ndla.listingapi.model.meta
 // to be used in the filtering functionality. Filtering of covers happens within a theme in the client.
 
 object Theme {
-  lazy val VERKTOY = "verktoy"
-  lazy val NATURBRUK = "naturbruk"
+  val VERKTOY = "verktoy"
+  val NATURBRUK = "naturbruk"
 
   val allowedThemes :List [String] = List(NATURBRUK, VERKTOY)
 }
