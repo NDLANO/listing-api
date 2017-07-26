@@ -42,7 +42,8 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
                |    ],
                |    "articleApiId": 1234,
                |    "description": "dogs and cats",
-               |    "coverPhotoUrl": "https://image.imgs/catdog.jpg"
+               |    "coverPhotoUrl": "https://image.imgs/catdog.jpg",
+               |    "theme": "verktoy"
                |}
              """.stripMargin
 
@@ -152,6 +153,19 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
   test("That GET /labels/subjects returns 200 and map of all uniqe labels"){
     get("/test/labels/subjects") {
       status should equal (200)
+    }
+  }
+
+
+  test("That GET /theme/:theme returns 200 and sequence of covers of that theme"){
+    get("/test/theme/verktoy") {
+      status should equal (200)
+    }
+  }
+
+  test("That GET /theme/:theme returns 400 on non valid theme"){
+    get("/test/theme/notValid") {
+      status should equal (400)
     }
   }
 

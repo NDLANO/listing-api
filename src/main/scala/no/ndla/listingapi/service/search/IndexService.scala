@@ -104,7 +104,8 @@ trait IndexService {
           intField("revision") index "not_analyzed",
           textField("supportedLanguages") index "not_analyzed",
           textField("updatedBy") index "not_analyzed",
-          dateField("update") index "not_analyzed"
+          dateField("update") index "not_analyzed",
+          textField("theme") index "not_analyzed"
         ),
         ListingApiProperties.SearchDocument).string()
     }

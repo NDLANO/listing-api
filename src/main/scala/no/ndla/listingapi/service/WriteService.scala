@@ -56,7 +56,8 @@ trait WriteService {
         description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, Option(toMerge.language))),
         labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language))),
         updatedBy = id,
-        updated = now
+        updated = now,
+        theme = toMerge.theme
       )
     }
 

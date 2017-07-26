@@ -11,6 +11,7 @@ package object domain {
   type Lang = String
   type LabelType = String
   type LabelName = String
+  type ThemeName = String
 
   def emptySomeToNone(lang: Option[String]): Option[String] = lang.filter(_.nonEmpty)
 

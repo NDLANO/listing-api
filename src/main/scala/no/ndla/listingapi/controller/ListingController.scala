@@ -12,8 +12,9 @@ package no.ndla.listingapi.controller
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize, RoleWithWriteAccess}
 import no.ndla.listingapi.auth.Role
-import no.ndla.listingapi.model.api.{Error, NewCover, UpdateCover, ValidationError}
+import no.ndla.listingapi.model.api.{Error, NewCover, ThemeResult, UpdateCover, ValidationError}
 import no.ndla.listingapi.model.domain.search.Sort
+import no.ndla.listingapi.model.meta.Theme
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service._
 import no.ndla.listingapi.service.search.SearchService
@@ -81,6 +82,15 @@ trait ListingController {
         )
         authorizations "oauth2"
         responseMessages(response400, response403, response404, response500))
+    val getThemeDoc =
+      (apiOperation[ThemeResult]("getTheme")
+        summary "Returns a sequence of covers with a named theme. Themes are predefined and should be known to the caller. "
+        notes s"Returns  a sequence of covers with a named theme given the current language. Default is $DefaultLanguage."
+        parameter (
+        queryParam[Option[String]]("language").description(s"Return the covers of the theme in this language. Default is $DefaultLanguage")
+        )
+        authorizations "oauth2"
+        responseMessages(response400, response403, response404, response500))
 
     protected val applicationDescription = "API for grouping content from ndla.no."
 
@@ -99,6 +109,16 @@ trait ListingController {
       searchService.matchingQuery(filter, language, page.toInt, pageSize.toInt, sort)
     }
 
+
+    get("/theme/:theme", operation(getThemeDoc)) {
+      val theme = params("theme")
+      val language = paramOrDefault("language", DefaultLanguage)
+      theme match {
+        case theme if Theme.allowedThemes.contains(theme) => readService.getTheme(theme, language)
+        case _ => BadRequest(body = Error(Error.VALIDATION, s"No theme with name '$theme' is configured."))
+      }
+    }
+
     put("/:coverid", operation(updateCoverDoc)) {
       authRole.assertHasRole(RoleWithWriteAccess)
       writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
@@ -110,7 +130,7 @@ trait ListingController {
 
       readService.coverWithId(coverId, language) match {
         case Some(cover) => cover
-        case None => NotFound(body = Error(Error.NOT_FOUND, s"No cover with id $coverId found"))
+        case None => NotFound(body = Error(Error.NOT_FOUND, s"No cover with id $coverId found."))
       }
     }
 

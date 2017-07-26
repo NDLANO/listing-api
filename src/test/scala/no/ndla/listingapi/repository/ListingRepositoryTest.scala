@@ -2,8 +2,8 @@ package no.ndla.listingapi.repository
 
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.model.domain
+import no.ndla.listingapi.model.meta.Theme
 import no.ndla.listingapi.{DBMigrator, IntegrationSuite, TestData, TestEnvironment}
-import org.flywaydb.core.Flyway
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
 class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with LazyLogging{
@@ -19,11 +19,9 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with L
     ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
   }
 
-  override def afterAll() = {
-    //Simplest way of just dumping the content of the DB for cleaner sweeter tests next time
-    val flyway = new Flyway()
-    flyway.setDataSource(getDataSource)
-    flyway.clean()
+  override def afterEach() = {
+    //Simple way of just dumping the content of the DB for clean next test
+    repository.allCovers().foreach(c => repository.deleteCover(c.id.get))
   }
 
   val sampleCover: domain.Cover = TestData.sampleCover
@@ -32,8 +30,6 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with L
   test("inserting a new cover should return the new ID") {
     val result = repository.insertCover(sampleCover)
     result.id.isDefined should be (true)
-
-    repository.deleteCover(result.id.get)
   }
 
   test("getCover should return a cover") {
@@ -41,8 +37,6 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with L
     inserted.id.isDefined should be (true)
 
     repository.getCover(inserted.id.get) should equal (Some(inserted))
-
-    repository.deleteCover(inserted.id.get)
   }
 
   test("updateing a new cover should return the cover on success") {
@@ -53,8 +47,6 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with L
     result.isSuccess should be (true)
     result.get.articleApiId should equal (toUpdate.articleApiId)
     result.get.id.isDefined should be (true)
-
-    repository.deleteCover(result.get.id.get)
   }
 
   test("updateing a new cover should return a failure if failed to update cover") {
@@ -65,16 +57,12 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with L
     val result = repository.insertCover(sampleCover.copy(revision=None))
     result.id.isDefined should be (true)
     result.revision should be (Some(1))
-
-    repository.deleteCover(result.id.get)
   }
 
   test("updateCover should fail to update if revision number does not match current") {
     val initial = repository.insertCover(sampleCover.copy(revision=None))
     repository.updateCover(initial.copy(revision = Some(initial.revision.get + 1))).isFailure should be (true)
     repository.updateCover(initial.copy(revision = Some(initial.revision.get - 1))).isFailure should be (true)
-
-    repository.deleteCover(initial.id.get)
   }
 
   test("updateCover should update current revision number") {
@@ -87,8 +75,6 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with L
     val secondUpdate = repository.updateCover(firstUpdate.get)
     secondUpdate.isSuccess should be (true)
     secondUpdate.get.revision.get should be (initial.revision.get + 2)
-
-    repository.deleteCover(initial.id.get)
   }
 
   test("get allLabels"){
@@ -107,5 +93,27 @@ class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with L
     allLabelsNN.labelsByType should be (Map("kategori" -> Set("arbeids verktøy"), "other" -> Set("byggkarer")))
     allLabelsEN.labelsByType should be (Map("category" -> Set("work tools"), "other" -> Set("workmen")))
   }
+
+  test("getTheme should return sequence of cards given allowed named theme"){
+    val cover1 = repository.insertCover(sampleCover)
+    val cover2 = repository.insertCover(sampleCover2)
+
+    val covers = repository.getTheme(Theme.VERKTOY)
+    val allCovers = repository.allCovers()
+    println(s"all ${allCovers.length} $allCovers")
+    println("repository.getTheme(Theme.VERKTOY):\n",covers)
+    covers.length should be (2)
+    repository.getTheme(Theme.NATURBRUK).length should be (0)
+
+  }
+
+  test("getTheme should return 0 on valid theme"){
+    val cover1 = repository.insertCover(sampleCover)
+    val cover2 = repository.insertCover(sampleCover2)
+
+    repository.getTheme("notvalid").length should be (0)
+  }
+
+
 
 }

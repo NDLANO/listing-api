@@ -78,6 +78,10 @@ trait ListingRepository {
       sql"delete from ${Cover.table} where id = $coverId".update.apply
     }
 
+    def getTheme(theme: ThemeName): Seq[Cover] = {
+      coversWhere(sqls"c.document->>'theme' = $theme")
+    }
+
     /* Group the labels by language in a Map, for each language there is a Map of labels by type.
       This is to go in the cache.
     */

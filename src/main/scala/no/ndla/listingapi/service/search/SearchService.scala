@@ -19,6 +19,7 @@ import no.ndla.listingapi.model.api
 import no.ndla.listingapi.model.api.NdlaSearchException
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.domain.search.Sort
+import no.ndla.listingapi.model.meta.Theme
 import no.ndla.listingapi.service.Clock
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.ElasticsearchException
@@ -74,7 +75,8 @@ trait SearchService {
             labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq,
             hit.get("supportedLanguages").getAsJsonArray.asScala.toSeq.map(_.getAsString),
             hit.get("updatedBy").getAsString,
-            clock.toDate(hit.get("update").getAsString)
+            clock.toDate(hit.get("update").getAsString),
+            hit.get("theme").getAsString
           )
       })
     }

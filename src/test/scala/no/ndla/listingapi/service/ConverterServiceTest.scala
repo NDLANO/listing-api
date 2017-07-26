@@ -31,7 +31,8 @@ class ConverterServiceTest extends UnitSuite with TestEnvironment {
         api.Label(None, Seq("bygg"))),
       Seq("nb"),
       "NDLA import script",
-      sampleCover.updated
+      sampleCover.updated,
+      sampleCover.theme
     )
     service.toApiCover(sampleCover, "nb") should equal (Success(expected))
   }
