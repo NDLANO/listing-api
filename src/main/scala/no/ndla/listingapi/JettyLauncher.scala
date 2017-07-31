@@ -29,7 +29,7 @@ object JettyLauncher extends LazyLogging {
 
     val startMillis = System.currentTimeMillis()
 
-    buildLabelsCache
+//    buildLabelsCache
     logger.info(s"Built tags cache in ${System.currentTimeMillis() - startMillis} ms.")
 
     val context = new ServletContextHandler()
