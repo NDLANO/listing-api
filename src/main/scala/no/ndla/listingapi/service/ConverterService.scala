@@ -34,11 +34,13 @@ trait ConverterService {
               cover.updatedBy,
               cover.updated,
               cover.theme,
-              cover.oldNodeId
+              cover.oldNodeId,
+              createOembedUrl(cover.oldNodeId)
             ))
         }
       }
     }
+
 
     private def toApiLabel(label: domain.Label): api.Label = api.Label(label.`type`, label.labels)
 

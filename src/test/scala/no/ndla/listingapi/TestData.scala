@@ -58,6 +58,7 @@ object TestData {
     updated,
     "verktoy",
     Some(10001),
+    Some("https://ndla.no/node/10001")
   )
 
   val sampleApiNewCover = api.NewCover(
