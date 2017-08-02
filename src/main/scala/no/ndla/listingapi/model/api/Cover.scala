@@ -27,5 +27,6 @@ case class Cover(
   @(ApiModelProperty@field)(description = "The languages this cover supports") supportedLanguages: Seq[String],
   @(ApiModelProperty@field)(description = "The user id that last updated the cover") updatedBy: String,
   @(ApiModelProperty@field)(description = "When the cover was last updated") updated: Date,
-  @(ApiModelProperty@field)(description = "The meta theme associated with this cover") theme: String
+  @(ApiModelProperty@field)(description = "The meta theme associated with this cover") theme: String,
+  @(ApiModelProperty@field)(description = "The id of the old article") oldNodeId: Option[Long],
 )

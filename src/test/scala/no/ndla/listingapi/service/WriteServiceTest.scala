@@ -127,7 +127,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val expectedResult = Cover(
       Some(1),
       Some(1),
-      None,
+      Some(10001),
       sampleCover.coverPhotoUrl,
       sampleCover.title ++ Seq(Title(toUpdate.title, Some(toUpdate.language))),
       sampleCover.description ++ Seq(Description(toUpdate.description, Some(toUpdate.language))),
@@ -155,7 +155,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val expectedResult = Cover(
       Some(1),
       Some(1),
-      None,
+      Some(10001),
       sampleCover.coverPhotoUrl,
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
@@ -183,7 +183,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val expectedResult = Cover(
       Some(1),
       Some(1),
-      None,
+      Some(10001),
       toUpdate.coverPhotoUrl.get,
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),
@@ -212,7 +212,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     val expectedResult = Cover(
       Some(1),
       Some(1000),
-      None,
+      Some(10001),
       toUpdate.coverPhotoUrl.get,
       Seq(Title(toUpdate.title, Some(toUpdate.language))),
       Seq(Description(toUpdate.description, Some(toUpdate.language))),

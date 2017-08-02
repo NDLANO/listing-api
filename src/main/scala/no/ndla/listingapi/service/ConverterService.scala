@@ -33,7 +33,8 @@ trait ConverterService {
               langs,
               cover.updatedBy,
               cover.updated,
-              cover.theme
+              cover.theme,
+              cover.oldNodeId
             ))
         }
       }

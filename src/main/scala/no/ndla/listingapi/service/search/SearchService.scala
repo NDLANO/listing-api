@@ -76,7 +76,8 @@ trait SearchService {
             hit.get("supportedLanguages").getAsJsonArray.asScala.toSeq.map(_.getAsString),
             hit.get("updatedBy").getAsString,
             clock.toDate(hit.get("update").getAsString),
-            hit.get("theme").getAsString
+            hit.get("theme").getAsString,
+            Option(hit.get("oldNodeId").getAsLong)
           )
       })
     }

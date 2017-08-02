@@ -9,7 +9,7 @@ object TestData {
   val sampleCover = domain.Cover(
     Some(1),
     Some(1),
-    None,
+    Some(10001),
     "https://test.api.ndla.no/image-api/v1/raw/image.jpg",
     Seq(domain.Title("hammer", Some("nb"))),
     Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
@@ -23,7 +23,7 @@ object TestData {
   val sampleCover2 = domain.Cover(
     Some(1),
     Some(1),
-    None,
+    Some(10001),
     "https://test.api.ndla.no/image-api/v1/raw/image.jpg",
     Seq(domain.Title("hammer2", Some("nb"))),
     Seq(domain.Description("En hammer2 er et nyttig verktøy", Some("nb"))),
@@ -56,7 +56,8 @@ object TestData {
     Seq("nb"),
     "NDLA import script",
     updated,
-    "verktoy"
+    "verktoy",
+    Some(10001),
   )
 
   val sampleApiNewCover = api.NewCover(
