@@ -32,7 +32,8 @@ class ConverterServiceTest extends UnitSuite with TestEnvironment {
       Seq("nb"),
       "NDLA import script",
       sampleCover.updated,
-      sampleCover.theme
+      sampleCover.theme,
+      sampleCover.oldNodeId.map(createOembedUrl)
     )
     service.toApiCover(sampleCover, "nb") should equal (Success(expected))
   }

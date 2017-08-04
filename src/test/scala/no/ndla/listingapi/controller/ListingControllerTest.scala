@@ -47,7 +47,7 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
                |}
              """.stripMargin
 
-  test("/<cover_id> should return 200 if the cover was found") {
+  test("/:coverid should return 200 if the cover was found") {
     when(readService.coverWithId(coverId, lang)).thenReturn(Some(TestData.sampleApiCover))
 
     get(s"/test/$coverId?language=$lang") {
@@ -55,7 +55,7 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
     }
   }
 
-  test("/<cover_id> should return 404 if the cover was not found") {
+  test("/:coverid should return 404 if the cover was not found") {
     when(readService.coverWithId(coverId, lang)).thenReturn(None)
 
     get(s"/test/$coverId?language=$lang") {
@@ -63,7 +63,7 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
     }
   }
 
-  test("/<cover_id> should return 400 if the cover_id is not an integer") {
+  test("/:coverid should return 400 if the cover_id is not an integer") {
     get(s"/test/one") {
       status should equal(400)
     }
@@ -82,13 +82,13 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
     }
   }
 
-  test("PUT /:cover-id should return 400 on failure to validate request") {
+  test("PUT /:coverid should return 400 on failure to validate request") {
     put("/test/1", "{}", headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(400)
     }
   }
 
-  test("PUT /:cover-id should return 200 on success") {
+  test("PUT /:coverid should return 200 on success") {
     when(writeService.updateCover(any[Long], any[UpdateCover])).thenReturn(Success(TestData.sampleApiCover))
     put("/test/1", requestBody, headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(200)
@@ -125,7 +125,7 @@ class ListingControllerTest extends UnitSuite with TestEnvironment with Scalatra
     }
   }
 
-  test("That PUT /:cover_id returns 403 if auth header does not have valid ndla_id") {
+  test("That PUT /:coverid returns 403 if auth header does not have valid ndla_id") {
     put("/test/1", headers = Map("Authorization" -> authHeaderWithEmptyNdlaId)) {
       status should equal (403)
     }

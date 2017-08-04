@@ -33,11 +33,13 @@ trait ConverterService {
               langs,
               cover.updatedBy,
               cover.updated,
-              cover.theme
+              cover.theme,
+              cover.oldNodeId.map(createOembedUrl)
             ))
         }
       }
     }
+
 
     private def toApiLabel(label: domain.Label): api.Label = api.Label(label.`type`, label.labels)
 
