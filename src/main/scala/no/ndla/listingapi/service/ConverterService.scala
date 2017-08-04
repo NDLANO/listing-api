@@ -34,8 +34,7 @@ trait ConverterService {
               cover.updatedBy,
               cover.updated,
               cover.theme,
-              cover.oldNodeId,
-              createOembedUrl(cover.oldNodeId)
+              cover.oldNodeId.map(createOembedUrl)
             ))
         }
       }

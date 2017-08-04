@@ -57,7 +57,6 @@ object TestData {
     "NDLA import script",
     updated,
     "verktoy",
-    Some(10001),
     Some("https://ndla.no/node/10001")
   )
 
