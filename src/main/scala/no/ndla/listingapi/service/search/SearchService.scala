@@ -58,8 +58,8 @@ trait SearchService {
 
       jestClient.execute(request.build()) match {
         case Success(response) => {
-          api.SearchResult((if (Language.supportedLanguages.contains(language)) response.getTotal.toLong else 0),
-            page, numResults, getHits(response, language))
+          val covers = getHits(response, language)
+          api.SearchResult(covers.length.toLong, page, numResults, covers)
         }
         case Failure(f) => errorHandler(Failure(f))
       }
