@@ -17,7 +17,7 @@ import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
 import no.ndla.listingapi.integration.ElasticClient
 import no.ndla.listingapi.model.api
 import no.ndla.listingapi.model.api.NdlaSearchException
-import no.ndla.listingapi.model.domain.search.Sort
+import no.ndla.listingapi.model.domain.search.{Language, Sort}
 import no.ndla.listingapi.service.{Clock, createOembedUrl}
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.ElasticsearchException
@@ -57,7 +57,10 @@ trait SearchService {
                     .setParameter("from", startAt)
 
       jestClient.execute(request.build()) match {
-        case Success(response) => api.SearchResult(response.getTotal.toLong, page, numResults, getHits(response, language))
+        case Success(response) => {
+          api.SearchResult((if (Language.supportedLanguages.contains(language)) response.getTotal.toLong else 0),
+            page, numResults, getHits(response, language))
+        }
         case Failure(f) => errorHandler(Failure(f))
       }
     }
@@ -84,7 +87,6 @@ trait SearchService {
       import scala.collection.JavaConverters._
       val labelsOpt = Option(hit.get("labels").getAsJsonObject.get(language)).map(lang => lang.getAsJsonArray.asScala.map(_.getAsJsonObject))
       val oembedUrl = Option(hit.get("oldNodeId").getAsLong).map(createOembedUrl)
-
 
       labelsOpt.map(labels => {
         api.Cover(
