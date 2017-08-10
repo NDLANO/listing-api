@@ -32,5 +32,6 @@ case class SearchableCover(
   supportedLanguages: Seq[String],
   updatedBy: String,
   update: Date,
-  theme: String
+  theme: String,
+  oldNodeId: Option[Long]
 )

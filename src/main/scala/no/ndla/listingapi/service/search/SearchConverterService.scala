@@ -33,7 +33,8 @@ trait SearchConverterService {
             supportedLanguages,
             card.updatedBy,
             card.updated,
-            card.theme
+            card.theme,
+            card.oldNodeId
           )
       }
     }

@@ -17,7 +17,7 @@ import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
 import no.ndla.listingapi.integration.ElasticClient
 import no.ndla.listingapi.model.api
 import no.ndla.listingapi.model.api.NdlaSearchException
-import no.ndla.listingapi.model.domain.search.Sort
+import no.ndla.listingapi.model.domain.search.{Language, Sort}
 import no.ndla.listingapi.service.{Clock, createOembedUrl}
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.ElasticsearchException
@@ -57,7 +57,10 @@ trait SearchService {
                     .setParameter("from", startAt)
 
       jestClient.execute(request.build()) match {
-        case Success(response) => api.SearchResult(response.getTotal.toLong, page, numResults, getHits(response, language))
+        case Success(response) => {
+          val covers = getHits(response, language)
+          api.SearchResult(covers.length.toLong, page, numResults, covers)
+        }
         case Failure(f) => errorHandler(Failure(f))
       }
     }
@@ -83,8 +86,8 @@ trait SearchService {
     def hitAsCard(hit: JsonObject, language: String): Option[api.Cover] = {
       import scala.collection.JavaConverters._
       val labelsOpt = Option(hit.get("labels").getAsJsonObject.get(language)).map(lang => lang.getAsJsonArray.asScala.map(_.getAsJsonObject))
-      val oembedUrl = Option(hit.get("oldNodeId").getAsLong).map(createOembedUrl)
 
+      def oldNodeIdOrNone = if (hit.get("oldNodeId") == null ) None else createOembedUrl(hit.get("oldNodeId").getAsLong)
 
       labelsOpt.map(labels => {
         api.Cover(
@@ -99,7 +102,7 @@ trait SearchService {
           hit.get("updatedBy").getAsString,
           clock.toDate(hit.get("update").getAsString),
           hit.get("theme").getAsString,
-          oembedUrl
+          oldNodeIdOrNone
         )
       })
     }
