@@ -86,7 +86,8 @@ trait SearchService {
     def hitAsCard(hit: JsonObject, language: String): Option[api.Cover] = {
       import scala.collection.JavaConverters._
       val labelsOpt = Option(hit.get("labels").getAsJsonObject.get(language)).map(lang => lang.getAsJsonArray.asScala.map(_.getAsJsonObject))
-      val oembedUrl = createOembedUrl(Option(hit.get("oldNodeId").getAsLong))
+
+      def oldNodeIdOrNone = if (hit.get("oldNodeId") == null ) None else createOembedUrl(hit.get("oldNodeId").getAsLong)
 
       labelsOpt.map(labels => {
         api.Cover(
@@ -101,7 +102,7 @@ trait SearchService {
           hit.get("updatedBy").getAsString,
           clock.toDate(hit.get("update").getAsString),
           hit.get("theme").getAsString,
-          oembedUrl
+          oldNodeIdOrNone
         )
       })
     }
