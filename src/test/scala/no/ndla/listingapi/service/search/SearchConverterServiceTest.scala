@@ -38,7 +38,7 @@ class SearchConverterServiceTest extends UnitSuite with TestEnvironment {
       sampleCover.updatedBy,
       TestData.updated(),
       sampleCover.theme,
-      sampleCover.oldNodeId.get
+      sampleCover.oldNodeId
     )
 
     searchConverterService.asSearchableCover(sampleCover) should equal (expected)

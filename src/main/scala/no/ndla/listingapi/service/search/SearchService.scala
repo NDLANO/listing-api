@@ -86,7 +86,7 @@ trait SearchService {
     def hitAsCard(hit: JsonObject, language: String): Option[api.Cover] = {
       import scala.collection.JavaConverters._
       val labelsOpt = Option(hit.get("labels").getAsJsonObject.get(language)).map(lang => lang.getAsJsonArray.asScala.map(_.getAsJsonObject))
-      val oembedUrl = Option(hit.get("oldNodeId").getAsLong).map(createOembedUrl)
+      val oembedUrl = createOembedUrl(Option(hit.get("oldNodeId").getAsLong))
 
       labelsOpt.map(labels => {
         api.Cover(

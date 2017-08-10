@@ -33,5 +33,5 @@ case class SearchableCover(
   updatedBy: String,
   update: Date,
   theme: String,
-  oldNodeId: Long
+  oldNodeId: Option[Long]
 )

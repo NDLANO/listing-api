@@ -34,7 +34,7 @@ trait SearchConverterService {
             card.updatedBy,
             card.updated,
             card.theme,
-            card.oldNodeId.get
+            card.oldNodeId
           )
       }
     }
