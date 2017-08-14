@@ -12,11 +12,11 @@ import no.ndla.listingapi.{TestEnvironment, UnitSuite}
 
 class SearchableCoverTest extends UnitSuite with TestEnvironment {
 
-  test("Language with empty Some should convert language to None") {
-    val lv = LanguageValue(Some(""), "This is ikke bare una Sprache")
-    lv.lang should equal(None)
+  test("Language with empty string should convert language to unknown") {
+    val lv = LanguageValue("", "This is ikke bare una Sprache")
+    lv.lang should equal("unknown")
     lv.value should equal("This is ikke bare una Sprache")
-    lv should equal(LanguageValue(None, "This is ikke bare una Sprache"))
+    lv should equal(LanguageValue("unknown", "This is ikke bare una Sprache"))
   }
 
 }

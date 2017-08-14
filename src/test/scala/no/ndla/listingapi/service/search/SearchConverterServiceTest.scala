@@ -20,20 +20,20 @@ class SearchConverterServiceTest extends UnitSuite with TestEnvironment {
 
   override val searchConverterService = new SearchConverterService
   val sampleCover = TestData.sampleCover.copy(
-    title = Seq(Title("title", Some("nb"))),
-    description = Seq(Description("description", Some("nb"))),
-    labels = Seq(LanguageLabels(Seq(Label(None, Seq("label"))), Some("nb")))
+    title = Seq(Title("title", "nb")),
+    description = Seq(Description("description", "nb")),
+    labels = Seq(LanguageLabels(Seq(Label(None, Seq("label"))), "nb"))
   )
 
   test("asSearchableCard should convert to expected SearchableCover") {
     val expected = SearchableCover(
       sampleCover.id.get,
       sampleCover.revision.get,
-      SearchableLanguageValues(Seq(LanguageValue(Some("nb"), "title"))),
-      SearchableLanguageValues(Seq(LanguageValue(Some("nb"), "description"))),
+      SearchableLanguageValues(Seq(LanguageValue("nb", "title"))),
+      SearchableLanguageValues(Seq(LanguageValue("nb", "description"))),
       sampleCover.articleApiId,
       sampleCover.coverPhotoUrl,
-      SearchableLanguageList(Seq(LanguageValue(Some("nb"), sampleCover.labels.head.labels))),
+      SearchableLanguageList(Seq(LanguageValue("nb", sampleCover.labels.head.labels))),
       Seq("nb"),
       sampleCover.updatedBy,
       TestData.updated(),

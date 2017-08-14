@@ -1,6 +1,6 @@
 package no.ndla.listingapi.model.api
 
-import org.scalatra.swagger.annotations.ApiModel
+import org.scalatra.swagger.annotations.{ApiModel, ApiModelProperty}
 import org.scalatra.swagger.runtime.annotations.ApiModelProperty
 
 import scala.annotation.meta.field

@@ -91,7 +91,7 @@ trait ListingRepository {
       //Get all labels and put them in a map where the key is the language.
       var uniqeLanguageLabels: Map[Lang, UniqeLabels] = Map()
       val allLables = allCovers().map(_.labels).flatten
-      val labelsByLanguage = allLables.groupBy(ll => ll.language.getOrElse(""))
+      val labelsByLanguage = allLables.groupBy(ll => ll.language)
 
 
       labelsByLanguage.keys.foreach(languageKey => {

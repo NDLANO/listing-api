@@ -1,5 +1,6 @@
 package no.ndla.listingapi
 
+import no.ndla.listingapi.model.api.{CoverDescription, CoverTitle}
 import no.ndla.listingapi.model.domain.{Label, LanguageLabels}
 import no.ndla.listingapi.model.{api, domain}
 import org.joda.time.{DateTime, DateTimeZone}
@@ -11,9 +12,9 @@ object TestData {
     Some(1),
     Some(10001),
     "https://test.api.ndla.no/image-api/v1/raw/image.jpg",
-    Seq(domain.Title("hammer", Some("nb"))),
-    Seq(domain.Description("En hammer er et nyttig verktøy", Some("nb"))),
-    Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy", "bygg verktøy")), Label(None, Seq("bygg"))), Some("nb"))),
+    Seq(domain.Title("hammer", "nb")),
+    Seq(domain.Description("En hammer er et nyttig verktøy", "nb")),
+    Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy", "bygg verktøy")), Label(None, Seq("bygg"))), "nb")),
     1122,
     "NDLA import script",
     updated,
@@ -25,18 +26,18 @@ object TestData {
     Some(1),
     Some(10001),
     "https://test.api.ndla.no/image-api/v1/raw/image.jpg",
-    Seq(domain.Title("hammer2", Some("nb"))),
-    Seq(domain.Description("En hammer2 er et nyttig verktøy", Some("nb"))),
+    Seq(domain.Title("hammer2", "nb")),
+    Seq(domain.Description("En hammer2 er et nyttig verktøy", "nb")),
     Seq(
       LanguageLabels(
         Seq(Label(Some("kategori"), Seq("jobbe verktøy", "mer label")), Label(None, Seq("byggherrer"))),
-        Some("nb")),
+        "nb"),
       LanguageLabels(
         Seq(Label(Some("kategori"), Seq("arbeids verktøy")), Label(None, Seq("byggkarer"))),
-        Some("nn")),
+        "nn"),
       LanguageLabels(
         Seq(Label(Some("category"), Seq("work tools")), Label(None, Seq("workmen"))),
-        Some("en"))
+        "en")
     ),
     1122,
     "NDLA import script",
@@ -49,10 +50,10 @@ object TestData {
     1,
     1,
     "https://i.ndla.no/image-api/v1/raw/image.jpg",
-    "hammer",
-    "En hammer er et nyttig verktøy",
+    CoverTitle("hammer", "nb" ),
+    CoverDescription("En hammer er et nyttig verktøy", "nb"),
     1122,
-    Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))),
+    Seq(api.LanguageLabels(Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))), "nb")),
     Seq("nb"),
     "NDLA import script",
     updated,

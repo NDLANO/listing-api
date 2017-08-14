@@ -52,9 +52,9 @@ trait WriteService {
         articleApiId = toMerge.articleApiId.getOrElse(existing.articleApiId),
         revision = Some(toMerge.revision),
         coverPhotoUrl = toMerge.coverPhotoUrl.getOrElse(existing.coverPhotoUrl),
-        title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, Option(toMerge.language))),
-        description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, Option(toMerge.language))),
-        labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language))),
+        title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, toMerge.language)),
+        description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, toMerge.language)),
+        labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel),toMerge.language)),
         updatedBy = id,
         updated = now,
         theme = toMerge.theme

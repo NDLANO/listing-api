@@ -16,7 +16,7 @@ import io.searchbox.params.Parameters
 import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
 import no.ndla.listingapi.integration.ElasticClient
 import no.ndla.listingapi.model.api
-import no.ndla.listingapi.model.api.NdlaSearchException
+import no.ndla.listingapi.model.api.{CoverDescription, CoverTitle, LanguageLabels, NdlaSearchException}
 import no.ndla.listingapi.model.domain.search.{Language, Sort}
 import no.ndla.listingapi.service.{Clock, createOembedUrl}
 import org.apache.lucene.search.join.ScoreMode
@@ -94,10 +94,10 @@ trait SearchService {
           hit.get("id").getAsLong,
           hit.get("revision").getAsInt,
           hit.get("coverPhotoUrl").getAsString,
-          hit.get("title").getAsJsonObject.get(language).getAsString,
-          hit.get("description").getAsJsonObject.get(language).getAsString,
+          CoverTitle(hit.get("title").getAsJsonObject.get(language).getAsString, language),
+          CoverDescription( hit.get("description").getAsJsonObject.get(language).getAsString, language ),
           hit.get("articleApiId").getAsLong,
-          labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq,
+          Seq(LanguageLabels(labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq, language )),
           hit.get("supportedLanguages").getAsJsonArray.asScala.toSeq.map(_.getAsString),
           hit.get("updatedBy").getAsString,
           clock.toDate(hit.get("update").getAsString),

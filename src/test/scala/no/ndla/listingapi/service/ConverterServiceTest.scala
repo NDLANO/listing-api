@@ -8,6 +8,7 @@
 
 package no.ndla.listingapi.service
 
+import no.ndla.listingapi.model.api.{CoverDescription, CoverTitle, LanguageLabels}
 import no.ndla.listingapi.model.{api, domain}
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
 
@@ -23,12 +24,13 @@ class ConverterServiceTest extends UnitSuite with TestEnvironment {
     val expected = api.Cover(sampleCover.id.get,
       sampleCover.revision.get,
       sampleCover.coverPhotoUrl,
-      sampleCover.title.head.title,
-      sampleCover.description.head.description,
+      CoverTitle(sampleCover.title.head.title , sampleCover.title.head.language),
+      CoverDescription(sampleCover.description.head.description, sampleCover.description.head.language),
       sampleCover.articleApiId,
-      Seq(api.Label(Some("kategori"),
+      Seq(LanguageLabels(
+        Seq(api.Label(Some("kategori"),
         Seq("personlig verktøy", "bygg verktøy")),
-        api.Label(None, Seq("bygg"))),
+        api.Label(None, Seq("bygg"))), "nb")),
       Seq("nb"),
       "NDLA import script",
       sampleCover.updated,
