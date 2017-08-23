@@ -90,15 +90,24 @@ trait SearchService {
       def oldNodeIdOrNone = if (hit.get("oldNodeId") == null ) None else createOembedUrl(hit.get("oldNodeId").getAsLong)
 
       labelsOpt.map(labels => {
+        val title = hit.get("title").getAsJsonObject.get(language).getAsString
+        val description = hit.get("description").getAsJsonObject.get(language).getAsString
+        val labelss = labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq
+        val supportedLanguages = hit.get("supportedLanguages")
+          .getAsJsonArray
+          .asScala
+          .toSeq
+          .map(x => x.getAsString)
+
         api.Cover(
           hit.get("id").getAsLong,
           hit.get("revision").getAsInt,
           hit.get("coverPhotoUrl").getAsString,
-          hit.get("title").getAsJsonObject.get(language).getAsString,
-          hit.get("description").getAsJsonObject.get(language).getAsString,
+          api.CoverTitle(title, language),
+          api.CoverDescription(description, language),
           hit.get("articleApiId").getAsLong,
-          labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq,
-          hit.get("supportedLanguages").getAsJsonArray.asScala.toSeq.map(_.getAsString),
+          api.CoverLabels(labelss, language),
+          supportedLanguages.toSet,
           hit.get("updatedBy").getAsString,
           clock.toDate(hit.get("update").getAsString),
           hit.get("theme").getAsString,

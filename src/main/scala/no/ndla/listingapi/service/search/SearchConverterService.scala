@@ -19,24 +19,20 @@ trait SearchConverterService {
 
   class SearchConverterService extends LazyLogging {
     def asSearchableCover(card: Cover): SearchableCover = {
-      card.getAllCoverLanguages match {
-        case Failure(e) => throw e
-        case Success(supportedLanguages) =>
-          SearchableCover(
-            id = card.id.get,
-            revision = card.revision.get,
-            title = SearchableLanguageValues(card.title.map(title => LanguageValue(title.language, title.title))),
-            description = SearchableLanguageValues(card.description.map(description => LanguageValue(description.language, description.description))),
-            card.articleApiId,
-            card.coverPhotoUrl,
-            SearchableLanguageList(card.labels.map(label => LanguageValue(label.language, label.labels))),
-            supportedLanguages,
-            card.updatedBy,
-            card.updated,
-            card.theme,
-            card.oldNodeId
-          )
-      }
+      SearchableCover(
+        id = card.id.get,
+        revision = card.revision.get,
+        title = SearchableLanguageValues(card.title.map(title => LanguageValue(title.language, title.title))),
+        description = SearchableLanguageValues(card.description.map(description => LanguageValue(description.language, description.description))),
+        card.articleApiId,
+        card.coverPhotoUrl,
+        SearchableLanguageList(card.labels.map(label => LanguageValue(label.language, label.labels))),
+        card.supportedLanguages,
+        card.updatedBy,
+        card.updated,
+        card.theme,
+        card.oldNodeId
+      )
     }
   }
 }

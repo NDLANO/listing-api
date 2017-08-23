@@ -30,15 +30,12 @@ case class Cover(id: Option[Long],
   updated: Date,
   theme: ThemeName
 ) {
-  def getAllCoverLanguages: Try[Seq[String]] = {
-    val titleLangs = title.flatMap(_.language)
-    val descriptionLangs = description.flatMap(_.language)
-    val labelLangs = labels.flatMap(_.language)
+  lazy val supportedLanguages: Set[String] = {
+    val titleLangs = title.map(_.language)
+    val descriptionLangs = description.map(_.language)
+    val labelLangs = labels.map(_.language)
 
-    titleLangs == descriptionLangs && descriptionLangs == labelLangs match {
-      case true => Success(titleLangs)
-      case false => Failure(new NotFoundException(message = "This cover contains incomplete language-data"))
-    }
+    titleLangs.union(descriptionLangs).union(labelLangs).toSet
   }
 }
 

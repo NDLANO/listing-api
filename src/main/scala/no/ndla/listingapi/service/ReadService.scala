@@ -12,21 +12,18 @@ trait ReadService {
   val readService: ReadService
 
   class ReadService extends LazyLogging {
-    val getAllLabelsMap = MemoizeAutoRenew(() => {
-      listingRepository.allLabelsMap()
-    })
+    val getAllLabelsMap = MemoizeAutoRenew(listingRepository.allLabelsMap)
 
-    def coverWithId(id: Long, language: String): Option[api.Cover] = {
-      listingRepository.getCover(id).flatMap(c => converterService.toApiCover(c, language).toOption)
-    }
+    def coverWithId(id: Long, language: String): Option[api.Cover] =
+      listingRepository.getCover(id).map(c => converterService.toApiCover(c, language))
 
     def allLabelsMap(): Map[Lang, UniqeLabels] = {
       getAllLabelsMap()
     }
 
     def getTheme(theme: ThemeName, language: String): api.ThemeResult = {
-      val covers = listingRepository.getTheme(theme).flatMap(t => converterService.toApiCover(t, language).toOption)
-      new ThemeResult(covers.length, covers)
+      val covers = listingRepository.getTheme(theme).map(t => converterService.toApiCover(t, language))
+      ThemeResult(covers.length, covers)
     }
 
   }

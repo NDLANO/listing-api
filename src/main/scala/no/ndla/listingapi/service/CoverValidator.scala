@@ -46,12 +46,12 @@ trait CoverValidator {
 
     private def validateDescription(description: domain.Description): Seq[ValidationMessage] = {
       validateNoHtmlTags("description.description", description.description).toSeq ++
-        description.language.flatMap(lang => validateLanguage("description.language", lang))
+        validateLanguage("description.language", description.language)
     }
 
     private def validateTitle(title: domain.Title): Seq[ValidationMessage] = {
       validateNoHtmlTags("title.title", title.title).toSeq ++
-        title.language.flatMap(lang => validateLanguage("title.language", lang))
+        validateLanguage("title.language", title.language)
     }
 
     private def validateCoverPhoto(coverPhotoMetaUrl: String): Option[ValidationMessage] = {
@@ -76,7 +76,7 @@ trait CoverValidator {
 
     private def validateLanguageLabels(labels: domain.LanguageLabels): Seq[ValidationMessage] = {
       labels.labels.flatMap(validateLabel) ++
-        labels.language.flatMap(lang => validateLanguage("labels.language", lang))
+        validateLanguage("labels.language", labels.language)
     }
 
     private def validateLabel(label: domain.Label): Seq[ValidationMessage] = {

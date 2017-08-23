@@ -63,7 +63,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     when(coverValidator.validate(any[Cover])).thenReturn(Success(sampleCover))
     when(listingRepository.insertCover(any[Cover])(any[DBSession])).thenReturn(sampleCover)
     when(indexService.indexDocument(sampleCover)).thenReturn(Success(sampleCover))
-    when(converterService.toApiCover(sampleCover, "nb")).thenReturn(Success(sampleApiCover))
+    when(converterService.toApiCover(sampleCover, "nb")).thenReturn(sampleApiCover)
 
     service.newCover(sampleNewCover).isSuccess should be(true)
   }
@@ -129,9 +129,9 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Some(1),
       Some(10001),
       sampleCover.coverPhotoUrl,
-      sampleCover.title ++ Seq(Title(toUpdate.title, Some(toUpdate.language))),
-      sampleCover.description ++ Seq(Description(toUpdate.description, Some(toUpdate.language))),
-      sampleCover.labels ++ Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
+      sampleCover.title ++ Seq(Title(toUpdate.title, toUpdate.language)),
+      sampleCover.description ++ Seq(Description(toUpdate.description, toUpdate.language)),
+      sampleCover.labels ++ Seq(LanguageLabels(Seq(domainLabel), toUpdate.language)),
       sampleCover.articleApiId,
       sampleCover.updatedBy,
       sampleCover.updated,
@@ -157,9 +157,9 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Some(1),
       Some(10001),
       sampleCover.coverPhotoUrl,
-      Seq(Title(toUpdate.title, Some(toUpdate.language))),
-      Seq(Description(toUpdate.description, Some(toUpdate.language))),
-      Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
+      Seq(Title(toUpdate.title, toUpdate.language)),
+      Seq(Description(toUpdate.description, toUpdate.language)),
+      Seq(LanguageLabels(Seq(domainLabel), toUpdate.language)),
       sampleCover.articleApiId,
       sampleCover.updatedBy,
       sampleCover.updated,
@@ -185,9 +185,9 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Some(1),
       Some(10001),
       toUpdate.coverPhotoUrl.get,
-      Seq(Title(toUpdate.title, Some(toUpdate.language))),
-      Seq(Description(toUpdate.description, Some(toUpdate.language))),
-      Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
+      Seq(Title(toUpdate.title, toUpdate.language)),
+      Seq(Description(toUpdate.description, toUpdate.language)),
+      Seq(LanguageLabels(Seq(domainLabel), toUpdate.language)),
       toUpdate.articleApiId.get,
       "NDLA import script",
       sampleCover.updated,
@@ -214,9 +214,9 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Some(1000),
       Some(10001),
       toUpdate.coverPhotoUrl.get,
-      Seq(Title(toUpdate.title, Some(toUpdate.language))),
-      Seq(Description(toUpdate.description, Some(toUpdate.language))),
-      Seq(LanguageLabels(Seq(domainLabel), Some(toUpdate.language))),
+      Seq(Title(toUpdate.title, toUpdate.language)),
+      Seq(Description(toUpdate.description, toUpdate.language)),
+      Seq(LanguageLabels(Seq(domainLabel), toUpdate.language)),
       toUpdate.articleApiId.get,
       "NDLA import script",
       sampleCover.updated,

@@ -31,23 +31,23 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
 
   val cover1 = TestData.sampleCover.copy(
     id = Some(1),
-    description = Seq(Description("stop. hammer time", Some("nb"))),
-    title = Seq(Title("hammer", Some("nb"))),
-    labels = Seq(LanguageLabels(Seq(Label(None, Seq("hammer", "time", "stop"))), Some("nb"))),
+    description = Seq(Description("stop. hammer time", "nb")),
+    title = Seq(Title("hammer", "nb")),
+    labels = Seq(LanguageLabels(Seq(Label(None, Seq("hammer", "time", "stop"))), "nb")),
     articleApiId = 1321)
 
   val cover2 = TestData.sampleCover.copy(
     id = Some(2),
-    description = Seq(Description("forsiktig med saga", Some("nb"))),
-    title = Seq(Title("sag", Some("nb"))),
-    labels = Seq(LanguageLabels(Seq(Label(None, Seq("sag", "forsiktig", "farlig"))), Some("nb"))),
+    description = Seq(Description("forsiktig med saga", "nb")),
+    title = Seq(Title("sag", "nb")),
+    labels = Seq(LanguageLabels(Seq(Label(None, Seq("sag", "forsiktig", "farlig"))), "nb")),
     articleApiId = 432)
 
   val cover3 = TestData.sampleCover.copy(
     id = Some(3),
-    description = Seq(Description("her er døden selv", Some("nb"))),
-    title = Seq(Title("mannen med ljåen", Some("nb"))),
-    labels = Seq(LanguageLabels(Seq(Label(None, Seq("ljå", "mann", "huff", "farlig", "personlig verktøy"))), Some("nb"))),
+    description = Seq(Description("her er døden selv", "nb")),
+    title = Seq(Title("mannen med ljåen", "nb")),
+    labels = Seq(LanguageLabels(Seq(Label(None, Seq("ljå", "mann", "huff", "farlig", "personlig verktøy"))), "nb")),
     articleApiId = 896)
 
   override def beforeAll = {
