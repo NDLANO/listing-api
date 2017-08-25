@@ -30,13 +30,7 @@ case class Cover(id: Option[Long],
   updated: Date,
   theme: ThemeName
 ) {
-  lazy val supportedLanguages: Set[String] = {
-    val titleLangs = title.map(_.language)
-    val descriptionLangs = description.map(_.language)
-    val labelLangs = labels.map(_.language)
-
-    titleLangs.union(descriptionLangs).union(labelLangs).toSet
-  }
+  lazy val supportedLanguages: Set[String] = (title union description union labels).map(_.language).toSet
 }
 
 object Cover extends SQLSyntaxSupport[Cover] {
