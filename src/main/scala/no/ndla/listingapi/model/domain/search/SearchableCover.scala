@@ -13,9 +13,9 @@ import java.util.Date
 import no.ndla.listingapi.model.domain.{Label, emptySomeToNone}
 
 object LanguageValue {
-  case class LanguageValue[T](lang: Option[String], value: T)
+  case class LanguageValue[T](lang: String, value: T)
 
-  def apply[T](lang: Option[String], value: T): LanguageValue[T] = LanguageValue(emptySomeToNone(lang), value)
+  def apply[T](lang: String, value: T): LanguageValue[T] = LanguageValue(lang, value)
 }
 
 case class SearchableLanguageValues(languageValues: Seq[LanguageValue.LanguageValue[String]])
@@ -29,7 +29,7 @@ case class SearchableCover(
   articleApiId: Long,
   coverPhotoUrl: String,
   labels: SearchableLanguageList,
-  supportedLanguages: Seq[String],
+  supportedLanguages: Set[String],
   updatedBy: String,
   update: Date,
   theme: String,

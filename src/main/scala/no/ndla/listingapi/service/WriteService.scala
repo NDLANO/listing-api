@@ -23,7 +23,7 @@ trait WriteService {
       val validCover = coverValidator.validate(converterService.toDomainCover(cover))
         .flatMap(domainCover => Try(listingRepository.insertCover(domainCover)))
         .flatMap(indexService.indexDocument)
-        .flatMap(insertedCover => converterService.toApiCover(insertedCover, cover.language))
+        .map(insertedCover => converterService.toApiCover(insertedCover, cover.language))
 
       readService.getAllLabelsMap.renewCache
       validCover
@@ -38,7 +38,7 @@ trait WriteService {
       val updatedCover = updateCover.flatMap(coverValidator.validate)
         .flatMap(listingRepository.updateCover)
         .flatMap(indexService.indexDocument)
-        .flatMap(updatedCover => converterService.toApiCover(updatedCover, cover.language))
+        .map(updatedCover => converterService.toApiCover(updatedCover, cover.language))
 
       readService.getAllLabelsMap.renewCache
       updatedCover
@@ -52,9 +52,9 @@ trait WriteService {
         articleApiId = toMerge.articleApiId.getOrElse(existing.articleApiId),
         revision = Some(toMerge.revision),
         coverPhotoUrl = toMerge.coverPhotoUrl.getOrElse(existing.coverPhotoUrl),
-        title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, Option(toMerge.language))),
-        description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, Option(toMerge.language))),
-        labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), Option(toMerge.language))),
+        title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, toMerge.language)),
+        description = mergeLanguageField[String, Description](existing.description, domain.Description(toMerge.description, toMerge.language)),
+        labels = mergeLanguageField[Seq[Label], LanguageLabels](existing.labels, domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), toMerge.language)),
         updatedBy = id,
         updated = now,
         theme = toMerge.theme

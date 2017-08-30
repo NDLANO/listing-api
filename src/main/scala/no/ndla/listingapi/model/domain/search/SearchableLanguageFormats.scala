@@ -7,17 +7,17 @@ import org.json4s.JsonAST.{JArray, JField, JObject, JString}
 
 class SearchableLanguageValueSerializer extends CustomSerializer[SearchableLanguageValues](_ => ( {
   case JObject(items) => SearchableLanguageValues(items.map {
-    case JField(name, JString(value)) => LanguageValue(Some(name), value)
+    case JField(name, JString(value)) => LanguageValue(name, value)
   })
 }, {
   case x: SearchableLanguageValues =>
-    JObject(x.languageValues.map(languageValue => JField(languageValue.lang.getOrElse(UnknownLanguage), JString(languageValue.value))).toList)
+    JObject(x.languageValues.map(languageValue => JField(languageValue.lang, JString(languageValue.value))).toList)
 }))
 
 class SearchableLanguageListSerializer extends CustomSerializer[SearchableLanguageList](format => ( {
   case JObject(items) => {
     val res = items.map {
-      case JField(name, JArray(fieldItems)) => LanguageValue(Some(name), fieldItems.map {
+      case JField(name, JArray(fieldItems)) => LanguageValue(name, fieldItems.map {
         case JObject(Seq(JField("type", JString(type_)), JField("labels", JArray(x)))) =>
           val labels = x.map {
             case JString(label) => label
@@ -41,7 +41,7 @@ class SearchableLanguageListSerializer extends CustomSerializer[SearchableLangua
 }, {
   case x: SearchableLanguageList =>
     JObject(x.languageValues.map(languageValue =>
-      JField(languageValue.lang.getOrElse(UnknownLanguage), JArray(languageValue.value.map(lv => {
+      JField(languageValue.lang, JArray(languageValue.value.map(lv => {
         lv.`type` match {
           case Some(typ) => JObject(JField("type", JString(typ)), JField("labels", JArray(lv.labels.map(l => JString(l)).toList)))
           case None => JObject(JField("labels", JArray(lv.labels.map(l => JString(l)).toList)))
