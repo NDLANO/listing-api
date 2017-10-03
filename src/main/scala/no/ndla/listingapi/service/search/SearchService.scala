@@ -13,10 +13,11 @@ import com.google.gson.JsonObject
 import com.typesafe.scalalogging.LazyLogging
 import io.searchbox.core.{Count, Search, SearchResult => JestSearchResult}
 import io.searchbox.params.Parameters
+import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
 import no.ndla.listingapi.integration.ElasticClient
 import no.ndla.listingapi.model.api
-import no.ndla.listingapi.model.api.NdlaSearchException
+import no.ndla.listingapi.model.api.{NdlaSearchException, ResultWindowTooLargeException}
 import no.ndla.listingapi.model.domain.search.{Language, Sort}
 import no.ndla.listingapi.service.{Clock, createOembedUrl}
 import org.apache.lucene.search.join.ScoreMode
@@ -55,6 +56,12 @@ trait SearchService {
                     .addIndex(SearchIndex)
                     .setParameter(Parameters.SIZE, numResults)
                     .setParameter("from", startAt)
+
+      val requestedResultWindow = pageSize*page
+      if(requestedResultWindow > ListingApiProperties.ElasticSearchIndexMaxResultWindow) {
+        logger.info(s"Max supported results are ${ListingApiProperties.ElasticSearchIndexMaxResultWindow}, user requested ${requestedResultWindow}")
+        throw new ResultWindowTooLargeException()
+      }
 
       jestClient.execute(request.build()) match {
         case Success(response) => {
