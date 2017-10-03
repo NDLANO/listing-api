@@ -81,6 +81,7 @@ trait IndexService {
           .put(s"analysis.analyzer.${labelAnalyzer.name}.type", "custom")
           .put(s"analysis.analyzer.${labelAnalyzer.name}.tokenizer", "keyword")
           .put(s"analysis.analyzer.${labelAnalyzer.name}.filter", "lowercase")
+          .put(s"index.max_result_window", ListingApiProperties.ElasticSearchIndexMaxResultWindow)
           .build().getAsMap
 
         val createIndexResponse = jestClient.execute(new CreateIndex.Builder(indexName).settings(analyserSettings).build())

@@ -50,6 +50,7 @@ object ListingApiProperties extends LazyLogging {
   val CorrelationIdHeader = "X-Correlation-ID"
 
   val ApiClientsCacheAgeInMs: Long = 1000 * 60 * 60 // 1 hour caching
+  val ElasticSearchIndexMaxResultWindow = 10000
 
   lazy val secrets = readSecrets(SecretsFile) match {
      case Success(values) => values
