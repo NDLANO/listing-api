@@ -4,8 +4,10 @@ import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.meta.Theme
 import no.ndla.listingapi.{DBMigrator, IntegrationSuite, TestData, TestEnvironment}
+import no.ndla.tag.IntegrationTest
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
+@IntegrationTest
 class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with LazyLogging{
   var repository: ListingRepository = _
 
