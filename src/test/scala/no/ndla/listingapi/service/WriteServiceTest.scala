@@ -21,7 +21,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
   val sampleApiUpdateCover = TestData.sampleApiUpdateCover
 
   override def beforeAll() = {
-    when(authUser.id()).thenReturn("NDLA import script")
+    when(authClient.client_id()).thenReturn("content-import-client")
     when(clock.now()).thenReturn((new DateTime(2017, 4, 1, 12, 15, 32, DateTimeZone.UTC)).toDate)
     val targetMock = mock[Target]
     val memoizedTarget = new Memoize[Map[Lang, UniqeLabels]](Long.MaxValue, targetMock.targetMethod, false)
@@ -189,7 +189,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Description(toUpdate.description, toUpdate.language)),
       Seq(LanguageLabels(Seq(domainLabel), toUpdate.language)),
       toUpdate.articleApiId.get,
-      "NDLA import script",
+      "content-import-client",
       sampleCover.updated,
       sampleCover.theme
     )
@@ -218,7 +218,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Seq(Description(toUpdate.description, toUpdate.language)),
       Seq(LanguageLabels(Seq(domainLabel), toUpdate.language)),
       toUpdate.articleApiId.get,
-      "NDLA import script",
+      "content-import-client",
       sampleCover.updated,
       sampleCover.theme
     )

@@ -1,6 +1,6 @@
 package no.ndla.listingapi.service
 
-import no.ndla.listingapi.auth.User
+import no.ndla.listingapi.auth.Client
 import no.ndla.listingapi.model.api.NotFoundException
 import no.ndla.listingapi.model.domain.search.Language.{DefaultLanguage, findByLanguageOrBestEffort}
 import no.ndla.listingapi.model.domain.{LanguageLabels, getByLanguage}
@@ -9,7 +9,7 @@ import no.ndla.listingapi.model.{api, domain}
 import scala.util.{Failure, Success, Try}
 
 trait ConverterService {
-  this: Clock with User =>
+  this: Clock with Client =>
   val converterService: ConverterService
 
   class ConverterService {
@@ -64,7 +64,7 @@ trait ConverterService {
         Seq(domain.Description(cover.description, cover.language)),
         Seq(LanguageLabels(cover.labels.map(toDomainLabel), cover.language)),
         cover.articleApiId,
-        authUser.id(),
+        authClient.client_id(),
         clock.now(),
         cover.theme
       )
