@@ -1,6 +1,6 @@
 package no.ndla.listingapi.service
 
-import no.ndla.listingapi.auth.User
+import no.ndla.listingapi.auth.Client
 import no.ndla.listingapi.model.api.{CoverAlreadyExistsException, NotFoundException}
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.{api, domain}
@@ -10,7 +10,7 @@ import no.ndla.listingapi.service.search.IndexService
 import scala.util.{Failure, Success, Try}
 
 trait WriteService {
-  this: ConverterService with ListingRepository with ReadService with CoverValidator with IndexService with Clock with User =>
+  this: ConverterService with ListingRepository with ReadService with CoverValidator with IndexService with Clock with Client =>
   val writeService: WriteService
 
   class WriteService {
@@ -45,7 +45,7 @@ trait WriteService {
     }
 
     private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
-      val id = authUser.id()
+      val id = authClient.client_id()
       val now = clock.now()
 
       existing.copy(

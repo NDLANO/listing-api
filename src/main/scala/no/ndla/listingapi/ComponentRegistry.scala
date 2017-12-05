@@ -10,7 +10,7 @@
 package no.ndla.listingapi
 
 import com.typesafe.scalalogging.LazyLogging
-import no.ndla.listingapi.auth.{Role, User}
+import no.ndla.listingapi.auth.{Role, Client}
 import no.ndla.listingapi.controller.{HealthController, InternController, ListingController}
 import no.ndla.listingapi.integration.{DataSource, ElasticClient, JestClientFactory}
 import no.ndla.listingapi.repository.ListingRepository
@@ -36,7 +36,7 @@ object ComponentRegistry
     with HealthController
     with Clock
     with Role
-    with User {
+    with Client {
   implicit val swagger = new ListingSwagger
 
   lazy val dataSource = new PGPoolingDataSource()
@@ -69,5 +69,5 @@ object ComponentRegistry
 
   lazy val clock = new SystemClock
   lazy val authRole = new AuthRole
-  lazy val authUser = new AuthUser
+  lazy val authClient = new AuthClient
 }

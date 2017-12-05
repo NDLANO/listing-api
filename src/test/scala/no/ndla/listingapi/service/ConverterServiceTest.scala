@@ -27,7 +27,7 @@ class ConverterServiceTest extends UnitSuite with TestEnvironment {
       sampleCover.articleApiId,
       api.CoverLabels(Seq(api.Label(Some("kategori"), Seq("personlig verktøy", "bygg verktøy")), api.Label(None, Seq("bygg"))), "nb"),
       Set("nb"),
-      "NDLA import script",
+      "content-import-client",
       sampleCover.updated,
       sampleCover.theme,
       createOembedUrl(sampleCover.oldNodeId)

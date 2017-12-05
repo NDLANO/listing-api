@@ -12,6 +12,7 @@ package no.ndla.listingapi.controller
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize, RoleWithWriteAccess}
 import no.ndla.listingapi.auth.Role
+import no.ndla.listingapi.auth.Client
 import no.ndla.listingapi.model.api.{Error, NewCover, ThemeResult, UpdateCover, ValidationError}
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.model.meta.Theme
@@ -23,7 +24,7 @@ import org.scalatra._
 import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
 
 trait ListingController {
-  this: ReadService with SearchService with ListingRepository with WriteService with Role =>
+  this: ReadService with SearchService with ListingRepository with WriteService with Role with Client =>
   val listingController: ListingController
 
   class ListingController(implicit val swagger: Swagger) extends NdlaController with SwaggerSupport with LazyLogging {
@@ -95,6 +96,7 @@ trait ListingController {
     protected val applicationDescription = "API for grouping content from ndla.no."
 
     post("/", operation(newCoverDoc)) {
+      authClient.assertHasClientId()
       authRole.assertHasRole(RoleWithWriteAccess)
       writeService.newCover(extract[NewCover](request.body))
     }
@@ -120,6 +122,7 @@ trait ListingController {
     }
 
     put("/:coverid", operation(updateCoverDoc)) {
+      authClient.assertHasClientId()
       authRole.assertHasRole(RoleWithWriteAccess)
       writeService.updateCover(long("coverid"), extract[UpdateCover](request.body))
     }

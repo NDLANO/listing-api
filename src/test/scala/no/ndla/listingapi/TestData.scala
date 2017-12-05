@@ -16,7 +16,7 @@ object TestData {
     Seq(domain.Description("En hammer er et nyttig verktøy", "nb")),
     Seq(LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy", "bygg verktøy")), Label(None, Seq("bygg"))), "nb")),
     1122,
-    "NDLA import script",
+    "content-import-client",
     updated,
     "verktoy"
   )
@@ -40,7 +40,7 @@ object TestData {
         "en")
     ),
     1122,
-    "NDLA import script",
+    "content-import-client",
     updated,
     "verktoy"
   )
@@ -55,7 +55,7 @@ object TestData {
     1122,
     api.CoverLabels(Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))), "nb"),
     Set("nb"),
-    "NDLA import script",
+    "content-import-client",
     updated,
     "verktoy",
     Some("https://ndla.no/node/10001")
