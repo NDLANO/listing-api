@@ -18,6 +18,8 @@ import scala.util.Properties._
 import scala.util.{Failure, Success}
 
 object ListingApiProperties extends LazyLogging {
+  val Auth0LoginEndpoint = "https://ndla.eu.auth0.com/authorize"
+
   val RoleWithWriteAccess = "listing:write"
   val SecretsFile = "listing-api.secrets"
 

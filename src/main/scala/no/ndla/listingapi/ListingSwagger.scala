@@ -28,5 +28,6 @@ object ListingApiInfo {
 }
 
 class ListingSwagger extends Swagger("2.0", "0.8", ListingApiInfo.apiInfo) {
-  addAuthorization(OAuth(List("listing:all"), List(ApplicationGrant(TokenEndpoint("/auth/tokens", "access_token")))))
+  val roleWithWriteAccessInTest = ListingApiProperties.RoleWithWriteAccess.replace(":", "-test:")
+  addAuthorization(OAuth(List(roleWithWriteAccessInTest), List(ImplicitGrant(LoginEndpoint(ListingApiProperties.Auth0LoginEndpoint),"access_token"))))
 }
