@@ -22,11 +22,11 @@ import scala.util.{Failure, Success, Try}
 @IntegrationTest
 class SearchServiceTest extends UnitSuite with TestEnvironment {
 
+  val esPort = 9200
   override val jestClient = JestClientFactory.getClient(searchServer = s"http://localhost:$esPort")
   override val searchService = new SearchService
   override val indexService = new IndexService
   override val searchConverterService = new SearchConverterService
-  val esPort = 9200
   val today = DateTime.now()
 
   val cover1 = TestData.sampleCover.copy(

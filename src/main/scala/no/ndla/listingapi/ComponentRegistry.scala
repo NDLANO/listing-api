@@ -10,9 +10,9 @@
 package no.ndla.listingapi
 
 import com.typesafe.scalalogging.LazyLogging
-import no.ndla.listingapi.auth.{Role, Client}
+import no.ndla.listingapi.auth.{Client, Role}
 import no.ndla.listingapi.controller.{HealthController, InternController, ListingController}
-import no.ndla.listingapi.integration.{DataSource, ElasticClient, JestClientFactory}
+import no.ndla.listingapi.integration._
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service._
 import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
@@ -27,6 +27,7 @@ object ComponentRegistry
     with CoverValidator
     with SearchService
     with ElasticClient
+    with Elastic4sClient
     with SearchIndexService
     with IndexService
     with SearchConverterService
@@ -63,6 +64,7 @@ object ComponentRegistry
 
   lazy val searchService = new SearchService
   lazy val jestClient = JestClientFactory.getClient()
+  lazy val e4sClient = Elastic4sClientFactory.getClient()
   lazy val searchIndexService = new SearchIndexService
   lazy val indexService = new IndexService
   lazy val searchConverterService = new SearchConverterService

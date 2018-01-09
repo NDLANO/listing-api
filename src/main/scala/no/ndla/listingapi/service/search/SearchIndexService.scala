@@ -25,7 +25,7 @@ trait SearchIndexService {
 
     def indexDocument(cover: Cover): Try[_] = {
       if (indexService.aliasTarget.isEmpty) {
-        indexService.createIndex.map(newIndex => indexService.createAliasTarget(newIndex))
+        indexService.createIndexWithGeneratedName.map(newIndex => indexService.createAliasTarget(newIndex))
       }
       indexService.indexDocument(cover)
     }
@@ -33,7 +33,7 @@ trait SearchIndexService {
     def indexDocuments: Try[ReindexResult] = {
       synchronized {
         val start = System.currentTimeMillis()
-        indexService.createIndex.flatMap(indexName => {
+        indexService.createIndexWithGeneratedName.flatMap(indexName => {
           val operations = for {
             numIndexed <- indexDocuments(indexName)
             _ <- switchAliasTarget(indexName)

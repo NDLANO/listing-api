@@ -14,14 +14,15 @@ import java.util.Calendar
 
 import com.sksamuel.elastic4s.analyzers._
 import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.mappings.{MappingContentBuilder, NestedFieldDefinition}
+import com.sksamuel.elastic4s.indexes.IndexDefinition
+import com.sksamuel.elastic4s.mappings.{MappingDefinition, NestedFieldDefinition}
 import com.typesafe.scalalogging.LazyLogging
 import io.searchbox.core.{Bulk, Delete, Index}
 import io.searchbox.indices.aliases.{AddAliasMapping, GetAliases, ModifyAliases, RemoveAliasMapping}
 import io.searchbox.indices.mapping.PutMapping
 import io.searchbox.indices.{CreateIndex, DeleteIndex, IndicesExists}
 import no.ndla.listingapi.ListingApiProperties
-import no.ndla.listingapi.integration.ElasticClient
+import no.ndla.listingapi.integration.{Elastic4sClient, ElasticClient}
 import no.ndla.listingapi.model.domain.Cover
 import no.ndla.listingapi.model.domain.search.Language.languageAnalyzers
 import no.ndla.listingapi.model.domain.search.SearchableLanguageFormats
@@ -31,21 +32,25 @@ import org.json4s.native.Serialization.write
 import scala.util.{Failure, Success, Try}
 
 trait IndexService {
-  this: ElasticClient with SearchConverterService =>
+  this: ElasticClient with Elastic4sClient with SearchConverterService =>
   val indexService: IndexService
 
   class IndexService extends LazyLogging {
     val labelAnalyzer = CustomAnalyzer("lowercaseKeyword")
 
-    private def createIndexRequest(card: Cover, indexName: String) = {
+    private def createIndexRequest(card: Cover, indexName: String): IndexDefinition = {
       implicit val formats = SearchableLanguageFormats.JSonFormats
       val source = write(searchConverterService.asSearchableCover(card))
-      new Index.Builder(source).index(indexName).`type`(ListingApiProperties.SearchDocument).id(card.id.get.toString).build
+      indexInto(indexName / ListingApiProperties.SearchDocument).doc(source).id(card.id.get.toString)
     }
 
     def indexDocument(cover: Cover): Try[Cover] = {
-      val result = jestClient.execute(createIndexRequest(cover, ListingApiProperties.SearchIndex))
-      result.map(_ => cover)
+      e4sClient.execute{
+        createIndexRequest(cover, ListingApiProperties.SearchIndex)
+      } match {
+        case Success(_) => Success(cover)
+        case Failure(ex) => Failure(ex)
+      }
     }
 
     def indexDocuments(covers: List[Cover], indexName: String): Try[Int] = {
@@ -61,7 +66,7 @@ trait IndexService {
 
     def deleteDocument(coverId: Long): Try[_] = {
       if (indexService.aliasTarget.isEmpty) {
-        createIndex.map(createAliasTarget)
+        createIndexWithGeneratedName.map(createAliasTarget)
       }
       val deleteRequest = new Delete.Builder(s"$coverId")
         .index(ListingApiProperties.SearchIndex)
@@ -69,7 +74,7 @@ trait IndexService {
       jestClient.execute(deleteRequest)
     }
 
-    def createIndex: Try[String] = {
+    def createIndexWithGeneratedName: Try[String] = {
       createIndexWithName(ListingApiProperties.SearchIndex + "_" + getTimestamp)
     }
 
@@ -77,60 +82,61 @@ trait IndexService {
       if (indexExists(indexName)) {
         Success(indexName)
       } else {
-        val analyserSettings = Settings.builder()
-          .put(s"analysis.analyzer.${labelAnalyzer.name}.type", "custom")
-          .put(s"analysis.analyzer.${labelAnalyzer.name}.tokenizer", "keyword")
-          .put(s"analysis.analyzer.${labelAnalyzer.name}.filter", "lowercase")
-          .put(s"index.max_result_window", ListingApiProperties.ElasticSearchIndexMaxResultWindow)
-          .build().getAsMap
+        val settings = Map(
+          s"analysis.analyzer.${labelAnalyzer.name}.type" -> "custom",
+          s"analysis.analyzer.${labelAnalyzer.name}.tokenizer" -> "keyword",
+          s"analysis.analyzer.${labelAnalyzer.name}.filter" -> "lowercase",
+          s"index.max_result_window" -> ListingApiProperties.ElasticSearchIndexMaxResultWindow
+        )
 
-        val createIndexResponse = jestClient.execute(new CreateIndex.Builder(indexName).settings(analyserSettings).build())
-        createIndexResponse.map(_ => createMapping(indexName)).map(_ => indexName)
+        val response = e4sClient.execute{
+          createIndex(indexName)
+            .mappings(buildMapping)
+            .settings(settings)
+        }
+
+        response match {
+          case Success(resp) => Success(indexName)
+          case Failure(ex) => Failure(ex)
+        }
       }
     }
 
-    private def createMapping(indexName: String): Try[String] = {
-      val mappingResponse = jestClient.execute(new PutMapping.Builder(indexName, ListingApiProperties.SearchDocument, buildMapping()).build())
-      mappingResponse.map(_ => indexName)
-    }
-
-    private def buildMapping(): String = {
-      MappingContentBuilder.buildWithName(mapping(ListingApiProperties.SearchDocument).fields(
+    private def buildMapping: MappingDefinition = {
+      mapping(ListingApiProperties.SearchDocument).fields(
           intField("id"),
           languageSupportedField("title", keepRaw = true),
           languageSupportedField("description"),
           languageSupportedLabels("labels"),
-          textField("coverPhotoUrl") index "not_analyzed",
-          intField("articleApiId") index "not_analyzed",
-          intField("revision") index "not_analyzed",
-          textField("supportedLanguages") index "not_analyzed",
-          textField("updatedBy") index "not_analyzed",
-          dateField("update") index "not_analyzed",
-          textField("theme") index "not_analyzed",
-          intField("oldNodeId") index "not_analyzed"
-        ),
-        ListingApiProperties.SearchDocument).string()
+          textField("coverPhotoUrl").index(false),
+          intField("articleApiId").index(false),
+          intField("revision").index(false),
+          textField("supportedLanguages").index(false),
+          textField("updatedBy").index(false),
+          dateField("update").index(false),
+          textField("theme").index(false),
+          intField("oldNodeId").index(false)
+        )
     }
 
     private def languageSupportedLabels(fieldName: String) = {
       val languageMappings = languageAnalyzers.map(analyzer => {
-        nestedField(analyzer.lang).as(
-          textField("type") fielddata true index "not_analyzed",
-          textField("labels") fielddata true analyzer labelAnalyzer.name
+        nestedField(analyzer.lang).fields(
+          textField("type").fielddata(true).index(false),
+          textField("labels").fielddata(true).analyzer(labelAnalyzer.name)
         )
       })
-
-      new NestedFieldDefinition(fieldName).as(languageMappings:_*)
+      nestedField(fieldName).fields(languageMappings)
     }
 
     private def languageSupportedField(fieldName: String, keepRaw: Boolean = false) = {
-      val languageSupportedField = new NestedFieldDefinition(fieldName)
-      languageSupportedField._fields = keepRaw match {
-        case true => languageAnalyzers.map(langAnalyzer => textField(langAnalyzer.lang).fielddata(true) analyzer langAnalyzer.analyzer fields (keywordField("raw") index "not_analyzed"))
-        case false => languageAnalyzers.map(langAnalyzer => textField(langAnalyzer.lang).fielddata(true) analyzer langAnalyzer.analyzer)
-      }
+      NestedFieldDefinition(fieldName).fields(
+        keepRaw match {
+          case true => languageAnalyzers.map(langAnalyzer => textField(langAnalyzer.lang).fielddata(true).analyzer(langAnalyzer.analyzer).fields(keywordField("raw").index(false)))
+          case false => languageAnalyzers.map(langAnalyzer => textField(langAnalyzer.lang).fielddata(true).analyzer(langAnalyzer.analyzer))
+        }
+      )
 
-      languageSupportedField
     }
 
     def aliasTarget: Option[String] = {
