@@ -21,6 +21,7 @@ abstract class IntegrationSuite extends UnitSuite {
   setEnv(PropertyKeys.MetaServerKey, "127.0.0.1")
   setEnv(PropertyKeys.MetaPortKey, "5432")
   setEnv(PropertyKeys.MetaSchemaKey, "listingapitest")
+  setEnv("RUN_WITH_SIGNED_SEARCH_REQUESTS", "false")
 
 
   def getDataSource: DataSource = {

@@ -10,7 +10,7 @@
 package no.ndla.listingapi.service.search
 
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize}
-import no.ndla.listingapi.integration.JestClientFactory
+import no.ndla.listingapi.integration.{Elastic4sClientFactory, JestClientFactory}
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.model.domain.{Description, Label, LanguageLabels, Title}
 import no.ndla.listingapi.{ListingApiProperties, TestData, TestEnvironment, UnitSuite}
@@ -24,6 +24,7 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
 
   val esPort = 9200
   override val jestClient = JestClientFactory.getClient(searchServer = s"http://localhost:$esPort")
+  override val e4sClient = Elastic4sClientFactory.getClient(searchServer = s"http://localhost:$esPort")
   override val searchService = new SearchService
   override val indexService = new IndexService
   override val searchConverterService = new SearchConverterService
@@ -129,6 +130,6 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
   }
 
   override def afterAll = {
-    indexService.deleteIndex(ListingApiProperties.SearchIndex)
+    indexService.deleteIndexWithName(Some(ListingApiProperties.SearchIndex))
   }
 }

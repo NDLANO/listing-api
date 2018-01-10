@@ -23,7 +23,7 @@ object ListingApiProperties extends LazyLogging {
   val RoleWithWriteAccess = "listing:write"
   val SecretsFile = "listing-api.secrets"
 
-  val ApplicationPort = 80
+  val ApplicationPort = propOrElse("APPLICATION_PORT", "80").toInt
   val ContactEmail = "christergundersen@ndla.no"
   val Environment = propOrElse("NDLA_ENVIRONMENT", "local")
   lazy val Domain: String = Domains.get(Environment)
