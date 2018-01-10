@@ -57,7 +57,7 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
     indexService.indexDocument(cover2)
     indexService.indexDocument(cover3)
 
-    blockUntil(() => searchService.countDocuments() == 3)
+    blockUntil(() => searchService.countDocuments == 3)
   }
 
   def blockUntil(predicate: () => Boolean): Unit = {
@@ -128,6 +128,15 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
     page2.results.size should be(1)
     page2.results.head.id should be(3)
   }
+
+  //TODO: test titlesorting
+  //TODO: test relevance sorting
+  //TODO: test last updated sorting?
+  //TODO: test sort by lastUpdated?
+
+  //TODO: test searching for all languages returns matched language
+  //TODO: test searching for all languages returns multiple languages
+  //TODO: test searching for all languages with sort?
 
   override def afterAll = {
     indexService.deleteIndexWithName(Some(ListingApiProperties.SearchIndex))

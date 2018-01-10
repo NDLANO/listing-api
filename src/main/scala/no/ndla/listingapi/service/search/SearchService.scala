@@ -9,35 +9,38 @@
 
 package no.ndla.listingapi.service.search
 
-import com.google.gson.JsonObject
+import com.sksamuel.elastic4s.searches.queries.BoolQueryDefinition
 import com.typesafe.scalalogging.LazyLogging
-import io.searchbox.core.{Count, Search, SearchResult => JestSearchResult}
-import io.searchbox.params.Parameters
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
-import no.ndla.listingapi.integration.ElasticClient
+import no.ndla.listingapi.integration.{Elastic4sClient, ElasticClient}
 import no.ndla.listingapi.model.api
 import no.ndla.listingapi.model.api.{NdlaSearchException, ResultWindowTooLargeException}
 import no.ndla.listingapi.model.domain.search.{Language, Sort}
 import no.ndla.listingapi.service.{Clock, createOembedUrl}
-import org.apache.lucene.search.join.ScoreMode
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.http.search.SearchResponse
+import com.sksamuel.elastic4s.searches.ScoreMode
+import com.sksamuel.elastic4s.searches.sort.{FieldSortDefinition, SortOrder}
 import org.elasticsearch.ElasticsearchException
 import org.elasticsearch.index.IndexNotFoundException
-import org.elasticsearch.index.query.{BoolQueryBuilder, QueryBuilders}
-import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.elasticsearch.search.sort.{FieldSortBuilder, SortBuilders, SortOrder}
+
+import scala.collection.JavaConverters._
+import org.json4s._
+import org.json4s.native.JsonMethods._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait SearchService {
-  this: ElasticClient with SearchIndexService with SearchConverterService with Clock =>
+  this: ElasticClient with Elastic4sClient with SearchIndexService with SearchConverterService with Clock =>
   val searchService: SearchService
 
   class SearchService extends LazyLogging {
+    implicit val formats = org.json4s.DefaultFormats
 
-    private val noCopyright = QueryBuilders.boolQuery().mustNot(QueryBuilders.termQuery("license", "copyrighted"))
+    private val noCopyright = boolQuery().not(termQuery("license", "copyrighted"))
 
     def all(language: String, page: Int, pageSize: Int, sort: Sort.Value): api.SearchResult = {
       executeSearch(
@@ -45,89 +48,107 @@ trait SearchService {
         sort,
         page,
         pageSize,
-        QueryBuilders.boolQuery())
+        boolQuery())
     }
 
-    private def executeSearch(language: String, sort: Sort.Value, page: Int, pageSize: Int, queryBuilder: BoolQueryBuilder): api.SearchResult = {
-      val searchQuery = new SearchSourceBuilder().query(queryBuilder).sort(getSortDefinition(sort, language))
-
+    private def executeSearch(language: String, sort: Sort.Value, page: Int, pageSize: Int, queryBuilder: BoolQueryDefinition): api.SearchResult = {
       val (startAt, numResults) = getStartAtAndNumResults(page, pageSize)
-      val request = new Search.Builder(searchQuery.toString)
-                    .addIndex(SearchIndex)
-                    .setParameter(Parameters.SIZE, numResults)
-                    .setParameter("from", startAt)
-
       val requestedResultWindow = pageSize*page
       if(requestedResultWindow > ListingApiProperties.ElasticSearchIndexMaxResultWindow) {
         logger.info(s"Max supported results are ${ListingApiProperties.ElasticSearchIndexMaxResultWindow}, user requested ${requestedResultWindow}")
         throw new ResultWindowTooLargeException()
       }
 
-      jestClient.execute(request.build()) match {
-        case Success(response) => {
-          val covers = getHits(response, language)
-          api.SearchResult(response.getTotal.toLong, page, numResults, covers)
-        }
-        case Failure(f) =>
-          errorHandler(Failure(f))
+      e4sClient.execute {
+        search(SearchIndex)
+          .query(queryBuilder)
+          .size(numResults)
+          .from(startAt)
+          .sortBy(getSortDefinition(sort, language))
+      } match {
+        case Success(response) =>
+          api.SearchResult(response.result.totalHits, page, numResults, getHits(response.result, language))
+        case Failure(ex) => errorHandler(Failure(ex))
       }
+
     }
 
-    def getHits(response: JestSearchResult, language: String): Seq[api.Cover] = {
-      var resultList = Seq[api.Cover]()
-      response.getTotal match {
-        case count: Integer if count > 0 => {
-          val resultArray = response.getJsonObject.get("hits").asInstanceOf[JsonObject].get("hits").getAsJsonArray
-          val iterator = resultArray.iterator()
-          while (iterator.hasNext) {
-            val card = hitAsCard(iterator.next.asInstanceOf[JsonObject].get("_source").asInstanceOf[JsonObject], language)
-            if (card.isDefined) {
-              resultList = resultList :+ card.get
+    def getHits(response: SearchResponse, language: String): Seq[api.Cover] = {
+      response.totalHits match {
+        case count if count > 0 =>
+          val resultArray = response.hits.hits
+
+          resultArray.flatMap(result => {
+            val matchedLanguage = language match {
+              case Language.AllLanguages | "*" =>
+                searchConverterService.getLanguageFromHit(result).getOrElse(language)
+              case _ => language
             }
-          }
-          resultList
-        }
-        case _ => Seq.empty
+
+            hitAsCard(result.sourceAsString, matchedLanguage)
+          })
+        case _ => Seq()
       }
     }
 
-    def hitAsCard(hit: JsonObject, language: String): Option[api.Cover] = {
-      import scala.collection.JavaConverters._
-      val labelsOpt = Option(hit.get("labels").getAsJsonObject.get(language)).map(lang => lang.getAsJsonArray.asScala.map(_.getAsJsonObject))
+    def hitAsCard(hitString: String, language: String): Option[api.Cover] = {
+      val hit = parse(hitString)
 
-      def oldNodeIdOrNone = if (hit.get("oldNodeId") == null ) None else createOembedUrl(hit.get("oldNodeId").getAsLong)
-
+      val labelsOpt = Option((hit \ "labels" \ language).extract[JArray].arr)
+      def oldNodeIdOrNone = if ((hit \ "oldNodeId") == JNothing ) None else createOembedUrl((hit \ "oldNodeId").extract[Long])
       labelsOpt.map(labels => {
-        val title = hit.get("title").getAsJsonObject.get(language).getAsString
-        val description = hit.get("description").getAsJsonObject.get(language).getAsString
-        val labelss = labels.map(x => api.Label(Option(x.get("type")).map(_.getAsString), x.get("labels").getAsJsonArray.asScala.toSeq.map(_.getAsString))).toSeq
-        val supportedLanguages = hit.get("supportedLanguages")
-          .getAsJsonArray
-          .asScala
-          .toSeq
-          .map(x => x.getAsString)
+        val title = (hit \ "title" \ language).extract[String]
+        val description = (hit \ "description" \ language).extract[String]
 
-        api.Cover(
-          hit.get("id").getAsLong,
-          hit.get("revision").getAsInt,
-          hit.get("coverPhotoUrl").getAsString,
+        val api_labels = labels.map(label => {
+          api.Label(
+            (label \ "type").extract[Option[String]],
+            (label \"labels").extract[Seq[String]]
+          )
+        })
+        val supportedLanguages = (hit \ "supportedLanguages").extract[Seq[String]]
+
+        val api_cover = api.Cover(
+          (hit \ "id").extract[Long],
+          (hit \ "revision").extract[Int],
+          (hit \ "coverPhotoUrl").extract[String],
           api.CoverTitle(title, language),
           api.CoverDescription(description, language),
-          hit.get("articleApiId").getAsLong,
-          api.CoverLabels(labelss, language),
+          (hit \ "articleApiId").extract[Long],
+          api.CoverLabels(api_labels, language),
           supportedLanguages.toSet,
-          hit.get("updatedBy").getAsString,
-          clock.toDate(hit.get("update").getAsString),
-          hit.get("theme").getAsString,
+          (hit \ "updatedBy").extract[String],
+          clock.toDate((hit \ "update").extract[String]),
+          (hit \ "theme").extract[String],
           oldNodeIdOrNone
         )
+        api_cover //TODO: remove temp variable
       })
     }
 
-    def getSortDefinition(sort: Sort.Value, language: String): FieldSortBuilder = {
+    def getSortDefinition(sort: Sort.Value, language: String): FieldSortDefinition = {
+      val sortLanguage = language match {
+        case Language.NoLanguage => Language.DefaultLanguage
+        case _ => language
+      }
+
       sort match {
-        case (Sort.ByIdAsc) => SortBuilders.fieldSort("id").order(SortOrder.ASC).missing("_last")
-        case (Sort.ByIdDesc) => SortBuilders.fieldSort("id").order(SortOrder.DESC).missing("_last")
+        case (Sort.ByTitleAsc) =>
+          language match {
+            case "*" | Language.AllLanguages => fieldSort("defaultTitle").order(SortOrder.ASC).missing("_last")
+            case _ => fieldSort(s"title.$sortLanguage.raw").nestedPath("title").order(SortOrder.ASC).missing("_last")
+          }
+        case (Sort.ByTitleDesc) =>
+          language match {
+            case "*" | Language.AllLanguages => fieldSort("defaultTitle").order(SortOrder.DESC).missing("_last")
+            case _ => fieldSort(s"title.$sortLanguage.raw").nestedPath("title").order(SortOrder.DESC).missing("_last")
+          }
+        case (Sort.ByRelevanceAsc) => fieldSort("_score").order(SortOrder.ASC)
+        case (Sort.ByRelevanceDesc) => fieldSort("_score").order(SortOrder.DESC)
+        case (Sort.ByLastUpdatedAsc) => fieldSort("lastUpdated").order(SortOrder.ASC).missing("_last")
+        case (Sort.ByLastUpdatedDesc) => fieldSort("lastUpdated").order(SortOrder.DESC).missing("_last")
+        case (Sort.ByIdAsc) => fieldSort("id").order(SortOrder.ASC).missing("_last")
+        case (Sort.ByIdDesc) => fieldSort("id").order(SortOrder.DESC).missing("_last")
       }
     }
 
@@ -172,23 +193,24 @@ trait SearchService {
 
     def matchingQuery(query: Seq[String], language: String, page: Int, pageSize: Int, sort: Sort.Value): api.SearchResult = {
       val qs = query.map(q => {
-        val termQ = QueryBuilders.matchPhraseQuery(s"labels.$language.labels", q)
-        val titleSearch = QueryBuilders.nestedQuery(s"labels.$language", termQ, ScoreMode.Avg)
-        QueryBuilders.nestedQuery("labels", titleSearch, ScoreMode.Avg)
+        val termQ = matchPhraseQuery(s"labels.$language.labels", q)
+        val titleSearch = nestedQuery(s"labels.$language", termQ).scoreMode(ScoreMode.Avg)
+        nestedQuery("labels", titleSearch).scoreMode(ScoreMode.Avg)
       })
 
-      val filter = qs.foldLeft(QueryBuilders.boolQuery())((query, term) => {
-        query.must(term)
-      })
-
+      val filter = boolQuery().must(qs)
       executeSearch(language, sort, page, pageSize, filter)
     }
 
-    def countDocuments(): Int = {
-      val ret = jestClient.execute(
-        new Count.Builder().addIndex(SearchIndex).build()
-      ).map(result => result.getCount.toInt)
-      ret.getOrElse(0)
+    def countDocuments: Long = {
+      val response = e4sClient.execute{
+        catCount(SearchIndex)
+      }
+
+      response match {
+        case Success(resp) => resp.result.count
+        case Failure(_) => 0
+      }
     }
 
   }
