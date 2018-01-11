@@ -95,7 +95,7 @@ trait IndexService {
           s"analysis.analyzer.${labelAnalyzer.name}.type" -> "custom",
           s"analysis.analyzer.${labelAnalyzer.name}.tokenizer" -> "keyword",
           s"analysis.analyzer.${labelAnalyzer.name}.filter" -> "lowercase",
-          s"index.max_result_window" -> ListingApiProperties.ElasticSearchIndexMaxResultWindow
+          s"max_result_window" -> ListingApiProperties.ElasticSearchIndexMaxResultWindow
         )
 
         val response = e4sClient.execute{
