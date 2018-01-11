@@ -20,6 +20,12 @@ trait SearchConverterService {
 
   class SearchConverterService extends LazyLogging {
     def asSearchableCover(card: Cover): SearchableCover = {
+      val defaultTitle = card.title.sortBy(title => {
+        val languagePriority = Language.languageAnalyzers.map(la => la.lang).reverse
+        languagePriority.indexOf(title.language)
+      }).lastOption
+
+
       SearchableCover(
         id = card.id.get,
         revision = card.revision.get,
@@ -28,6 +34,7 @@ trait SearchConverterService {
         card.articleApiId,
         card.coverPhotoUrl,
         SearchableLanguageList(card.labels.map(label => LanguageValue(label.language, label.labels))),
+        defaultTitle.map(_.title),
         card.supportedLanguages,
         card.updatedBy,
         card.updated,
@@ -45,7 +52,7 @@ trait SearchConverterService {
         case (_, innerHit) =>
           innerHit.hits.sortBy(hit => hit.score).reverse.headOption.flatMap(hit => {
             hit.highlight.headOption.map(hl => {
-              hl._1.split('.').filterNot(_ == "raw").last
+              hl._1.split('.').filterNot(_ == "labels").last
             })
           })
       }

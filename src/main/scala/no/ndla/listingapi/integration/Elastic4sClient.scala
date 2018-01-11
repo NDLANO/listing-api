@@ -41,6 +41,7 @@ case class NdlaE4sClient(httpClient: HttpClient) {
       case Failure(ex) => Failure(ex)
     }
   }
+  def c = httpClient
 }
 
 object Elastic4sClientFactory {

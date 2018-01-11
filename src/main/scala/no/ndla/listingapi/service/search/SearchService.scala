@@ -52,22 +52,39 @@ trait SearchService {
     }
 
     private def executeSearch(language: String, sort: Sort.Value, page: Int, pageSize: Int, queryBuilder: BoolQueryDefinition): api.SearchResult = {
+      val (languageFilter, searchLanguage) = language match {
+        case Language.NoLanguage | Language.AllLanguages => (None, "*")
+        case lang => (Some(nestedQuery("title", existsQuery(s"title.$lang")).scoreMode(ScoreMode.Avg)), lang)
+      }
+
+      val filters = List(languageFilter)
+      val filteredSearch = queryBuilder.filter(filters.flatten)
+
+
       val (startAt, numResults) = getStartAtAndNumResults(page, pageSize)
       val requestedResultWindow = pageSize*page
       if(requestedResultWindow > ListingApiProperties.ElasticSearchIndexMaxResultWindow) {
-        logger.info(s"Max supported results are ${ListingApiProperties.ElasticSearchIndexMaxResultWindow}, user requested ${requestedResultWindow}")
+        logger.info(s"Max supported results are ${ListingApiProperties.ElasticSearchIndexMaxResultWindow}, user requested $requestedResultWindow")
         throw new ResultWindowTooLargeException()
+      }
+
+      val json = e4sClient.c.show{
+        search(SearchIndex)
+          .query(filteredSearch)
+          .size(numResults)
+          .from(startAt)
+          .sortBy(getSortDefinition(sort, searchLanguage))
       }
 
       e4sClient.execute {
         search(SearchIndex)
-          .query(queryBuilder)
+          .query(filteredSearch)
           .size(numResults)
           .from(startAt)
-          .sortBy(getSortDefinition(sort, language))
+          .sortBy(getSortDefinition(sort, searchLanguage))
       } match {
         case Success(response) =>
-          api.SearchResult(response.result.totalHits, page, numResults, getHits(response.result, language))
+          api.SearchResult(response.result.totalHits, page, numResults, searchLanguage, getHits(response.result, searchLanguage))
         case Failure(ex) => errorHandler(Failure(ex))
       }
 
@@ -94,13 +111,13 @@ trait SearchService {
     def hitAsCard(hitString: String, language: String): Option[api.Cover] = {
       val hit = parse(hitString)
 
-      val labelsOpt = Option((hit \ "labels" \ language).extract[JArray].arr)
+      val labelsOpt = (hit \ "labels" \ language).extract[Option[JArray]]
       def oldNodeIdOrNone = if ((hit \ "oldNodeId") == JNothing ) None else createOembedUrl((hit \ "oldNodeId").extract[Long])
       labelsOpt.map(labels => {
         val title = (hit \ "title" \ language).extract[String]
         val description = (hit \ "description" \ language).extract[String]
 
-        val api_labels = labels.map(label => {
+        val api_labels = labels.arr.map(label => {
           api.Label(
             (label \ "type").extract[Option[String]],
             (label \"labels").extract[Seq[String]]
@@ -118,7 +135,7 @@ trait SearchService {
           api.CoverLabels(api_labels, language),
           supportedLanguages.toSet,
           (hit \ "updatedBy").extract[String],
-          clock.toDate((hit \ "update").extract[String]),
+          clock.toDate((hit \ "lastUpdated").extract[String]),
           (hit \ "theme").extract[String],
           oldNodeIdOrNone
         )
@@ -143,8 +160,6 @@ trait SearchService {
             case "*" | Language.AllLanguages => fieldSort("defaultTitle").order(SortOrder.DESC).missing("_last")
             case _ => fieldSort(s"title.$sortLanguage.raw").nestedPath("title").order(SortOrder.DESC).missing("_last")
           }
-        case (Sort.ByRelevanceAsc) => fieldSort("_score").order(SortOrder.ASC)
-        case (Sort.ByRelevanceDesc) => fieldSort("_score").order(SortOrder.DESC)
         case (Sort.ByLastUpdatedAsc) => fieldSort("lastUpdated").order(SortOrder.ASC).missing("_last")
         case (Sort.ByLastUpdatedDesc) => fieldSort("lastUpdated").order(SortOrder.DESC).missing("_last")
         case (Sort.ByIdAsc) => fieldSort("id").order(SortOrder.ASC).missing("_last")
@@ -192,13 +207,24 @@ trait SearchService {
     }
 
     def matchingQuery(query: Seq[String], language: String, page: Int, pageSize: Int, sort: Sort.Value): api.SearchResult = {
-      val qs = query.map(q => {
-        val termQ = matchPhraseQuery(s"labels.$language.labels", q)
-        val titleSearch = nestedQuery(s"labels.$language", termQ).scoreMode(ScoreMode.Avg)
-        nestedQuery("labels", titleSearch).scoreMode(ScoreMode.Avg)
+      val searchLanguage, languages = language match {
+        case Language.AllLanguages | "*" =>
+          Language.supportedLanguages
+        case lang =>
+          List(lang)
+      }
+
+      val queries = languages.map(lang => {
+        boolQuery().must(query.map(q => {
+          val hi = highlight("*").preTag("").postTag("").numberOfFragments(0)
+          val ih = innerHits(lang).highlighting(hi)
+          val termQ = matchPhraseQuery(s"labels.$lang.labels", q)
+          val titleSearch = nestedQuery(s"labels.$lang", termQ).scoreMode(ScoreMode.Avg)
+          nestedQuery("labels", titleSearch).scoreMode(ScoreMode.Avg).inner(ih)
+        }))
       })
 
-      val filter = boolQuery().must(qs)
+      val filter = boolQuery().should(queries)
       executeSearch(language, sort, page, pageSize, filter)
     }
 

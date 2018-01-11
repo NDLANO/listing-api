@@ -117,12 +117,13 @@ trait IndexService {
           languageSupportedField("title", keepRaw = true),
           languageSupportedField("description"),
           languageSupportedLabels("labels"),
+          keywordField("defaultTitle"),
           textField("coverPhotoUrl"),
           intField("articleApiId"),
           intField("revision"),
           textField("supportedLanguages"),
           textField("updatedBy"),
-          dateField("update"),
+          dateField("lastUpdated"),
           textField("theme"),
           intField("oldNodeId")
         )

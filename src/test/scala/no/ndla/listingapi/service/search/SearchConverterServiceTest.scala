@@ -34,6 +34,7 @@ class SearchConverterServiceTest extends UnitSuite with TestEnvironment {
       sampleCover.articleApiId,
       sampleCover.coverPhotoUrl,
       SearchableLanguageList(Seq(LanguageValue("nb", sampleCover.labels.head.labels))),
+      Some("title"),
       Set("nb"),
       sampleCover.updatedBy,
       TestData.updated,
