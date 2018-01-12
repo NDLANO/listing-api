@@ -97,7 +97,7 @@ trait SearchService {
           .sortBy(getSortDefinition(sort, searchLanguage))
       } match {
         case Success(response) =>
-          api.SearchResult(response.result.totalHits, page, numResults, searchLanguage, getHits(response.result, searchLanguage))
+          api.SearchResult(response.result.totalHits, page, numResults, if (searchLanguage == "*") Language.AllLanguages else searchLanguage, getHits(response.result, searchLanguage))
         case Failure(ex) => errorHandler(Failure(ex))
       }
 
@@ -138,7 +138,7 @@ trait SearchService {
         })
         val supportedLanguages = (hit \ "supportedLanguages").extract[Seq[String]]
 
-        val api_cover = api.Cover(
+        api.Cover(
           (hit \ "id").extract[Long],
           (hit \ "revision").extract[Int],
           (hit \ "coverPhotoUrl").extract[String],
@@ -152,7 +152,6 @@ trait SearchService {
           (hit \ "theme").extract[String],
           oldNodeIdOrNone
         )
-        api_cover //TODO: remove temp variable
       })
     }
 
