@@ -24,7 +24,6 @@ trait TestEnvironment
     with WriteService
     with CoverValidator
     with SearchService
-    with ElasticClient
     with Elastic4sClient
     with SearchIndexService
     with SearchConverterService
@@ -49,7 +48,6 @@ trait TestEnvironment
   val listingController = mock[ListingController]
 
   val searchService = mock[SearchService]
-  val jestClient = mock[NdlaJestClient]
   val e4sClient = mock[NdlaE4sClient]
   val searchIndexService = mock[SearchIndexService]
   val searchConverterService = mock[SearchConverterService]

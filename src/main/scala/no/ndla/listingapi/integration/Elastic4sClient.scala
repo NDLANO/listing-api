@@ -17,7 +17,7 @@ import com.sksamuel.elastic4s.aws._
 import com.sksamuel.elastic4s.http.{HttpClient, HttpExecutable, HttpRequestClient, RequestSuccess}
 import com.sksamuel.elastic4s.searches.queries.QueryDefinition
 import no.ndla.listingapi.ListingApiProperties
-import no.ndla.listingapi.model.api.Ndla4sSearchException
+import no.ndla.listingapi.model.api.NdlaSearchException
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -36,7 +36,7 @@ case class NdlaE4sClient(httpClient: HttpClient) {
     response match {
       case Success(either) => either match {
         case Right(result) => Success(result)
-        case Left(requestFailure) => Failure(Ndla4sSearchException(requestFailure))
+        case Left(requestFailure) => Failure(NdlaSearchException(requestFailure))
       }
       case Failure(ex) => Failure(ex)
     }

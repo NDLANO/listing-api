@@ -13,7 +13,7 @@ import com.sksamuel.elastic4s.searches.queries.{BoolQueryDefinition, QueryDefini
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
-import no.ndla.listingapi.integration.{Elastic4sClient, ElasticClient}
+import no.ndla.listingapi.integration.Elastic4sClient
 import no.ndla.listingapi.model.api
 import no.ndla.listingapi.model.api.{NdlaSearchException, ResultWindowTooLargeException}
 import no.ndla.listingapi.model.domain.search.{Language, Sort}
@@ -34,7 +34,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait SearchService {
-  this: ElasticClient with Elastic4sClient with SearchIndexService with SearchConverterService with Clock =>
+  this: Elastic4sClient with SearchIndexService with SearchConverterService with Clock =>
   val searchService: SearchService
 
   class SearchService extends LazyLogging {
@@ -190,15 +190,15 @@ trait SearchService {
     private def errorHandler[T](failure: Failure[T]) = {
       failure match {
         case Failure(e: NdlaSearchException) => {
-          e.getResponse.getResponseCode match {
+          e.rf.status match {
             case notFound: Int if notFound == 404 => {
               logger.error(s"Index $SearchIndex not found. Scheduling a reindex.")
               scheduleIndexDocuments()
               throw new IndexNotFoundException(s"Index $SearchIndex not found. Scheduling a reindex")
             }
             case _ => {
-              logger.error(e.getResponse.getErrorMessage)
-              throw new ElasticsearchException(s"Unable to execute search in $SearchIndex", e.getResponse.getErrorMessage)
+              logger.error(e.getMessage)
+              throw new ElasticsearchException(s"Unable to execute search in $SearchIndex", e.getMessage)
             }
           }
 

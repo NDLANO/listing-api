@@ -16,7 +16,6 @@ import com.sksamuel.elastic4s.http.RequestFailure
 import org.scalatra.swagger.annotations.{ApiModel, ApiModelProperty}
 
 import scala.annotation.meta.field
-import io.searchbox.client.JestResult
 
 @ApiModel(description = "Information about an error")
 case class Error(@(ApiModelProperty@field)(description = "Code stating the type of error") code: String = Error.GENERIC,
@@ -55,10 +54,7 @@ class CoverAlreadyExistsException(message: String = "This cover already exists",
 class ValidationException(message: String = "Validation Error", val errors: Seq[ValidationMessage]) extends RuntimeException(message)
 class AccessDeniedException(message: String) extends RuntimeException(message)
 class OptimisticLockException(message: String = Error.RESOURCE_OUTDATED_DESCRIPTION) extends RuntimeException(message)
-class NdlaSearchException(jestResponse: JestResult) extends RuntimeException(jestResponse.getErrorMessage) {
-  def getResponse: JestResult = jestResponse
-}
-case class Ndla4sSearchException(rf: RequestFailure) extends RuntimeException(
+case class NdlaSearchException(rf: RequestFailure) extends RuntimeException(
   s"""
      |index: ${rf.error.index.getOrElse("Error did not contain index")}
      |reason: ${rf.error.reason}

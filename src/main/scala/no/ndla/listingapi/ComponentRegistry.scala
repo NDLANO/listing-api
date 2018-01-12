@@ -26,7 +26,6 @@ object ComponentRegistry
     with WriteService
     with CoverValidator
     with SearchService
-    with ElasticClient
     with Elastic4sClient
     with SearchIndexService
     with IndexService
@@ -63,7 +62,6 @@ object ComponentRegistry
   lazy val coverValidator = new CoverValidator
 
   lazy val searchService = new SearchService
-  lazy val jestClient = JestClientFactory.getClient()
   lazy val e4sClient = Elastic4sClientFactory.getClient()
   lazy val searchIndexService = new SearchIndexService
   lazy val indexService = new IndexService
