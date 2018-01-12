@@ -24,38 +24,36 @@ trait SearchIndexService {
   class SearchIndexService extends LazyLogging {
 
     def indexDocument(cover: Cover): Try[_] = {
-      if (indexService.aliasTarget.isEmpty) {
-        indexService.createIndex.map(newIndex => indexService.createAliasTarget(newIndex))
-      }
-      indexService.indexDocument(cover)
+      for {
+        _ <- indexService.aliasTarget.map {
+          case Some(index) => Success(index)
+          case None => indexService.createIndexWithGeneratedName.map(newIndex => indexService.updateAliasTarget(None, newIndex))
+        }
+        imported <- indexService.indexDocument(cover)
+      } yield imported
     }
 
     def indexDocuments: Try[ReindexResult] = {
       synchronized {
         val start = System.currentTimeMillis()
-        indexService.createIndex.flatMap(indexName => {
+        indexService.createIndexWithGeneratedName.flatMap(indexName => {
           val operations = for {
             numIndexed <- indexDocuments(indexName)
-            _ <- switchAliasTarget(indexName)
+            aliasTarget <- indexService.aliasTarget
+            _ <- indexService.updateAliasTarget(aliasTarget, indexName)
+            _ <- indexService.deleteIndexWithName(aliasTarget)
           } yield numIndexed
 
           operations match {
-            case Failure(f) =>
-              indexService.deleteIndex(indexName)
+            case Failure(f) => {
+              indexService.deleteIndexWithName(Some(indexName))
               Failure(f)
-            case Success(totalIndexed) =>
+            }
+            case Success(totalIndexed) => {
               Success(ReindexResult(totalIndexed, System.currentTimeMillis() - start))
+            }
           }
         })
-      }
-    }
-
-    private def switchAliasTarget(newIndex: String): Try[_] = {
-      indexService.aliasTarget match {
-        case Some(target) =>
-          indexService.updateAliasTarget(target, newIndex).map(_ =>
-            indexService.deleteIndex(target))
-        case None => indexService.createAliasTarget(newIndex)
       }
     }
 
@@ -73,11 +71,12 @@ trait SearchIndexService {
       })
     }
 
-    def getRanges:Try[List[(Long,Long)]] = {
-      Try{
+    def getRanges: Try[List[(Long, Long)]] = {
+      Try {
         val (minId, maxId) = listingRepository.minMaxId
         Seq.range(minId, maxId).grouped(ListingApiProperties.IndexBulkSize).map(group => (group.head, group.last + 1)).toList
       }
     }
   }
+
 }

@@ -9,6 +9,10 @@
 package no.ndla.listingapi.model.domain.search
 
 object Sort  extends Enumeration {
+  val ByTitleDesc = Value("-title")
+  val ByTitleAsc = Value("title")
+  val ByLastUpdatedDesc = Value("-lastUpdated")
+  val ByLastUpdatedAsc = Value("lastUpdated")
   val ByIdDesc = Value("-id")
   val ByIdAsc = Value("id")
 

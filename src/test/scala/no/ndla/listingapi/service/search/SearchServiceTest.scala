@@ -10,30 +10,36 @@
 package no.ndla.listingapi.service.search
 
 import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize}
-import no.ndla.listingapi.integration.JestClientFactory
+import no.ndla.listingapi.integration.Elastic4sClientFactory
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.model.domain.{Description, Label, LanguageLabels, Title}
-import no.ndla.listingapi.{ListingApiProperties, TestData, TestEnvironment, UnitSuite}
+import no.ndla.listingapi._
 import no.ndla.tag.IntegrationTest
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.util.{Failure, Success, Try}
 
 @IntegrationTest
-class SearchServiceTest extends UnitSuite with TestEnvironment {
+class SearchServiceTest extends IntegrationSuite with TestEnvironment {
 
-  override val jestClient = JestClientFactory.getClient(searchServer = s"http://localhost:$esPort")
+  val esPort = 9200
+  override val e4sClient = Elastic4sClientFactory.getClient(searchServer = s"http://localhost:$esPort")
   override val searchService = new SearchService
   override val indexService = new IndexService
   override val searchConverterService = new SearchConverterService
-  val esPort = 9200
   val today = DateTime.now()
+  val date1 = new DateTime(2017, 2, 1, 12, 12, 32, DateTimeZone.UTC).toDate
+  val date2 = new DateTime(2018, 1, 2, 15, 15, 32, DateTimeZone.UTC).toDate
+  val date3 = new DateTime(2019, 3, 1, 12, 11, 32, DateTimeZone.UTC).toDate
+  val date4 = new DateTime(2020, 4, 3, 11, 15, 32, DateTimeZone.UTC).toDate
+  val date5 = new DateTime(2021, 5, 1, 1, 15, 32, DateTimeZone.UTC).toDate
 
   val cover1 = TestData.sampleCover.copy(
     id = Some(1),
     description = Seq(Description("stop. hammer time", "nb")),
     title = Seq(Title("hammer", "nb")),
     labels = Seq(LanguageLabels(Seq(Label(None, Seq("hammer", "time", "stop"))), "nb")),
+    updated = date4,
     articleApiId = 1321)
 
   val cover2 = TestData.sampleCover.copy(
@@ -41,6 +47,7 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
     description = Seq(Description("forsiktig med saga", "nb")),
     title = Seq(Title("sag", "nb")),
     labels = Seq(LanguageLabels(Seq(Label(None, Seq("sag", "forsiktig", "farlig"))), "nb")),
+    updated = date2,
     articleApiId = 432)
 
   val cover3 = TestData.sampleCover.copy(
@@ -48,15 +55,34 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
     description = Seq(Description("her er døden selv", "nb")),
     title = Seq(Title("mannen med ljåen", "nb")),
     labels = Seq(LanguageLabels(Seq(Label(None, Seq("ljå", "mann", "huff", "farlig", "personlig verktøy"))), "nb")),
+    updated = date1,
     articleApiId = 896)
+
+  val cover4 = TestData.sampleCover.copy(
+    id = Some(4),
+    description = Seq(Description("unrelated", "en"), Description("urelatert", "nb")),
+    title = Seq(Title("unrelated", "en"), Title("urelatert", "nb")),
+    labels = Seq(LanguageLabels(Seq(Label(None, Seq("pilt"))), "en"), LanguageLabels(Seq(Label(None, Seq("pompel"))), "nb")),
+    updated = date5,
+    articleApiId = 512)
+
+  val cover5 = TestData.sampleCover.copy(
+    id = Some(5),
+    description = Seq(Description("englando only", "en")),
+    title = Seq(Title("englando", "en")),
+    labels = Seq(LanguageLabels(Seq(Label(None, Seq("english"))), "en")),
+    updated = date3,
+    articleApiId = 134)
 
   override def beforeAll = {
     indexService.createIndexWithName(ListingApiProperties.SearchIndex)
     indexService.indexDocument(cover1)
     indexService.indexDocument(cover2)
     indexService.indexDocument(cover3)
+    indexService.indexDocument(cover4)
+    indexService.indexDocument(cover5)
 
-    blockUntil(() => searchService.countDocuments() == 3)
+    blockUntil(() => searchService.countDocuments == 5)
   }
 
   def blockUntil(predicate: () => Boolean): Unit = {
@@ -100,16 +126,17 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
 
   test("That all returns all documents ordered by id ascending") {
     val results = searchService.all(DefaultLanguage, 1, DefaultPageSize, Sort.ByIdAsc)
-    results.totalCount should be(3)
+    results.totalCount should be(4)
     results.results.head.id should be(1)
     results.results(1).id should be(2)
     results.results(2).id should be(3)
+    results.results(3).id should be(4)
   }
 
   test("That all returns all documents ordered by id descending") {
     val results = searchService.all(DefaultLanguage, 1, DefaultPageSize, Sort.ByIdDesc)
-    results.totalCount should be(3)
-    results.results.head.id should be(3)
+    results.totalCount should be(4)
+    results.results.head.id should be(4)
     results.results.last.id should be(1)
   }
 
@@ -117,18 +144,69 @@ class SearchServiceTest extends UnitSuite with TestEnvironment {
   test("That paging returns only hits on current page and not more than page-size") {
     val page1 = searchService.all(DefaultLanguage, 1, 2, Sort.ByIdAsc)
     val page2 = searchService.all(DefaultLanguage, 2, 2, Sort.ByIdAsc)
-    page1.totalCount should be(3)
+    page1.totalCount should be(4)
     page1.page should be(1)
     page1.results.size should be(2)
     page1.results.head.id should be(1)
     page1.results.last.id should be(2)
-    page2.totalCount should be(3)
+    page2.totalCount should be(4)
     page2.page should be(2)
-    page2.results.size should be(1)
+    page2.results.size should be(2)
     page2.results.head.id should be(3)
+    page2.results.last.id should be(4)
+  }
+
+  test("That search returns covers sorted by title ascending") {
+    val results = searchService.all("all", 1, 10, Sort.ByTitleAsc)
+
+    results.totalCount should be(5)
+    results.results.toList.map(_.id) should be(Seq(5, 1, 3, 2, 4))
+  }
+
+  test("That search returns covers sorted by title descending") {
+    val results = searchService.all("all", 1, 10, Sort.ByTitleDesc)
+
+    results.totalCount should be(5)
+    results.results.toList.map(_.id) should be(Seq(4, 2, 3, 1, 5))
+  }
+
+  test("That search returns covers sorted by lastUpdated ascending") {
+    val results = searchService.all("all", 1, 10, Sort.ByLastUpdatedAsc)
+
+    results.totalCount should be(5)
+    results.results.map(_.id) should be(Seq(3, 2, 5, 1, 4))
+  }
+
+  test("That search returns covers sorted by lastUpdated descending") {
+    val results = searchService.all("all", 1, 10, Sort.ByLastUpdatedDesc)
+
+    results.totalCount should be(5)
+    results.results.map(_.id) should be(Seq(4, 1, 5, 2, 3))
+  }
+
+  test("That search returns matched language when filtering and searching for all languages") {
+    val resultsEn = searchService.matchingQuery(Seq("pilt"), "all", 1, 10, Sort.ByIdAsc)
+    val resultsNb = searchService.matchingQuery(Seq("pompel"), "all", 1, 10, Sort.ByTitleAsc)
+
+    resultsEn.totalCount should be(1)
+    resultsEn.results.head.id should be(4)
+    resultsEn.results.head.title.language should be("en")
+
+    resultsNb.totalCount should be(1)
+    resultsNb.results.head.id should be(4)
+    resultsNb.results.head.title.language should be("nb")
+  }
+
+  test("That searching for all languages returns 'best' language") {
+    val results = searchService.all("all", 1, 10, Sort.ByTitleDesc)
+
+    results.totalCount should be(5)
+    results.results.map(_.id) should be(Seq(4, 2, 3, 1, 5))
+    results.results(0).title.language should be("nb")
+    results.results(4).title.language should be("en")
   }
 
   override def afterAll = {
-    indexService.deleteIndex(ListingApiProperties.SearchIndex)
+    indexService.deleteIndexWithName(Some(ListingApiProperties.SearchIndex))
   }
 }

@@ -10,9 +10,9 @@ package no.ndla.listingapi
 
 import javax.sql
 
-import no.ndla.listingapi.auth.{Role, Client}
+import no.ndla.listingapi.auth.{Client, Role}
 import no.ndla.listingapi.controller.{HealthController, ListingController}
-import no.ndla.listingapi.integration.{DataSource, ElasticClient, NdlaJestClient}
+import no.ndla.listingapi.integration._
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service._
 import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
@@ -24,7 +24,7 @@ trait TestEnvironment
     with WriteService
     with CoverValidator
     with SearchService
-    with ElasticClient
+    with Elastic4sClient
     with SearchIndexService
     with SearchConverterService
     with IndexService
@@ -48,7 +48,7 @@ trait TestEnvironment
   val listingController = mock[ListingController]
 
   val searchService = mock[SearchService]
-  val jestClient = mock[NdlaJestClient]
+  val e4sClient = mock[NdlaE4sClient]
   val searchIndexService = mock[SearchIndexService]
   val searchConverterService = mock[SearchConverterService]
   val indexService = mock[IndexService]

@@ -29,9 +29,10 @@ case class SearchableCover(
   articleApiId: Long,
   coverPhotoUrl: String,
   labels: SearchableLanguageList,
+  defaultTitle: Option[String],
   supportedLanguages: Set[String],
   updatedBy: String,
-  update: Date,
+  lastUpdated: Date,
   theme: String,
   oldNodeId: Option[Long]
 )
