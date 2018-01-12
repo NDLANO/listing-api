@@ -175,19 +175,19 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
     val results = searchService.all("all", 1, 10, Sort.ByLastUpdatedAsc)
 
     results.totalCount should be(5)
-    results.results.toList.map(_.id) should be(Seq(3, 2, 5, 1, 4))
+    results.results.map(_.id) should be(Seq(3, 2, 5, 1, 4))
   }
 
   test("That search returns covers sorted by lastUpdated descending") {
     val results = searchService.all("all", 1, 10, Sort.ByLastUpdatedDesc)
 
     results.totalCount should be(5)
-    results.results.toList.map(_.id) should be(Seq(4, 1, 5, 2, 3))
+    results.results.map(_.id) should be(Seq(4, 1, 5, 2, 3))
   }
 
   test("That search returns matched language when filtering and searching for all languages") {
     val resultsEn = searchService.matchingQuery(Seq("pilt"), "all", 1, 10, Sort.ByIdAsc)
-    val resultsNb = searchService.matchingQuery(Seq("pompel"), "all", 1, 10, Sort.ByIdAsc)
+    val resultsNb = searchService.matchingQuery(Seq("pompel"), "all", 1, 10, Sort.ByTitleAsc)
 
     resultsEn.totalCount should be(1)
     resultsEn.results.head.id should be(4)
@@ -198,9 +198,14 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
     resultsNb.results.head.title.language should be("nb")
   }
 
-  //TODO: test searching for all languages returns matched language
-  //TODO: test searching for all languages returns multiple languages
-  //TODO: test searching for all languages with sort?
+  test("That searching for all languages returns 'best' language") {
+    val results = searchService.all("all", 1, 10, Sort.ByTitleDesc)
+
+    results.totalCount should be(5)
+    results.results.map(_.id) should be(Seq(4, 2, 3, 1, 5))
+    results.results(0).title.language should be("nb")
+    results.results(4).title.language should be("en")
+  }
 
   override def afterAll = {
     indexService.deleteIndexWithName(Some(ListingApiProperties.SearchIndex))

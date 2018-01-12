@@ -9,7 +9,7 @@
 
 package no.ndla.listingapi.service.search
 
-import com.sksamuel.elastic4s.searches.queries.BoolQueryDefinition
+import com.sksamuel.elastic4s.searches.queries.{BoolQueryDefinition, QueryDefinition}
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
@@ -48,17 +48,37 @@ trait SearchService {
         sort,
         page,
         pageSize,
-        boolQuery())
+        List()
+      )
     }
 
-    private def executeSearch(language: String, sort: Sort.Value, page: Int, pageSize: Int, queryBuilder: BoolQueryDefinition): api.SearchResult = {
+    def matchingQuery(query: Seq[String], language: String, page: Int, pageSize: Int, sort: Sort.Value): api.SearchResult = {
+      val languages = language match {
+        case Language.AllLanguages | "*" => Language.supportedLanguages
+        case lang => List(lang)
+      }
+
+      val queries = languages.map(lang => {
+        boolQuery().must(query.map(q => {
+          val hi = highlight("*").preTag("").postTag("").numberOfFragments(0)
+          val ih = innerHits(lang).highlighting(hi)
+          val termQ = matchPhraseQuery(s"labels.$lang.labels", q)
+          val titleSearch = nestedQuery(s"labels.$lang", termQ).scoreMode(ScoreMode.Avg)
+          nestedQuery("labels", titleSearch).scoreMode(ScoreMode.Avg).inner(ih)
+        }))
+      })
+
+      executeSearch(language, sort, page, pageSize, queries)
+    }
+
+    private def executeSearch(language: String, sort: Sort.Value, page: Int, pageSize: Int, queries: Seq[BoolQueryDefinition]): api.SearchResult = {
       val (languageFilter, searchLanguage) = language match {
         case Language.NoLanguage | Language.AllLanguages => (None, "*")
         case lang => (Some(nestedQuery("title", existsQuery(s"title.$lang")).scoreMode(ScoreMode.Avg)), lang)
       }
 
-      val filters = List(languageFilter)
-      val filteredSearch = queryBuilder.filter(filters.flatten)
+      val postFilters = List(languageFilter)
+      val querySearch = boolQuery().should(queries)
 
 
       val (startAt, numResults) = getStartAtAndNumResults(page, pageSize)
@@ -68,17 +88,10 @@ trait SearchService {
         throw new ResultWindowTooLargeException()
       }
 
-      val json = e4sClient.c.show{
-        search(SearchIndex)
-          .query(filteredSearch)
-          .size(numResults)
-          .from(startAt)
-          .sortBy(getSortDefinition(sort, searchLanguage))
-      }
-
       e4sClient.execute {
         search(SearchIndex)
-          .query(filteredSearch)
+          .query(querySearch)
+          .postFilter(boolQuery().filter(postFilters.flatten))
           .size(numResults)
           .from(startAt)
           .sortBy(getSortDefinition(sort, searchLanguage))
@@ -204,28 +217,6 @@ trait SearchService {
         case Success(reindexResult) => logger.info(s"Completed indexing of ${reindexResult.totalIndexed} documents in ${reindexResult.millisUsed} ms.")
         case Failure(ex) => logger.warn(ex.getMessage, ex)
       }
-    }
-
-    def matchingQuery(query: Seq[String], language: String, page: Int, pageSize: Int, sort: Sort.Value): api.SearchResult = {
-      val searchLanguage, languages = language match {
-        case Language.AllLanguages | "*" =>
-          Language.supportedLanguages
-        case lang =>
-          List(lang)
-      }
-
-      val queries = languages.map(lang => {
-        boolQuery().must(query.map(q => {
-          val hi = highlight("*").preTag("").postTag("").numberOfFragments(0)
-          val ih = innerHits(lang).highlighting(hi)
-          val termQ = matchPhraseQuery(s"labels.$lang.labels", q)
-          val titleSearch = nestedQuery(s"labels.$lang", termQ).scoreMode(ScoreMode.Avg)
-          nestedQuery("labels", titleSearch).scoreMode(ScoreMode.Avg).inner(ih)
-        }))
-      })
-
-      val filter = boolQuery().should(queries)
-      executeSearch(language, sort, page, pageSize, filter)
     }
 
     def countDocuments: Long = {
