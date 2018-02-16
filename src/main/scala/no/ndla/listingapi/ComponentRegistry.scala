@@ -37,6 +37,8 @@ object ComponentRegistry
     with Clock
     with Role
     with Client {
+  def connectToDatabase(): Unit = ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
+
   implicit val swagger = new ListingSwagger
 
   lazy val dataSource = new PGPoolingDataSource()
@@ -48,7 +50,7 @@ object ComponentRegistry
   dataSource.setInitialConnections(ListingApiProperties.MetaInitialConnections)
   dataSource.setMaxConnections(ListingApiProperties.MetaMaxConnections)
   dataSource.setCurrentSchema(ListingApiProperties.MetaSchema)
-  ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
+  connectToDatabase()
 
   lazy val listingController = new ListingController
   lazy val healthController = new HealthController
