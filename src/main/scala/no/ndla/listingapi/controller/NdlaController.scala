@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest
 
 import com.amazonaws.services.kms.model.AlreadyExistsException
 import com.typesafe.scalalogging.LazyLogging
+import no.ndla.listingapi.ComponentRegistry
 import no.ndla.listingapi.ListingApiProperties.{CorrelationIdHeader, CorrelationIdKey}
 import no.ndla.listingapi.model.api.{AccessDeniedException, CoverAlreadyExistsException, Error, NotFoundException, OptimisticLockException, ResultWindowTooLargeException, ValidationError, ValidationException, ValidationMessage}
 import no.ndla.network.{ApplicationUrl, AuthUser, CorrelationID}
@@ -20,8 +21,10 @@ import org.apache.logging.log4j.ThreadContext
 import org.elasticsearch.index.IndexNotFoundException
 import org.json4s.native.Serialization.read
 import org.json4s.{DefaultFormats, Formats}
+import org.postgresql.util.PSQLException
 import org.scalatra._
 import org.scalatra.json.NativeJsonSupport
+import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
 import scala.util.{Failure, Success, Try}
 
@@ -52,6 +55,9 @@ abstract class NdlaController extends ScalatraServlet with NativeJsonSupport wit
     case o: OptimisticLockException => Conflict(body=Error(Error.RESOURCE_OUTDATED, o.getMessage))
     case e: CoverAlreadyExistsException => Conflict(body=Error(Error.ALREADY_EXISTS, e.getMessage, Some(e.id)))
     case rw: ResultWindowTooLargeException => UnprocessableEntity(body = Error(Error.WINDOW_TOO_LARGE, rw.getMessage))
+    case _: PSQLException =>
+      ComponentRegistry.connectToDatabase()
+      InternalServerError(Error.DatabaseUnavailableError)
     case t: Throwable => {
       logger.error(Error.GenericError.toString, t)
       InternalServerError(body=Error.GenericError)

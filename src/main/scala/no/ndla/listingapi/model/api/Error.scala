@@ -43,10 +43,12 @@ object Error {
   val INDEX_MISSING_DESCRIPTION = s"Ooops. Our search index is not available at the moment, but we are trying to recreate it. Please try again in a few minutes. Feel free to contact ${ListingApiProperties.ContactEmail} if the error persists."
   val RESOURCE_OUTDATED_DESCRIPTION = "The resource is outdated. Please try fetching before submitting again."
   val WINDOW_TOO_LARGE = "RESULT WINDOW TOO LARGE"
+  val DATABASE_UNAVAILABLE = "DATABASE_UNAVAILABLE"
 
   val GenericError = Error(GENERIC, GENERIC_DESCRIPTION)
   val IndexMissingError = Error(INDEX_MISSING, INDEX_MISSING_DESCRIPTION)
   val WindowTooLargeError = Error(WINDOW_TOO_LARGE, s"The result window is too large. Fetching pages above ${ListingApiProperties.ElasticSearchIndexMaxResultWindow} results are unsupported.")
+  val DatabaseUnavailableError = Error(DATABASE_UNAVAILABLE, s"Database seems to be unavailable, retrying connection.")
 }
 
 class NotFoundException(message: String = "The cover was not found") extends RuntimeException(message)
