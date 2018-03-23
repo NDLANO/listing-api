@@ -8,9 +8,9 @@ val Jettyversion = "9.2.10.v20150310"
 val AwsSdkversion = "1.11.46"
 val ScalaTestVersion = "3.0.1"
 val MockitoVersion = "1.10.19"
-val Elastic4sVersion = "6.1.2"
+val Elastic4sVersion = "6.1.4"
 val ElasticsearchVersion = "6.0.1"
-val JacksonVersion = "2.7.4"
+val JacksonVersion = "2.9.4"
 val JsoupVersion =  "1.10.2"
 
 val appProperties = settingKey[Properties]("The application properties")
@@ -59,6 +59,7 @@ lazy val listing_api = (project in file(".")).
       "com.sksamuel.elastic4s" %% "elastic4s-core" % Elastic4sVersion,
       "com.sksamuel.elastic4s" %% "elastic4s-http" % Elastic4sVersion,
       "com.sksamuel.elastic4s" %% "elastic4s-aws" % Elastic4sVersion,
+      "com.fasterxml.jackson.core" % "jackson-databind" % JacksonVersion, // Overriding jackson-databind used in elastic4s because of https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111
       "org.elasticsearch" % "elasticsearch" % ElasticsearchVersion % "test",
       "org.jsoup" % "jsoup" % JsoupVersion
     )
