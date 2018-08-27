@@ -1,6 +1,6 @@
 import java.util.Properties
 
-val Scalaversion = "2.12.2"
+val Scalaversion = "2.12.6"
 val Scalatraversion = "2.5.1"
 val ScalaLoggingVersion = "3.5.0"
 val Log4JVersion = "2.9.1"
@@ -21,16 +21,12 @@ appProperties := {
   prop
 }
 
-lazy val commonSettings = Seq(
-  organization := appProperties.value.getProperty("NDLAOrganization"),
-  version := appProperties.value.getProperty("NDLAComponentVersion"),
-  scalaVersion := Scalaversion
-)
-
 lazy val listing_api = (project in file(".")).
-  settings(commonSettings: _*).
   settings(
     name := "listing-api",
+    organization := appProperties.value.getProperty("NDLAOrganization"),
+    version := appProperties.value.getProperty("NDLAComponentVersion"),
+    scalaVersion := Scalaversion,
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
     scalacOptions := Seq("-target:jvm-1.8"),
     libraryDependencies ++= Seq(
@@ -63,19 +59,17 @@ lazy val listing_api = (project in file(".")).
       "org.elasticsearch" % "elasticsearch" % ElasticsearchVersion % "test",
       "org.jsoup" % "jsoup" % JsoupVersion
     )
-  ).enablePlugins(DockerPlugin).enablePlugins(GitVersioning).enablePlugins(JettyPlugin)
+  ).enablePlugins(DockerPlugin).enablePlugins(JettyPlugin)
 
-unmanagedResourceDirectories in Compile <+= (baseDirectory) {_ / "src/main/webapp"}
-
-assemblyJarName in assembly := "listing-api.jar"
-mainClass in assembly := Some("no.ndla.listingapi.JettyLauncher")
-assemblyMergeStrategy in assembly := {
+assembly / assemblyJarName := "listing-api.jar"
+assembly / mainClass := Some("no.ndla.listingapi.JettyLauncher")
+assembly / assemblyMergeStrategy := {
   case "mime.types" => MergeStrategy.filterDistinctLines
   case PathList("org", "joda", "convert", "ToString.class")  => MergeStrategy.first
   case PathList("org", "joda", "convert", "FromString.class")  => MergeStrategy.first
   case PathList("org", "joda", "time", "base", "BaseDateTime.class")  => MergeStrategy.first
   case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    val oldStrategy = (assembly / assemblyMergeStrategy).value
     oldStrategy(x)
 }
 
@@ -84,13 +78,13 @@ assemblyMergeStrategy in assembly := {
 // sbt "test-only -- -n no.ndla.tag.IntegrationTest"
 // will not run unless this line gets commented out or you remove the tag over the test class
 // This should be solved better!
-testOptions in Test += Tests.Argument("-l", "no.ndla.tag.IntegrationTest")
+Test / testOptions += Tests.Argument("-l", "no.ndla.tag.IntegrationTest")
 
 // Make the docker task depend on the assembly task, which generates a fat JAR file
-docker <<= (docker dependsOn assembly)
+docker := (docker dependsOn assembly).value
 
-dockerfile in docker := {
-  val artifact = (assemblyOutputPath in assembly).value
+docker / dockerfile := {
+  val artifact = (assembly / assemblyOutputPath).value
   val artifactTargetPath = s"/app/${artifact.name}"
   new Dockerfile {
     from("openjdk:8-jre-alpine")
@@ -100,15 +94,11 @@ dockerfile in docker := {
   }
 }
 
-val gitHeadCommitSha = settingKey[String]("current git commit SHA")
-gitHeadCommitSha in ThisBuild := Process("git log --pretty=format:%h -n 1").lines.head
-
-imageNames in docker := Seq(
+docker / imageNames := Seq(
   ImageName(
     namespace = Some(organization.value),
     repository = name.value,
     tag = Some(System.getProperty("docker.tag", "SNAPSHOT")))
 )
-
 
 resolvers ++= scala.util.Properties.envOrNone("NDLA_RELEASES").map(repo => "Release Sonatype Nexus Repository Manager" at repo).toSeq
