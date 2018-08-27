@@ -6,7 +6,6 @@
  *
  */
 
-
 package no.ndla.listingapi.service.search
 
 import java.text.SimpleDateFormat
@@ -15,7 +14,10 @@ import java.util.Calendar
 import com.sksamuel.elastic4s.analyzers._
 import com.sksamuel.elastic4s.http.ElasticDsl._
 import com.sksamuel.elastic4s.indexes.IndexDefinition
-import com.sksamuel.elastic4s.mappings.{MappingDefinition, NestedFieldDefinition}
+import com.sksamuel.elastic4s.mappings.{
+  MappingDefinition,
+  NestedFieldDefinition
+}
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.integration.Elastic4sClient
@@ -34,17 +36,20 @@ trait IndexService {
   class IndexService extends LazyLogging {
     val labelAnalyzer = CustomAnalyzer("lowercaseKeyword")
 
-    private def createIndexRequest(card: Cover, indexName: String): IndexDefinition = {
+    private def createIndexRequest(card: Cover,
+                                   indexName: String): IndexDefinition = {
       implicit val formats = SearchableLanguageFormats.JSonFormats
       val source = write(searchConverterService.asSearchableCover(card))
-      indexInto(indexName / ListingApiProperties.SearchDocument).doc(source).id(card.id.get.toString)
+      indexInto(indexName / ListingApiProperties.SearchDocument)
+        .doc(source)
+        .id(card.id.get.toString)
     }
 
     def indexDocument(cover: Cover): Try[Cover] = {
-      e4sClient.execute{
+      e4sClient.execute {
         createIndexRequest(cover, ListingApiProperties.SearchIndex)
       } match {
-        case Success(_) => Success(cover)
+        case Success(_)  => Success(cover)
         case Failure(ex) => Failure(ex)
       }
     }
@@ -52,8 +57,7 @@ trait IndexService {
     def indexDocuments(covers: List[Cover], indexName: String): Try[Int] = {
       if (covers.isEmpty) {
         Success(0)
-      }
-      else {
+      } else {
         val response = e4sClient.execute {
           bulk(covers.map(cover => {
             createIndexRequest(cover, indexName)
@@ -62,7 +66,8 @@ trait IndexService {
 
         response match {
           case Success(res) =>
-            logger.info(s"Indexed ${covers.size} documents. No of failed items: ${res.result.failures.size}")
+            logger.info(
+              s"Indexed ${covers.size} documents. No of failed items: ${res.result.failures.size}")
             Success(covers.size)
           case Failure(ex) => Failure(ex)
         }
@@ -73,11 +78,14 @@ trait IndexService {
       for {
         _ <- aliasTarget.map {
           case Some(index) => Success(index)
-          case None => createIndexWithGeneratedName.map(newIndex => updateAliasTarget(None, newIndex))
+          case None =>
+            createIndexWithGeneratedName.map(newIndex =>
+              updateAliasTarget(None, newIndex))
         }
         deleted <- {
-          e4sClient.execute{
-            delete(s"$coverId").from(ListingApiProperties.SearchIndex / ListingApiProperties.SearchDocument)
+          e4sClient.execute {
+            delete(s"$coverId").from(
+              ListingApiProperties.SearchIndex / ListingApiProperties.SearchDocument)
           }
         }
       } yield deleted
@@ -98,14 +106,14 @@ trait IndexService {
           s"max_result_window" -> ListingApiProperties.ElasticSearchIndexMaxResultWindow
         )
 
-        val response = e4sClient.execute{
+        val response = e4sClient.execute {
           createIndex(indexName)
             .mappings(buildMapping)
             .settings(settings)
         }
 
         response match {
-          case Success(_) => Success(indexName)
+          case Success(_)  => Success(indexName)
           case Failure(ex) => Failure(ex)
         }
       }
@@ -113,20 +121,20 @@ trait IndexService {
 
     private def buildMapping: MappingDefinition = {
       mapping(ListingApiProperties.SearchDocument).fields(
-          intField("id"),
-          languageSupportedField("title", keepRaw = true),
-          languageSupportedField("description"),
-          languageSupportedLabels("labels"),
-          keywordField("defaultTitle"),
-          textField("coverPhotoUrl"),
-          intField("articleApiId"),
-          intField("revision"),
-          textField("supportedLanguages"),
-          textField("updatedBy"),
-          dateField("lastUpdated"),
-          textField("theme"),
-          intField("oldNodeId")
-        )
+        intField("id"),
+        languageSupportedField("title", keepRaw = true),
+        languageSupportedField("description"),
+        languageSupportedLabels("labels"),
+        keywordField("defaultTitle"),
+        textField("coverPhotoUrl"),
+        intField("articleApiId"),
+        intField("revision"),
+        textField("supportedLanguages"),
+        textField("updatedBy"),
+        dateField("lastUpdated"),
+        textField("theme"),
+        intField("oldNodeId")
+      )
     }
 
     private def languageSupportedLabels(fieldName: String) = {
@@ -139,18 +147,30 @@ trait IndexService {
       nestedField(fieldName).fields(languageMappings)
     }
 
-    private def languageSupportedField(fieldName: String, keepRaw: Boolean = false) = {
+    private def languageSupportedField(fieldName: String,
+                                       keepRaw: Boolean = false) = {
       NestedFieldDefinition(fieldName).fields(
         keepRaw match {
-          case true => languageAnalyzers.map(langAnalyzer => textField(langAnalyzer.lang).fielddata(true).analyzer(langAnalyzer.analyzer).fields(keywordField("raw")))
-          case false => languageAnalyzers.map(langAnalyzer => textField(langAnalyzer.lang).fielddata(true).analyzer(langAnalyzer.analyzer))
+          case true =>
+            languageAnalyzers.map(
+              langAnalyzer =>
+                textField(langAnalyzer.lang)
+                  .fielddata(true)
+                  .analyzer(langAnalyzer.analyzer)
+                  .fields(keywordField("raw")))
+          case false =>
+            languageAnalyzers.map(
+              langAnalyzer =>
+                textField(langAnalyzer.lang)
+                  .fielddata(true)
+                  .analyzer(langAnalyzer.analyzer))
         }
       )
 
     }
 
     def aliasTarget: Try[Option[String]] = {
-      val response = e4sClient.execute{
+      val response = e4sClient.execute {
         getAliases(Nil, List(ListingApiProperties.SearchIndex))
       }
 
@@ -161,13 +181,15 @@ trait IndexService {
       }
     }
 
-    def updateAliasTarget(oldIndexName: Option[String], newIndexName: String): Try[Any] = {
+    def updateAliasTarget(oldIndexName: Option[String],
+                          newIndexName: String): Try[Any] = {
       if (!indexWithNameExists(newIndexName).getOrElse(false)) {
         Failure(new IllegalArgumentException(s"No such index: $newIndexName"))
       } else {
         oldIndexName match {
           case None =>
-            e4sClient.execute(addAlias(ListingApiProperties.SearchIndex).on(newIndexName))
+            e4sClient.execute(
+              addAlias(ListingApiProperties.SearchIndex).on(newIndexName))
           case Some(oldIndex) =>
             e4sClient.execute {
               removeAlias(ListingApiProperties.SearchIndex).on(oldIndex)
@@ -184,7 +206,7 @@ trait IndexService {
           if (!indexWithNameExists(indexName).getOrElse(false)) {
             Failure(new IllegalArgumentException(s"No such index: $indexName"))
           } else {
-            e4sClient.execute{
+            e4sClient.execute {
               deleteIndex(indexName)
             }
           }
@@ -199,13 +221,14 @@ trait IndexService {
 
       response match {
         case Success(resp) if resp.status != 404 => Success(true)
-        case Success(_) => Success(false)
-        case Failure(ex) => Failure(ex)
+        case Success(_)                          => Success(false)
+        case Failure(ex)                         => Failure(ex)
       }
     }
 
     private def getTimestamp: String = {
-      new SimpleDateFormat("yyyyMMddHHmmss").format(Calendar.getInstance.getTime)
+      new SimpleDateFormat("yyyyMMddHHmmss")
+        .format(Calendar.getInstance.getTime)
     }
   }
 }

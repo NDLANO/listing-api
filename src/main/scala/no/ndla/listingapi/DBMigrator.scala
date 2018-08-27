@@ -6,7 +6,6 @@
  *
  */
 
-
 package no.ndla.listingapi
 
 import javax.sql.DataSource

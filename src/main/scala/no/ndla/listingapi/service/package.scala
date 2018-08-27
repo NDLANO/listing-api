@@ -4,7 +4,7 @@ package object service {
 
   def createOembedUrl(oldNodeId: Option[Long]): Option[String] = {
     oldNodeId match {
-      case None => createOembedUrl(null)
+      case None     => createOembedUrl(null)
       case Some(id) => createOembedUrl(id)
     }
   }
@@ -12,7 +12,7 @@ package object service {
   def createOembedUrl(oldNodeId: Long): Option[String] = {
     oldNodeId match {
       case id if id == null => None
-      case _ => Option(s"https://ndla.no/node/$oldNodeId")
+      case _                => Option(s"https://ndla.no/node/$oldNodeId")
     }
   }
 }

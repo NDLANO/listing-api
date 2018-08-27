@@ -6,7 +6,6 @@
  *
  */
 
-
 package no.ndla.listingapi.controller
 
 import no.ndla.listingapi.service.WriteService
@@ -16,7 +15,7 @@ import org.scalatra.{InternalServerError, Ok}
 import scala.util.{Failure, Success}
 
 trait InternController {
-  this:  SearchIndexService with WriteService =>
+  this: SearchIndexService with WriteService =>
   val internController: InternController
 
   class InternController extends NdlaController {
@@ -24,7 +23,8 @@ trait InternController {
     post("/index") {
       searchIndexService.indexDocuments match {
         case Success(reindexResult) => {
-          val result = s"Completed indexing of ${reindexResult.totalIndexed} documents in ${reindexResult.millisUsed} ms."
+          val result =
+            s"Completed indexing of ${reindexResult.totalIndexed} documents in ${reindexResult.millisUsed} ms."
           logger.info(result)
           Ok(result)
         }

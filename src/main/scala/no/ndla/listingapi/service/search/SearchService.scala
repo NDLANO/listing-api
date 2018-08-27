@@ -6,16 +6,21 @@
  *
  */
 
-
 package no.ndla.listingapi.service.search
 
-import com.sksamuel.elastic4s.searches.queries.{BoolQueryDefinition, QueryDefinition}
+import com.sksamuel.elastic4s.searches.queries.{
+  BoolQueryDefinition,
+  QueryDefinition
+}
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
 import no.ndla.listingapi.integration.Elastic4sClient
 import no.ndla.listingapi.model.api
-import no.ndla.listingapi.model.api.{NdlaSearchException, ResultWindowTooLargeException}
+import no.ndla.listingapi.model.api.{
+  NdlaSearchException,
+  ResultWindowTooLargeException
+}
 import no.ndla.listingapi.model.domain.search.{Language, Sort}
 import no.ndla.listingapi.service.{Clock, createOembedUrl}
 import com.sksamuel.elastic4s.http.ElasticDsl._
@@ -34,15 +39,22 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait SearchService {
-  this: Elastic4sClient with SearchIndexService with SearchConverterService with Clock =>
+  this: Elastic4sClient
+    with SearchIndexService
+    with SearchConverterService
+    with Clock =>
   val searchService: SearchService
 
   class SearchService extends LazyLogging {
     implicit val formats = org.json4s.DefaultFormats
 
-    private val noCopyright = boolQuery().not(termQuery("license", "copyrighted"))
+    private val noCopyright =
+      boolQuery().not(termQuery("license", "copyrighted"))
 
-    def all(language: String, page: Int, pageSize: Int, sort: Sort.Value): api.SearchResult = {
+    def all(language: String,
+            page: Int,
+            pageSize: Int,
+            sort: Sort.Value): api.SearchResult = {
       executeSearch(
         language,
         sort,
@@ -52,10 +64,14 @@ trait SearchService {
       )
     }
 
-    def matchingQuery(query: Seq[String], language: String, page: Int, pageSize: Int, sort: Sort.Value): api.SearchResult = {
+    def matchingQuery(query: Seq[String],
+                      language: String,
+                      page: Int,
+                      pageSize: Int,
+                      sort: Sort.Value): api.SearchResult = {
       val languages = language match {
         case Language.AllLanguages | "*" => Language.supportedLanguages
-        case lang => List(lang)
+        case lang                        => List(lang)
       }
 
       val queries = languages.map(lang => {
@@ -63,7 +79,8 @@ trait SearchService {
           val hi = highlight("*").preTag("").postTag("").numberOfFragments(0)
           val ih = innerHits(lang).highlighting(hi)
           val termQ = matchPhraseQuery(s"labels.$lang.labels", q)
-          val titleSearch = nestedQuery(s"labels.$lang", termQ).scoreMode(ScoreMode.Avg)
+          val titleSearch =
+            nestedQuery(s"labels.$lang", termQ).scoreMode(ScoreMode.Avg)
           nestedQuery("labels", titleSearch).scoreMode(ScoreMode.Avg).inner(ih)
         }))
       })
@@ -71,20 +88,29 @@ trait SearchService {
       executeSearch(language, sort, page, pageSize, queries)
     }
 
-    private def executeSearch(language: String, sort: Sort.Value, page: Int, pageSize: Int, queries: Seq[BoolQueryDefinition]): api.SearchResult = {
+    private def executeSearch(
+        language: String,
+        sort: Sort.Value,
+        page: Int,
+        pageSize: Int,
+        queries: Seq[BoolQueryDefinition]): api.SearchResult = {
       val (languageFilter, searchLanguage) = language match {
         case Language.NoLanguage | Language.AllLanguages => (None, "*")
-        case lang => (Some(nestedQuery("title", existsQuery(s"title.$lang")).scoreMode(ScoreMode.Avg)), lang)
+        case lang =>
+          (Some(
+             nestedQuery("title", existsQuery(s"title.$lang"))
+               .scoreMode(ScoreMode.Avg)),
+           lang)
       }
 
       val postFilters = List(languageFilter)
       val querySearch = boolQuery().should(queries)
 
-
       val (startAt, numResults) = getStartAtAndNumResults(page, pageSize)
-      val requestedResultWindow = pageSize*page
-      if(requestedResultWindow > ListingApiProperties.ElasticSearchIndexMaxResultWindow) {
-        logger.info(s"Max supported results are ${ListingApiProperties.ElasticSearchIndexMaxResultWindow}, user requested $requestedResultWindow")
+      val requestedResultWindow = pageSize * page
+      if (requestedResultWindow > ListingApiProperties.ElasticSearchIndexMaxResultWindow) {
+        logger.info(
+          s"Max supported results are ${ListingApiProperties.ElasticSearchIndexMaxResultWindow}, user requested $requestedResultWindow")
         throw new ResultWindowTooLargeException()
       }
 
@@ -97,7 +123,12 @@ trait SearchService {
           .sortBy(getSortDefinition(sort, searchLanguage))
       } match {
         case Success(response) =>
-          api.SearchResult(response.result.totalHits, page, numResults, if (searchLanguage == "*") Language.AllLanguages else searchLanguage, getHits(response.result, searchLanguage))
+          api.SearchResult(response.result.totalHits,
+                           page,
+                           numResults,
+                           if (searchLanguage == "*") Language.AllLanguages
+                           else searchLanguage,
+                           getHits(response.result, searchLanguage))
         case Failure(ex) => errorHandler(Failure(ex))
       }
 
@@ -111,7 +142,9 @@ trait SearchService {
           resultArray.flatMap(result => {
             val matchedLanguage = language match {
               case Language.AllLanguages | "*" =>
-                searchConverterService.getLanguageFromHit(result).getOrElse(language)
+                searchConverterService
+                  .getLanguageFromHit(result)
+                  .getOrElse(language)
               case _ => language
             }
 
@@ -125,7 +158,9 @@ trait SearchService {
       val hit = parse(hitString)
 
       val labelsOpt = (hit \ "labels" \ language).extract[Option[JArray]]
-      def oldNodeIdOrNone = if ((hit \ "oldNodeId") == JNothing ) None else createOembedUrl((hit \ "oldNodeId").extract[Long])
+      def oldNodeIdOrNone =
+        if ((hit \ "oldNodeId") == JNothing) None
+        else createOembedUrl((hit \ "oldNodeId").extract[Long])
       labelsOpt.map(labels => {
         val title = (hit \ "title" \ language).extract[String]
         val description = (hit \ "description" \ language).extract[String]
@@ -133,10 +168,11 @@ trait SearchService {
         val api_labels = labels.arr.map(label => {
           api.Label(
             (label \ "type").extract[Option[String]],
-            (label \"labels").extract[Seq[String]]
+            (label \ "labels").extract[Seq[String]]
           )
         })
-        val supportedLanguages = (hit \ "supportedLanguages").extract[Seq[String]]
+        val supportedLanguages =
+          (hit \ "supportedLanguages").extract[Seq[String]]
 
         api.Cover(
           (hit \ "id").extract[Long],
@@ -155,27 +191,42 @@ trait SearchService {
       })
     }
 
-    def getSortDefinition(sort: Sort.Value, language: String): FieldSortDefinition = {
+    def getSortDefinition(sort: Sort.Value,
+                          language: String): FieldSortDefinition = {
       val sortLanguage = language match {
         case Language.NoLanguage => Language.DefaultLanguage
-        case _ => language
+        case _                   => language
       }
 
       sort match {
         case (Sort.ByTitleAsc) =>
           language match {
-            case "*" | Language.AllLanguages => fieldSort("defaultTitle").order(SortOrder.ASC).missing("_last")
-            case _ => fieldSort(s"title.$sortLanguage.raw").nestedPath("title").order(SortOrder.ASC).missing("_last")
+            case "*" | Language.AllLanguages =>
+              fieldSort("defaultTitle").order(SortOrder.ASC).missing("_last")
+            case _ =>
+              fieldSort(s"title.$sortLanguage.raw")
+                .nestedPath("title")
+                .order(SortOrder.ASC)
+                .missing("_last")
           }
         case (Sort.ByTitleDesc) =>
           language match {
-            case "*" | Language.AllLanguages => fieldSort("defaultTitle").order(SortOrder.DESC).missing("_last")
-            case _ => fieldSort(s"title.$sortLanguage.raw").nestedPath("title").order(SortOrder.DESC).missing("_last")
+            case "*" | Language.AllLanguages =>
+              fieldSort("defaultTitle").order(SortOrder.DESC).missing("_last")
+            case _ =>
+              fieldSort(s"title.$sortLanguage.raw")
+                .nestedPath("title")
+                .order(SortOrder.DESC)
+                .missing("_last")
           }
-        case (Sort.ByLastUpdatedAsc) => fieldSort("lastUpdated").order(SortOrder.ASC).missing("_last")
-        case (Sort.ByLastUpdatedDesc) => fieldSort("lastUpdated").order(SortOrder.DESC).missing("_last")
-        case (Sort.ByIdAsc) => fieldSort("id").order(SortOrder.ASC).missing("_last")
-        case (Sort.ByIdDesc) => fieldSort("id").order(SortOrder.DESC).missing("_last")
+        case (Sort.ByLastUpdatedAsc) =>
+          fieldSort("lastUpdated").order(SortOrder.ASC).missing("_last")
+        case (Sort.ByLastUpdatedDesc) =>
+          fieldSort("lastUpdated").order(SortOrder.DESC).missing("_last")
+        case (Sort.ByIdAsc) =>
+          fieldSort("id").order(SortOrder.ASC).missing("_last")
+        case (Sort.ByIdDesc) =>
+          fieldSort("id").order(SortOrder.DESC).missing("_last")
       }
     }
 
@@ -191,13 +242,17 @@ trait SearchService {
         case Failure(e: NdlaSearchException) => {
           e.rf.status match {
             case notFound: Int if notFound == 404 => {
-              logger.error(s"Index $SearchIndex not found. Scheduling a reindex.")
+              logger.error(
+                s"Index $SearchIndex not found. Scheduling a reindex.")
               scheduleIndexDocuments()
-              throw new IndexNotFoundException(s"Index $SearchIndex not found. Scheduling a reindex")
+              throw new IndexNotFoundException(
+                s"Index $SearchIndex not found. Scheduling a reindex")
             }
             case _ => {
               logger.error(e.getMessage)
-              throw new ElasticsearchException(s"Unable to execute search in $SearchIndex", e.getMessage)
+              throw new ElasticsearchException(
+                s"Unable to execute search in $SearchIndex",
+                e.getMessage)
             }
           }
 
@@ -211,21 +266,24 @@ trait SearchService {
         searchIndexService.indexDocuments
       }
 
-      f.failed.foreach(t => logger.warn("unable to create index: " + t.getMessage, t))
+      f.failed.foreach(t =>
+        logger.warn("unable to create index: " + t.getMessage, t))
       f.foreach {
-        case Success(reindexResult) => logger.info(s"Completed indexing of ${reindexResult.totalIndexed} documents in ${reindexResult.millisUsed} ms.")
+        case Success(reindexResult) =>
+          logger.info(
+            s"Completed indexing of ${reindexResult.totalIndexed} documents in ${reindexResult.millisUsed} ms.")
         case Failure(ex) => logger.warn(ex.getMessage, ex)
       }
     }
 
     def countDocuments: Long = {
-      val response = e4sClient.execute{
+      val response = e4sClient.execute {
         catCount(SearchIndex)
       }
 
       response match {
         case Success(resp) => resp.result.count
-        case Failure(_) => 0
+        case Failure(_)    => 0
       }
     }
 

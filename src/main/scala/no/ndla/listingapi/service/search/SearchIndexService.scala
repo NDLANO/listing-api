@@ -6,7 +6,6 @@
  *
  */
 
-
 package no.ndla.listingapi.service.search
 
 import com.typesafe.scalalogging.LazyLogging
@@ -27,7 +26,9 @@ trait SearchIndexService {
       for {
         _ <- indexService.aliasTarget.map {
           case Some(index) => Success(index)
-          case None => indexService.createIndexWithGeneratedName.map(newIndex => indexService.updateAliasTarget(None, newIndex))
+          case None =>
+            indexService.createIndexWithGeneratedName.map(newIndex =>
+              indexService.updateAliasTarget(None, newIndex))
         }
         imported <- indexService.indexDocument(cover)
       } yield imported
@@ -50,7 +51,8 @@ trait SearchIndexService {
               Failure(f)
             }
             case Success(totalIndexed) => {
-              Success(ReindexResult(totalIndexed, System.currentTimeMillis() - start))
+              Success(
+                ReindexResult(totalIndexed, System.currentTimeMillis() - start))
             }
           }
         })
@@ -61,10 +63,12 @@ trait SearchIndexService {
       var numIndexed = 0
       getRanges.map(ranges => {
         ranges.foreach(range => {
-          val numberInBulk = indexService.indexDocuments(listingRepository.cardsWithIdBetween(range._1, range._2), indexName)
+          val numberInBulk = indexService.indexDocuments(
+            listingRepository.cardsWithIdBetween(range._1, range._2),
+            indexName)
           numberInBulk match {
             case Success(num) => numIndexed += num
-            case Failure(f) => return Failure(f)
+            case Failure(f)   => return Failure(f)
           }
         })
         numIndexed
@@ -74,7 +78,11 @@ trait SearchIndexService {
     def getRanges: Try[List[(Long, Long)]] = {
       Try {
         val (minId, maxId) = listingRepository.minMaxId
-        Seq.range(minId, maxId).grouped(ListingApiProperties.IndexBulkSize).map(group => (group.head, group.last + 1)).toList
+        Seq
+          .range(minId, maxId)
+          .grouped(ListingApiProperties.IndexBulkSize)
+          .map(group => (group.head, group.last + 1))
+          .toList
       }
     }
   }

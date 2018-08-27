@@ -12,7 +12,16 @@ import no.ndla.network.secrets.PropertyKeys
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest._
 
-abstract class UnitSuite extends FunSuite with Matchers with OptionValues with Inside with Inspectors with MockitoSugar with BeforeAndAfterEach with BeforeAndAfterAll with PrivateMethodTester {
+abstract class UnitSuite
+    extends FunSuite
+    with Matchers
+    with OptionValues
+    with Inside
+    with Inspectors
+    with MockitoSugar
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll
+    with PrivateMethodTester {
   setEnv("NDLA_ENVIRONMENT", "local")
   setEnv(PropertyKeys.MetaUserNameKey, "postgres")
   setEnv(PropertyKeys.MetaPasswordKey, "hemmelig")
@@ -28,6 +37,8 @@ abstract class UnitSuite extends FunSuite with Matchers with OptionValues with I
   private def env = {
     val field = System.getenv().getClass.getDeclaredField("m")
     field.setAccessible(true)
-    field.get(System.getenv()).asInstanceOf[java.util.Map[java.lang.String, java.lang.String]]
+    field
+      .get(System.getenv())
+      .asInstanceOf[java.util.Map[java.lang.String, java.lang.String]]
   }
 }
