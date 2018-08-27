@@ -73,6 +73,24 @@ assembly / assemblyMergeStrategy := {
     oldStrategy(x)
 }
 
+val checkfmt = taskKey[Boolean]("check for code style errors")
+checkfmt := {
+  val noErrorsInMainFiles = (Compile / scalafmtCheck).value
+  val noErrorsInTestFiles = (Test / scalafmtCheck).value
+  val noErrorsInBuildFiles = (Compile / scalafmtSbtCheck).value
+
+  noErrorsInMainFiles && noErrorsInTestFiles && noErrorsInBuildFiles
+}
+
+Test / test := (Test / test).dependsOn(Test / checkfmt).value
+
+val fmt = taskKey[Unit]("Automatically apply code style fixes")
+fmt := {
+  (Compile / scalafmt).value
+  (Test / scalafmt).value
+  (Compile / scalafmtSbt).value
+}
+
 // Don't run Integration tests in default run on Travis as there is no elasticsearch localhost:9200 there yet.
 // NB this line will unfortunalty override runs on your local commandline so that
 // sbt "test-only -- -n no.ndla.tag.IntegrationTest"
