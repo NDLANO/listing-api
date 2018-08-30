@@ -33,14 +33,17 @@ object Language {
 
   val supportedLanguages = languageAnalyzers.map(_.lang)
 
-  def findByLanguageOrBestEffort[P <: LanguageField[_]](sequence: Seq[P], lang: String): Option[P] = {
-    @tailrec def findFirstLanguageMatching(sequence: Seq[P], lang: Seq[String]): Option[P] = {
+  def findByLanguageOrBestEffort[P <: LanguageField[_]](
+      sequence: Seq[P],
+      lang: String): Option[P] = {
+    @tailrec def findFirstLanguageMatching(sequence: Seq[P],
+                                           lang: Seq[String]): Option[P] = {
       lang match {
         case Nil => sequence.headOption
         case head :: tail =>
           sequence.find(_.language == head) match {
             case Some(x) => Some(x)
-            case None => findFirstLanguageMatching(sequence, tail)
+            case None    => findFirstLanguageMatching(sequence, tail)
           }
       }
     }
@@ -51,7 +54,7 @@ object Language {
   def languageOrUnknown(language: Option[String]): String = {
     language.filter(_.nonEmpty) match {
       case Some(x) => x
-      case None => UnknownLanguage
+      case None    => UnknownLanguage
     }
   }
 }

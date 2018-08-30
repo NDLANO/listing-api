@@ -23,7 +23,6 @@ abstract class IntegrationSuite extends UnitSuite {
   setEnv(PropertyKeys.MetaSchemaKey, "listingapitest")
   setEnv("RUN_WITH_SIGNED_SEARCH_REQUESTS", "false")
 
-
   def getDataSource: DataSource = {
     val datasource = new PGPoolingDataSource()
     datasource.setUser(ListingApiProperties.MetaUserName)
@@ -31,7 +30,8 @@ abstract class IntegrationSuite extends UnitSuite {
     datasource.setDatabaseName(ListingApiProperties.MetaResource)
     datasource.setServerName(ListingApiProperties.MetaServer)
     datasource.setPortNumber(ListingApiProperties.MetaPort)
-    datasource.setInitialConnections(ListingApiProperties.MetaInitialConnections)
+    datasource.setInitialConnections(
+      ListingApiProperties.MetaInitialConnections)
     datasource.setMaxConnections(ListingApiProperties.MetaMaxConnections)
     datasource.setCurrentSchema(ListingApiProperties.MetaSchema)
     datasource

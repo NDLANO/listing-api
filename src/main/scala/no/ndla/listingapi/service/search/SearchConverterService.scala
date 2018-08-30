@@ -20,20 +20,26 @@ trait SearchConverterService {
 
   class SearchConverterService extends LazyLogging {
     def asSearchableCover(card: Cover): SearchableCover = {
-      val defaultTitle = card.title.sortBy(title => {
-        val languagePriority = Language.languageAnalyzers.map(la => la.lang).reverse
-        languagePriority.indexOf(title.language)
-      }).lastOption
-
+      val defaultTitle = card.title
+        .sortBy(title => {
+          val languagePriority =
+            Language.languageAnalyzers.map(la => la.lang).reverse
+          languagePriority.indexOf(title.language)
+        })
+        .lastOption
 
       SearchableCover(
         id = card.id.get,
         revision = card.revision.get,
-        title = SearchableLanguageValues(card.title.map(title => LanguageValue(title.language, title.title))),
-        description = SearchableLanguageValues(card.description.map(description => LanguageValue(description.language, description.description))),
+        title = SearchableLanguageValues(
+          card.title.map(title => LanguageValue(title.language, title.title))),
+        description =
+          SearchableLanguageValues(card.description.map(description =>
+            LanguageValue(description.language, description.description))),
         card.articleApiId,
         card.coverPhotoUrl,
-        SearchableLanguageList(card.labels.map(label => LanguageValue(label.language, label.labels))),
+        SearchableLanguageList(card.labels.map(label =>
+          LanguageValue(label.language, label.labels))),
         defaultTitle.map(_.title),
         card.supportedLanguages,
         card.updatedBy,
@@ -44,17 +50,24 @@ trait SearchConverterService {
     }
 
     def getLanguageFromHit(result: SearchHit): Option[String] = {
-      val sortedInnerHits = result.innerHits.toList.filter(ih => ih._2.total > 0).sortBy {
-        case (_, hit) => hit.max_score
-      }.reverse
+      val sortedInnerHits = result.innerHits.toList
+        .filter(ih => ih._2.total > 0)
+        .sortBy {
+          case (_, hit) => hit.max_score
+        }
+        .reverse
 
       val matchLanguage = sortedInnerHits.headOption.flatMap {
         case (_, innerHit) =>
-          innerHit.hits.sortBy(hit => hit.score).reverse.headOption.flatMap(hit => {
-            hit.highlight.headOption.map(hl => {
-              hl._1.split('.').filterNot(_ == "labels").last
+          innerHit.hits
+            .sortBy(hit => hit.score)
+            .reverse
+            .headOption
+            .flatMap(hit => {
+              hit.highlight.headOption.map(hl => {
+                hl._1.split('.').filterNot(_ == "labels").last
+              })
             })
-          })
       }
 
       matchLanguage match {
@@ -69,10 +82,13 @@ trait SearchConverterService {
           val languages = titleMap.map(title => title.keySet.toList)
 
           languages.flatMap(languageList => {
-            languageList.sortBy(lang => {
-              val languagePriority = Language.languageAnalyzers.map(la => la.lang).reverse
-              languagePriority.indexOf(lang)
-            }).lastOption
+            languageList
+              .sortBy(lang => {
+                val languagePriority =
+                  Language.languageAnalyzers.map(la => la.lang).reverse
+                languagePriority.indexOf(lang)
+              })
+              .lastOption
           })
       }
     }

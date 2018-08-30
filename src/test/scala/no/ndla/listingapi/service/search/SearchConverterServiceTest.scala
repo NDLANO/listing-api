@@ -11,9 +11,18 @@ package no.ndla.listingapi.service.search
 import java.util.Date
 
 import no.ndla.listingapi.model.api.NotFoundException
-import no.ndla.listingapi.model.domain.{Description, Label, LanguageLabels, Title}
+import no.ndla.listingapi.model.domain.{
+  Description,
+  Label,
+  LanguageLabels,
+  Title
+}
 import no.ndla.listingapi.model.domain.search.LanguageValue.LanguageValue
-import no.ndla.listingapi.model.domain.search.{SearchableCover, SearchableLanguageList, SearchableLanguageValues}
+import no.ndla.listingapi.model.domain.search.{
+  SearchableCover,
+  SearchableLanguageList,
+  SearchableLanguageValues
+}
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
 
 class SearchConverterServiceTest extends UnitSuite with TestEnvironment {
@@ -33,7 +42,8 @@ class SearchConverterServiceTest extends UnitSuite with TestEnvironment {
       SearchableLanguageValues(Seq(LanguageValue("nb", "description"))),
       sampleCover.articleApiId,
       sampleCover.coverPhotoUrl,
-      SearchableLanguageList(Seq(LanguageValue("nb", sampleCover.labels.head.labels))),
+      SearchableLanguageList(
+        Seq(LanguageValue("nb", sampleCover.labels.head.labels))),
       Some("title"),
       Set("nb"),
       sampleCover.updatedBy,
@@ -42,7 +52,7 @@ class SearchConverterServiceTest extends UnitSuite with TestEnvironment {
       sampleCover.oldNodeId
     )
 
-    searchConverterService.asSearchableCover(sampleCover) should equal (expected)
+    searchConverterService.asSearchableCover(sampleCover) should equal(expected)
   }
 
 }

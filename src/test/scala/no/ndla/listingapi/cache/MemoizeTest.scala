@@ -6,7 +6,6 @@
  *
  */
 
-
 package no.ndla.listingapi.cache
 
 import no.ndla.listingapi.UnitSuite
@@ -21,7 +20,8 @@ class MemoizeTest extends UnitSuite {
 
   test("That an uncached value will do an actual call") {
     val targetMock = mock[Target]
-    val memoizedTarget = new Memoize[String](Long.MaxValue, targetMock.targetMethod, false)
+    val memoizedTarget =
+      new Memoize[String](Long.MaxValue, targetMock.targetMethod, false)
 
     when(targetMock.targetMethod()).thenReturn("Hello from mock")
     memoizedTarget() should equal("Hello from mock")
@@ -30,10 +30,11 @@ class MemoizeTest extends UnitSuite {
 
   test("That a cached value will not forward the call to the target") {
     val targetMock = mock[Target]
-    val memoizedTarget = new Memoize[String](Long.MaxValue, targetMock.targetMethod, false)
+    val memoizedTarget =
+      new Memoize[String](Long.MaxValue, targetMock.targetMethod, false)
 
     when(targetMock.targetMethod()).thenReturn("Hello from mock")
-    Seq(1 to 10).foreach (i => {
+    Seq(1 to 10).foreach(i => {
       memoizedTarget() should equal("Hello from mock")
     })
     verify(targetMock, times(1)).targetMethod()
@@ -42,7 +43,8 @@ class MemoizeTest extends UnitSuite {
   test("That the cache is invalidated after cacheMaxAge") {
     val cacheMaxAgeInMs = 20
     val targetMock = mock[Target]
-    val memoizedTarget = new Memoize[String](cacheMaxAgeInMs, targetMock.targetMethod, false)
+    val memoizedTarget =
+      new Memoize[String](cacheMaxAgeInMs, targetMock.targetMethod, false)
 
     when(targetMock.targetMethod()).thenReturn("Hello from mock")
 

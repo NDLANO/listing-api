@@ -11,7 +11,6 @@ import java.util.Date
 
 import no.ndla.listingapi.{TestEnvironment, UnitSuite}
 
-
 class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
 
   val migration = new V2__AddLanguageToAll
@@ -24,7 +23,9 @@ class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
       "",
       Seq(V2_Title("Tittel", None)),
       Seq(V2_Description("Description", None)),
-      Seq(V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))), None)),
+      Seq(
+        V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))),
+                          None)),
       1,
       "",
       new Date(),
@@ -33,9 +34,9 @@ class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
 
     val after = migration.updateCoverLanguage(before)
 
-    after.title.forall(_.language.contains("unknown")) should be (true)
-    after.labels.forall(_.language.contains("unknown")) should be (true)
-    after.description.forall(_.language.contains("unknown")) should be (true)
+    after.title.forall(_.language.contains("unknown")) should be(true)
+    after.labels.forall(_.language.contains("unknown")) should be(true)
+    after.description.forall(_.language.contains("unknown")) should be(true)
   }
 
   test("add language to stuff with missing empty string as language") {
@@ -46,7 +47,9 @@ class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
       "",
       Seq(V2_Title("Tittel", Some(""))),
       Seq(V2_Description("Description", Some(""))),
-      Seq(V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))), Some(""))),
+      Seq(
+        V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))),
+                          Some(""))),
       1,
       "",
       new Date(),
@@ -54,9 +57,9 @@ class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
     )
 
     val after = migration.updateCoverLanguage(before)
-    after.title.forall(_.language.contains("unknown")) should be (true)
-    after.labels.forall(_.language.contains("unknown")) should be (true)
-    after.description.forall(_.language.contains("unknown")) should be (true)
+    after.title.forall(_.language.contains("unknown")) should be(true)
+    after.labels.forall(_.language.contains("unknown")) should be(true)
+    after.description.forall(_.language.contains("unknown")) should be(true)
   }
 
   test("existing languages should not be modified") {
@@ -67,7 +70,9 @@ class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
       "",
       Seq(V2_Title("Tittel", Some("nb"))),
       Seq(V2_Description("Description", Some("de"))),
-      Seq(V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))), Some("fr"))),
+      Seq(
+        V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))),
+                          Some("fr"))),
       1,
       "",
       new Date(),
@@ -75,9 +80,9 @@ class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
     )
 
     val after = migration.updateCoverLanguage(before)
-    after.title.forall(_.language.contains("nb")) should be (true)
-    after.labels.forall(_.language.contains("fr")) should be (true)
-    after.description.forall(_.language.contains("de")) should be (true)
+    after.title.forall(_.language.contains("nb")) should be(true)
+    after.labels.forall(_.language.contains("fr")) should be(true)
+    after.description.forall(_.language.contains("de")) should be(true)
   }
 
 }

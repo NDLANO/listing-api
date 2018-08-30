@@ -7,5 +7,5 @@ object Theme {
   val VERKTOY = "verktoy"
   val NATURBRUK = "naturbruk"
 
-  val allowedThemes :List [String] = List(NATURBRUK, VERKTOY)
+  val allowedThemes: List[String] = List(NATURBRUK, VERKTOY)
 }

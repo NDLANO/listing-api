@@ -13,13 +13,15 @@ package object domain {
   type LabelName = String
   type ThemeName = String
 
-  def emptySomeToNone(lang: Option[String]): Option[String] = lang.filter(_.nonEmpty)
+  def emptySomeToNone(lang: Option[String]): Option[String] =
+    lang.filter(_.nonEmpty)
 
   trait LanguageField[T] {
     val language: String
     def data: T
   }
 
-  def getByLanguage[U <: LanguageField[_]](fields: Seq[U], language: String): Option[U] =
+  def getByLanguage[U <: LanguageField[_]](fields: Seq[U],
+                                           language: String): Option[U] =
     fields.find(_.language == language)
 }

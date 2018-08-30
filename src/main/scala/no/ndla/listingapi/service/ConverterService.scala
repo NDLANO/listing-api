@@ -2,7 +2,10 @@ package no.ndla.listingapi.service
 
 import no.ndla.listingapi.auth.Client
 import no.ndla.listingapi.model.api.NotFoundException
-import no.ndla.listingapi.model.domain.search.Language.{DefaultLanguage, findByLanguageOrBestEffort}
+import no.ndla.listingapi.model.domain.search.Language.{
+  DefaultLanguage,
+  findByLanguageOrBestEffort
+}
 import no.ndla.listingapi.model.domain.{LanguageLabels, getByLanguage}
 import no.ndla.listingapi.model.{api, domain}
 
@@ -34,25 +37,30 @@ trait ConverterService {
       )
     }
 
-    private def toApiCoverTitle(titles: Seq[domain.Title], language: String): api.CoverTitle = {
+    private def toApiCoverTitle(titles: Seq[domain.Title],
+                                language: String): api.CoverTitle = {
       findByLanguageOrBestEffort(titles, language)
         .map(t => api.CoverTitle(t.title, t.language))
         .getOrElse(api.CoverTitle("", DefaultLanguage))
     }
 
-    private def toApiCoverDescription(descriptions: Seq[domain.Description], language: String): api.CoverDescription = {
+    private def toApiCoverDescription(
+        descriptions: Seq[domain.Description],
+        language: String): api.CoverDescription = {
       findByLanguageOrBestEffort(descriptions, language)
         .map(t => api.CoverDescription(t.description, t.language))
         .getOrElse(api.CoverDescription("", DefaultLanguage))
     }
 
-    private def toApiCoverLabels(labels: Seq[LanguageLabels], language: String): api.CoverLabels = {
+    private def toApiCoverLabels(labels: Seq[LanguageLabels],
+                                 language: String): api.CoverLabels = {
       findByLanguageOrBestEffort(labels, language)
         .map(t => api.CoverLabels(t.labels.map(toApiCoverLabel), t.language))
         .getOrElse(api.CoverLabels(Seq.empty, DefaultLanguage))
     }
 
-    private def toApiCoverLabel(label: domain.Label): api.Label = api.Label(label.`type`, label.labels)
+    private def toApiCoverLabel(label: domain.Label): api.Label =
+      api.Label(label.`type`, label.labels)
 
     def toDomainCover(cover: api.NewCover): domain.Cover = {
       domain.Cover(
@@ -70,7 +78,8 @@ trait ConverterService {
       )
     }
 
-    def toDomainLabel(label: api.Label): domain.Label = domain.Label(label.`type`, label.labels)
+    def toDomainLabel(label: api.Label): domain.Label =
+      domain.Label(label.`type`, label.labels)
 
   }
 

@@ -15,11 +15,16 @@ import no.ndla.listingapi.controller.{HealthController, ListingController}
 import no.ndla.listingapi.integration._
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service._
-import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
+import no.ndla.listingapi.service.search.{
+  IndexService,
+  SearchConverterService,
+  SearchIndexService,
+  SearchService
+}
 import org.scalatest.mockito.MockitoSugar._
 
 trait TestEnvironment
-  extends DataSource
+    extends DataSource
     with ReadService
     with WriteService
     with CoverValidator

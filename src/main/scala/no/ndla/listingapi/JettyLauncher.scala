@@ -15,14 +15,16 @@ import org.scalatra.servlet.ScalatraListener
 
 import scala.io.Source
 
-
 object JettyLauncher extends LazyLogging {
   def buildLabelsCache = {
     ComponentRegistry.readService.allLabelsMap()
   }
 
   def main(args: Array[String]) {
-    logger.info(Source.fromInputStream(getClass.getResourceAsStream("/log-license.txt")).mkString)
+    logger.info(
+      Source
+        .fromInputStream(getClass.getResourceAsStream("/log-license.txt"))
+        .mkString)
 
     val source = ComponentRegistry.dataSource
     DBMigrator.migrate(source)
@@ -30,20 +32,23 @@ object JettyLauncher extends LazyLogging {
     val startMillis = System.currentTimeMillis()
 
     buildLabelsCache
-    logger.info(s"Built tags cache in ${System.currentTimeMillis() - startMillis} ms.")
+    logger.info(
+      s"Built tags cache in ${System.currentTimeMillis() - startMillis} ms.")
 
     val context = new ServletContextHandler()
     context setContextPath "/"
     context.addEventListener(new ScalatraListener)
     context.addServlet(classOf[DefaultServlet], "/")
-    context.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false")
+    context.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed",
+                             "false")
 
     val server = new Server(ListingApiProperties.ApplicationPort)
     server.setHandler(context)
     server.start()
 
     val startTime = System.currentTimeMillis() - startMillis
-    logger.info(s"Started at port ${ListingApiProperties.ApplicationPort} in $startTime ms.")
+    logger.info(
+      s"Started at port ${ListingApiProperties.ApplicationPort} in $startTime ms.")
 
     server.join()
   }

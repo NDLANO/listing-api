@@ -19,18 +19,18 @@ import scalikejdbc._
 import scala.util.{Failure, Success, Try}
 
 case class Cover(id: Option[Long],
-  revision: Option[Int],
-  oldNodeId: Option[Long],
-  coverPhotoUrl: String,
-  title: Seq[Title],
-  description: Seq[Description],
-  labels: Seq[LanguageLabels],
-  articleApiId: Long,
-  updatedBy: String,
-  updated: Date,
-  theme: ThemeName
-) {
-  lazy val supportedLanguages: Set[String] = (title union description union labels).map(_.language).toSet
+                 revision: Option[Int],
+                 oldNodeId: Option[Long],
+                 coverPhotoUrl: String,
+                 title: Seq[Title],
+                 description: Seq[Description],
+                 labels: Seq[LanguageLabels],
+                 articleApiId: Long,
+                 updatedBy: String,
+                 updated: Date,
+                 theme: ThemeName) {
+  lazy val supportedLanguages: Set[String] =
+    (title union description union labels).map(_.language).toSet
 }
 
 object Cover extends SQLSyntaxSupport[Cover] {
@@ -42,11 +42,13 @@ object Cover extends SQLSyntaxSupport[Cover] {
       ignore("revision")
   )
 
-  def apply(s: SyntaxProvider[Cover])(rs: WrappedResultSet): Cover = apply(s.resultName)(rs)
+  def apply(s: SyntaxProvider[Cover])(rs: WrappedResultSet): Cover =
+    apply(s.resultName)(rs)
 
   def apply(s: ResultName[Cover])(rs: WrappedResultSet): Cover = {
     val meta = read[Cover](rs.string(s.c("document")))
-    Cover(Some(rs.long(s.c("id"))),
+    Cover(
+      Some(rs.long(s.c("id"))),
       Some(rs.int(s.c("revision"))),
       meta.oldNodeId,
       meta.coverPhotoUrl,

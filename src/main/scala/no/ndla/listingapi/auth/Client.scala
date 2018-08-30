@@ -10,7 +10,6 @@ package no.ndla.listingapi.auth
 import no.ndla.listingapi.model.api.AccessDeniedException
 import no.ndla.network.AuthUser
 
-
 trait Client {
 
   val authClient: AuthClient
@@ -24,10 +23,10 @@ trait Client {
 
     def assertHasClientId(): Unit = {
       if (AuthUser.getClientId.isEmpty || AuthUser.getClientId.get.isEmpty) {
-        throw new AccessDeniedException("Client id required to perform this operation")
+        throw new AccessDeniedException(
+          "Client id required to perform this operation")
       }
     }
-
 
   }
 

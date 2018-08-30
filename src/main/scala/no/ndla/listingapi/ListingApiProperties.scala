@@ -6,7 +6,6 @@
  *
  */
 
-
 package no.ndla.listingapi
 
 import com.typesafe.scalalogging.LazyLogging
@@ -28,9 +27,11 @@ object ListingApiProperties extends LazyLogging {
   val Environment = propOrElse("NDLA_ENVIRONMENT", "local")
   lazy val Domain: String = Domains.get(Environment)
 
-  val SearchServer = propOrElse("SEARCH_SERVER", "http://search-listing-api.ndla-local")
+  val SearchServer =
+    propOrElse("SEARCH_SERVER", "http://search-listing-api.ndla-local")
   val SearchRegion = propOrElse("SEARCH_REGION", "eu-central-1")
-  val RunWithSignedSearchRequests = propOrElse("RUN_WITH_SIGNED_SEARCH_REQUESTS", "true").toBoolean
+  val RunWithSignedSearchRequests =
+    propOrElse("RUN_WITH_SIGNED_SEARCH_REQUESTS", "true").toBoolean
   val SearchIndex = propOrElse("SEARCH_INDEX_NAME", "listings")
   val SearchDocument = "listing"
   val DefaultPageSize = 100
@@ -55,9 +56,12 @@ object ListingApiProperties extends LazyLogging {
   val ElasticSearchIndexMaxResultWindow = 10000
 
   lazy val secrets = readSecrets(SecretsFile) match {
-     case Success(values) => values
-     case Failure(exception) => throw new RuntimeException(s"Unable to load remote secrets from $SecretsFile", exception)
-   }
+    case Success(values) => values
+    case Failure(exception) =>
+      throw new RuntimeException(
+        s"Unable to load remote secrets from $SecretsFile",
+        exception)
+  }
 
   def booleanProp(key: String) = prop(key).toBoolean
 
@@ -71,7 +75,7 @@ object ListingApiProperties extends LazyLogging {
       case None =>
         envOrNone(key) match {
           case Some(env) => env
-          case None => default
+          case None      => default
         }
     }
   }

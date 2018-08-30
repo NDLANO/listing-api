@@ -19,7 +19,8 @@ import org.postgresql.util.PGobject
 import scalikejdbc.{DB, DBSession, _}
 
 class V2__AddLanguageToAll extends JdbcMigration {
-  implicit val formats = org.json4s.DefaultFormats + FieldSerializer[V2_Cover](ignore("id"))
+  implicit val formats = org.json4s.DefaultFormats + FieldSerializer[V2_Cover](
+    ignore("id"))
 
   override def migrate(connection: Connection): Unit = {
     val db = DB(connection)
@@ -32,30 +33,39 @@ class V2__AddLanguageToAll extends JdbcMigration {
 
   def updateCoverLanguage(cover: V2_Cover): V2_Cover = {
     cover.copy(
-      title = cover.title.map(t => V2_Title(t.title, Some(Language.languageOrUnknown(t.language)))),
-      description = cover.description.map(t => V2_Description(t.description, Some(Language.languageOrUnknown(t.language)))),
-      labels = cover.labels.map(t => V2_LanguageLabels(t.labels, Some(Language.languageOrUnknown(t.language))))
+      title = cover.title.map(t =>
+        V2_Title(t.title, Some(Language.languageOrUnknown(t.language)))),
+      description = cover.description.map(
+        t =>
+          V2_Description(t.description,
+                         Some(Language.languageOrUnknown(t.language)))),
+      labels = cover.labels.map(
+        t =>
+          V2_LanguageLabels(t.labels,
+                            Some(Language.languageOrUnknown(t.language))))
     )
   }
 
   def allImages(implicit session: DBSession): List[V2_Cover] = {
-    sql"select id, document, revision from covers".map(rs => {
-      val meta = read[V2_Cover](rs.string("document"))
-      V2_Cover(
-        Some(rs.long("id")),
-        Some(rs.int("revision")),
-        meta.oldNodeId,
-        meta.coverPhotoUrl,
-        meta.title,
-        meta.description,
-        meta.labels,
-        meta.articleApiId,
-        meta.updatedBy,
-        meta.updated,
-        meta.theme
-      )
-    }
-    ).list().apply()
+    sql"select id, document, revision from covers"
+      .map(rs => {
+        val meta = read[V2_Cover](rs.string("document"))
+        V2_Cover(
+          Some(rs.long("id")),
+          Some(rs.int("revision")),
+          meta.oldNodeId,
+          meta.coverPhotoUrl,
+          meta.title,
+          meta.description,
+          meta.labels,
+          meta.articleApiId,
+          meta.updatedBy,
+          meta.updated,
+          meta.theme
+        )
+      })
+      .list()
+      .apply()
   }
 
   def update(cover: V2_Cover)(implicit session: DBSession) = {
@@ -63,22 +73,24 @@ class V2__AddLanguageToAll extends JdbcMigration {
     dataObject.setType("jsonb")
     dataObject.setValue(write(cover))
 
-    sql"update covers set document = $dataObject where id = ${cover.id}".update().apply
+    sql"update covers set document = $dataObject where id = ${cover.id}"
+      .update()
+      .apply
   }
 
 }
 
 case class V2_Cover(id: Option[Long],
-                 revision: Option[Int],
-                 oldNodeId: Option[Long],
-                 coverPhotoUrl: String,
-                 title: Seq[V2_Title],
-                 description: Seq[V2_Description],
-                 labels: Seq[V2_LanguageLabels],
-                 articleApiId: Long,
-                 updatedBy: String,
-                 updated: Date,
-                 theme: String)
+                    revision: Option[Int],
+                    oldNodeId: Option[Long],
+                    coverPhotoUrl: String,
+                    title: Seq[V2_Title],
+                    description: Seq[V2_Description],
+                    labels: Seq[V2_LanguageLabels],
+                    articleApiId: Long,
+                    updatedBy: String,
+                    updated: Date,
+                    theme: String)
 
 case class V2_Title(title: String, language: Option[String])
 case class V2_Description(description: String, language: Option[String])
