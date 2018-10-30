@@ -8,11 +8,14 @@
 
 package no.ndla.listingapi.service.search
 
+import java.nio.file.{Files, Path}
+
+import com.sksamuel.elastic4s.embedded.{InternalLocalNode, LocalNode}
 import no.ndla.listingapi.ListingApiProperties.{
   DefaultLanguage,
   DefaultPageSize
 }
-import no.ndla.listingapi.integration.Elastic4sClientFactory
+import no.ndla.listingapi.integration.{Elastic4sClientFactory, NdlaE4sClient}
 import no.ndla.listingapi.model.domain.search.Sort
 import no.ndla.listingapi.model.domain.{
   Description,
@@ -26,15 +29,17 @@ import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.util.{Failure, Success, Try}
 
-@IntegrationTest
 class SearchServiceTest extends IntegrationSuite with TestEnvironment {
+  val tmpDir: Path = Files.createTempDirectory(this.getClass.getName)
+  val localNodeSettings: Map[String, String] =
+    LocalNode.requiredSettings(this.getClass.getName, tmpDir.toString)
+  val localNode: InternalLocalNode = LocalNode(localNodeSettings)
+  override val e4sClient: NdlaE4sClient = NdlaE4sClient(localNode.client(true))
 
-  val esPort = 9200
-  override val e4sClient =
-    Elastic4sClientFactory.getClient(searchServer = s"http://localhost:$esPort")
   override val searchService = new SearchService
   override val indexService = new IndexService
   override val searchConverterService = new SearchConverterService
+  override val converterService = new ConverterService
   val today = DateTime.now()
   val date1 = new DateTime(2017, 2, 1, 12, 12, 32, DateTimeZone.UTC).toDate
   val date2 = new DateTime(2018, 1, 2, 15, 15, 32, DateTimeZone.UTC).toDate

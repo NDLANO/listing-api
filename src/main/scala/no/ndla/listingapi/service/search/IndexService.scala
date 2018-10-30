@@ -13,18 +13,14 @@ import java.util.Calendar
 
 import com.sksamuel.elastic4s.analyzers._
 import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.indexes.IndexDefinition
-import com.sksamuel.elastic4s.mappings.{
-  MappingDefinition,
-  NestedFieldDefinition
-}
+import com.sksamuel.elastic4s.indexes.IndexRequest
+import com.sksamuel.elastic4s.mappings.{MappingDefinition, NestedField}
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.integration.Elastic4sClient
 import no.ndla.listingapi.model.domain.Cover
 import no.ndla.listingapi.model.domain.search.Language.languageAnalyzers
 import no.ndla.listingapi.model.domain.search.SearchableLanguageFormats
-import org.elasticsearch.common.settings.Settings
 import org.json4s.native.Serialization.write
 
 import scala.util.{Failure, Success, Try}
@@ -37,7 +33,7 @@ trait IndexService {
     val labelAnalyzer = CustomAnalyzer("lowercaseKeyword")
 
     private def createIndexRequest(card: Cover,
-                                   indexName: String): IndexDefinition = {
+                                   indexName: String): IndexRequest = {
       implicit val formats = SearchableLanguageFormats.JSonFormats
       val source = write(searchConverterService.asSearchableCover(card))
       indexInto(indexName / ListingApiProperties.SearchDocument)
@@ -149,7 +145,7 @@ trait IndexService {
 
     private def languageSupportedField(fieldName: String,
                                        keepRaw: Boolean = false) = {
-      NestedFieldDefinition(fieldName).fields(
+      NestedField(fieldName).fields(
         keepRaw match {
           case true =>
             languageAnalyzers.map(

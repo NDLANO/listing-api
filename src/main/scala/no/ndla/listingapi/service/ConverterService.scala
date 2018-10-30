@@ -37,16 +37,15 @@ trait ConverterService {
       )
     }
 
-    private def toApiCoverTitle(titles: Seq[domain.Title],
-                                language: String): api.CoverTitle = {
+    def toApiCoverTitle(titles: Seq[domain.Title],
+                        language: String): api.CoverTitle = {
       findByLanguageOrBestEffort(titles, language)
         .map(t => api.CoverTitle(t.title, t.language))
         .getOrElse(api.CoverTitle("", DefaultLanguage))
     }
 
-    private def toApiCoverDescription(
-        descriptions: Seq[domain.Description],
-        language: String): api.CoverDescription = {
+    def toApiCoverDescription(descriptions: Seq[domain.Description],
+                              language: String): api.CoverDescription = {
       findByLanguageOrBestEffort(descriptions, language)
         .map(t => api.CoverDescription(t.description, t.language))
         .getOrElse(api.CoverDescription("", DefaultLanguage))
@@ -59,7 +58,7 @@ trait ConverterService {
         .getOrElse(api.CoverLabels(Seq.empty, DefaultLanguage))
     }
 
-    private def toApiCoverLabel(label: domain.Label): api.Label =
+    def toApiCoverLabel(label: domain.Label): api.Label =
       api.Label(label.`type`, label.labels)
 
     def toDomainCover(cover: api.NewCover): domain.Cover = {

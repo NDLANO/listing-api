@@ -30,7 +30,12 @@ import no.ndla.listingapi.service._
 import no.ndla.listingapi.service.search.SearchService
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra._
-import org.scalatra.swagger.{ResponseMessage, Swagger, SwaggerSupport}
+import org.scalatra.swagger.{
+  ResponseMessage,
+  Swagger,
+  SwaggerSupport,
+  SwaggerSupportSyntax
+}
 
 trait ListingController {
   this: ReadService
@@ -46,6 +51,7 @@ trait ListingController {
       with SwaggerSupport
       with LazyLogging {
     protected implicit override val jsonFormats: Formats = DefaultFormats
+
     val response400 =
       ResponseMessage(400, "Validation error", Some("ValidationError"))
 
@@ -54,69 +60,75 @@ trait ListingController {
     val response403 = ResponseMessage(403, "Access Denied", Some("Error"))
     val response404 = ResponseMessage(404, "Not found", Some("Error"))
     val response500 = ResponseMessage(500, "Unknown error", Some("Error"))
-    val filterCoverDoc =
+
+    val filterCoverDoc: SwaggerSupportSyntax.OperationBuilder =
       (apiOperation[String]("filterCovers")
         summary "Returns covers matching a filter"
-        notes "Returns a list of covers"
+        description "Returns a list of covers"
         parameters (
           queryParam[Option[String]]("filter")
             .description("A comma separated string containing labels"),
-          queryParam[Option[String]]("language").description(
-            s"Only return results on the given language. Default is $DefaultLanguage"),
-          queryParam[Option[String]]("sort").description(
-            s"Sort results. Valid options are ${Sort.values.mkString(", ")}"),
+          queryParam[Option[String]]("language")
+            .description(
+              s"Only return results on the given language. Default is $DefaultLanguage"),
+          queryParam[Option[String]]("sort")
+            .description(
+              s"Sort results. Valid options are ${Sort.values.mkString(", ")}"),
           queryParam[Option[Int]]("page-size")
             .description("Return this many results per page"),
           queryParam[Option[Int]]("page")
             .description("Return results for this page")
       )
         authorizations "oauth2"
-        responseMessages (response500))
-    val getCoverDoc =
+        responseMessages response500)
+
+    val getCoverDoc: SwaggerSupportSyntax.OperationBuilder =
       (apiOperation[String]("getCover")
         summary "Returns cover meta data"
-        notes "Returns a cover"
+        description "Returns a cover"
         parameters (
           pathParam[Long]("coverid")
             .description("Id of the cover that is to be returned"),
-          queryParam[Option[String]]("language").description(
-            s"Return the cover on this language. Default is $DefaultLanguage")
+          queryParam[Option[String]]("language")
+            .description(
+              s"Return the cover on this language. Default is $DefaultLanguage")
       )
         authorizations "oauth2"
         responseMessages (response400, response404, response500))
-    val newCoverDoc =
+
+    val newCoverDoc: SwaggerSupportSyntax.OperationBuilder =
       (apiOperation[NewCover]("newCover")
         summary "Create a new cover"
-        notes "Create a new cover. Returns the a json-document with then resulting cover"
+        description "Create a new cover. Returns the a json-document with then resulting cover"
         authorizations "oauth2"
         responseMessages (response400, response403, response404, response500))
-    val updateCoverDoc =
+
+    val updateCoverDoc: SwaggerSupportSyntax.OperationBuilder =
       (apiOperation[UpdateCover]("updateCover")
         summary "Update a cover"
-        notes "Update a cover with a new translation or update an existing translation"
-        parameters (
-          pathParam[Long]("coverid").description("ID of the cover to update")
-        )
+        description "Update a cover with a new translation or update an existing translation"
+        parameters pathParam[Long]("coverid")
+          .description("ID of the cover to update")
         authorizations "oauth2"
         responseMessages (response400, response403, response404, response500))
-    val getLabelsDoc =
+
+    val getLabelsDoc: SwaggerSupportSyntax.OperationBuilder =
       (apiOperation[String]("getLabels")
         summary "Returns a map of all uniqe labels"
-        notes s"Returns a map of all labels given the current language. Default is $DefaultLanguage"
-        parameter (
-          queryParam[Option[String]]("language").description(
+        description s"Returns a map of all labels given the current language. Default is $DefaultLanguage"
+        parameter queryParam[Option[String]]("language")
+          .description(
             s"Return the labels on this language. Default is $DefaultLanguage")
-        )
         authorizations "oauth2"
         responseMessages (response400, response403, response404, response500))
-    val getThemeDoc =
+
+    val getThemeDoc: SwaggerSupportSyntax.OperationBuilder =
       (apiOperation[ThemeResult]("getTheme")
         summary "Returns a sequence of covers with a named theme. Themes are predefined and should be known to the caller. "
-        notes s"Returns  a sequence of covers with a named theme given the current language. Default is $DefaultLanguage."
-        parameter (
-          queryParam[Option[String]]("language").description(
+        description s"Returns  a sequence of covers with a named theme given the current language. Default is $DefaultLanguage."
+        parameter queryParam[Option[String]]("language")
+          .description(
             s"Return the covers of the theme in this language. Default is $DefaultLanguage")
-        )
         authorizations "oauth2"
         responseMessages (response400, response403, response404, response500))
 
@@ -148,7 +160,7 @@ trait ListingController {
       val theme = params("theme")
       val language = paramOrDefault("language", DefaultLanguage)
       theme match {
-        case theme if Theme.allowedThemes.contains(theme) =>
+        case `theme` if Theme.allowedThemes.contains(theme) =>
           readService.getTheme(theme, language)
         case _ =>
           BadRequest(
@@ -189,14 +201,14 @@ trait ListingController {
 
     private def getLabels(language: String, labelType: String) = {
       val allLabels = readService.allLabelsMap()
-      val theLangueLabels = allLabels.get(language)
+      val theLanguageLabels = allLabels.get(language)
 
-      theLangueLabels match {
-        case Some(uniqeLabels) => {
+      theLanguageLabels match {
+        case Some(uniqueLabels) => {
           if (labelType.equalsIgnoreCase("all")) {
-            Ok(uniqeLabels.labelsByType)
+            Ok(uniqueLabels.labelsByType)
           } else {
-            Ok(uniqeLabels.labelsByType.get(labelType))
+            Ok(uniqueLabels.labelsByType.get(labelType))
           }
         }
         case None => Ok(Nil)

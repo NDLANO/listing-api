@@ -8,8 +8,7 @@
 
 package no.ndla.listingapi
 
-import javax.sql
-
+import com.zaxxer.hikari.HikariDataSource
 import no.ndla.listingapi.auth.{Client, Role}
 import no.ndla.listingapi.controller.{HealthController, ListingController}
 import no.ndla.listingapi.integration._
@@ -41,7 +40,7 @@ trait TestEnvironment
     with Client
     with Role {
 
-  val dataSource = mock[sql.DataSource]
+  val dataSource = mock[HikariDataSource]
   val listingRepository = mock[ListingRepository]
   val readService = mock[ReadService]
   val writeService = mock[WriteService]
