@@ -8,7 +8,8 @@
 
 package no.ndla.listingapi.service
 
-import com.netaporter.uri.Uri._
+import io.lemonlabs.uri.Url
+import io.lemonlabs.uri.dsl._
 import no.ndla.listingapi.model.api.{ValidationException, ValidationMessage}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain.Cover
@@ -60,11 +61,11 @@ trait CoverValidator {
 
     private def validateCoverPhoto(
         coverPhotoMetaUrl: String): Option[ValidationMessage] = {
-      val parsedUrl = parse(coverPhotoMetaUrl)
-      val host = parsedUrl.host.getOrElse("")
+      val parsedUrl = Url.parse(coverPhotoMetaUrl)
+      val host = parsedUrl.hostOption.map(_.toString).getOrElse("")
 
       val hostCorrect = host.endsWith("ndla.no") || host.endsWith("ndla-local")
-      val pathCorrect = parsedUrl.path.startsWith("/image-api/")
+      val pathCorrect = parsedUrl.path.toString.startsWith("/image-api/")
 
       hostCorrect && pathCorrect match {
         case true => None

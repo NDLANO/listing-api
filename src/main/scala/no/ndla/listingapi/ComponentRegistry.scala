@@ -24,7 +24,6 @@ import no.ndla.listingapi.service.search.{
   SearchIndexService,
   SearchService
 }
-import org.postgresql.ds.PGPoolingDataSource
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
 object ComponentRegistry
@@ -50,15 +49,7 @@ object ComponentRegistry
 
   implicit val swagger = new ListingSwagger
 
-  lazy val dataSource = new PGPoolingDataSource()
-  dataSource.setUser(ListingApiProperties.MetaUserName)
-  dataSource.setPassword(ListingApiProperties.MetaPassword)
-  dataSource.setDatabaseName(ListingApiProperties.MetaResource)
-  dataSource.setServerName(ListingApiProperties.MetaServer)
-  dataSource.setPortNumber(ListingApiProperties.MetaPort)
-  dataSource.setInitialConnections(ListingApiProperties.MetaInitialConnections)
-  dataSource.setMaxConnections(ListingApiProperties.MetaMaxConnections)
-  dataSource.setCurrentSchema(ListingApiProperties.MetaSchema)
+  lazy val dataSource = DataSource.getHikariDataSource
   connectToDatabase()
 
   lazy val listingController = new ListingController

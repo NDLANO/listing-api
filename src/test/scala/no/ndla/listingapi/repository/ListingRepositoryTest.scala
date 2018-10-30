@@ -1,6 +1,7 @@
 package no.ndla.listingapi.repository
 
 import com.typesafe.scalalogging.LazyLogging
+import no.ndla.listingapi.integration.DataSource
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.meta.Theme
 import no.ndla.listingapi.{
@@ -19,17 +20,17 @@ class ListingRepositoryTest
     with LazyLogging {
   var repository: ListingRepository = _
 
-  override def beforeEach = {
+  override def beforeEach: Unit = {
     repository = new ListingRepository()
   }
 
-  override def beforeAll = {
-    val dataSource = getDataSource
+  override def beforeAll: Unit = {
+    val dataSource = DataSource.getHikariDataSource
     DBMigrator.migrate(dataSource)
     ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
   }
 
-  override def afterEach() = {
+  override def afterEach(): Unit = {
     //Simple way of just dumping the content of the DB for clean next test
     repository.allCovers().foreach(c => repository.deleteCover(c.id.get))
   }

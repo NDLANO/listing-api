@@ -31,7 +31,7 @@ object Language {
     LanguageAnalyzer(UnknownLanguage, StandardAnalyzer)
   )
 
-  val supportedLanguages = languageAnalyzers.map(_.lang)
+  val supportedLanguages: Seq[String] = languageAnalyzers.map(_.lang)
 
   def findByLanguageOrBestEffort[P <: LanguageField[_]](
       sequence: Seq[P],

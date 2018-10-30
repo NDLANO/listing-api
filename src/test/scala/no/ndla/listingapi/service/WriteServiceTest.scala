@@ -11,7 +11,7 @@ import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
 import org.joda.time.{DateTime, DateTimeZone}
-import org.mockito.Matchers._
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import scalikejdbc.DBSession
 
