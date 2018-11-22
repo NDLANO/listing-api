@@ -4,20 +4,12 @@ import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.integration.DataSource
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.meta.Theme
-import no.ndla.listingapi.{
-  DBMigrator,
-  IntegrationSuite,
-  TestData,
-  TestEnvironment
-}
+import no.ndla.listingapi.{DBMigrator, IntegrationSuite, TestData, TestEnvironment}
 import no.ndla.tag.IntegrationTest
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
 @IntegrationTest
-class ListingRepositoryTest
-    extends IntegrationSuite
-    with TestEnvironment
-    with LazyLogging {
+class ListingRepositoryTest extends IntegrationSuite with TestEnvironment with LazyLogging {
   var repository: ListingRepository = _
 
   override def beforeEach: Unit = {
@@ -60,8 +52,7 @@ class ListingRepositoryTest
     result.get.id.isDefined should be(true)
   }
 
-  test(
-    "updateing a new cover should return a failure if failed to update cover") {
+  test("updateing a new cover should return a failure if failed to update cover") {
     repository.updateCover(TestData.sampleCover).isFailure should be(true)
   }
 
@@ -71,8 +62,7 @@ class ListingRepositoryTest
     result.revision should be(Some(1))
   }
 
-  test(
-    "updateCover should fail to update if revision number does not match current") {
+  test("updateCover should fail to update if revision number does not match current") {
     val initial = repository.insertCover(sampleCover.copy(revision = None))
     repository
       .updateCover(initial.copy(revision = Some(initial.revision.get + 1)))
@@ -107,15 +97,10 @@ class ListingRepositoryTest
     val allLabelsEN = allLabelsMap("en")
 
     allLabelsNB.labelsByType should be(
-      Map("kategori" -> Set("bygg verktøy",
-                            "jobbe verktøy",
-                            "mer label",
-                            "personlig verktøy"),
+      Map("kategori" -> Set("bygg verktøy", "jobbe verktøy", "mer label", "personlig verktøy"),
           "other" -> Set("bygg", "byggherrer")))
-    allLabelsNN.labelsByType should be(
-      Map("kategori" -> Set("arbeids verktøy"), "other" -> Set("byggkarer")))
-    allLabelsEN.labelsByType should be(
-      Map("category" -> Set("work tools"), "other" -> Set("workmen")))
+    allLabelsNN.labelsByType should be(Map("kategori" -> Set("arbeids verktøy"), "other" -> Set("byggkarer")))
+    allLabelsEN.labelsByType should be(Map("category" -> Set("work tools"), "other" -> Set("workmen")))
   }
 
   test("getTheme should return sequence of cards given allowed named theme") {

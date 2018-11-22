@@ -15,10 +15,10 @@ trait Role {
   val authRole: AuthRole
 
   class AuthRole {
+
     def assertHasRole(role: String): Unit = {
       if (!AuthUser.hasRole(role))
-        throw new AccessDeniedException(
-          "User is missing required role to perform this operation")
+        throw new AccessDeniedException("User is missing required role to perform this operation")
     }
   }
 

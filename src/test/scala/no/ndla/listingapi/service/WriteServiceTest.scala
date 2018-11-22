@@ -1,12 +1,7 @@
 package no.ndla.listingapi.service
 
 import no.ndla.listingapi.caching.Memoize
-import no.ndla.listingapi.model.api.{
-  CoverAlreadyExistsException,
-  Label,
-  NewCover,
-  ValidationException
-}
+import no.ndla.listingapi.model.api.{CoverAlreadyExistsException, Label, NewCover, ValidationException}
 import no.ndla.listingapi.model.domain
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.{TestData, TestEnvironment, UnitSuite}
@@ -27,13 +22,9 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
 
   override def beforeAll() = {
     when(authClient.client_id()).thenReturn("content-import-client")
-    when(clock.now()).thenReturn(
-      (new DateTime(2017, 4, 1, 12, 15, 32, DateTimeZone.UTC)).toDate)
+    when(clock.now()).thenReturn((new DateTime(2017, 4, 1, 12, 15, 32, DateTimeZone.UTC)).toDate)
     val targetMock = mock[Target]
-    val memoizedTarget = new Memoize[Map[Lang, UniqeLabels]](
-      Long.MaxValue,
-      targetMock.targetMethod,
-      false)
+    val memoizedTarget = new Memoize[Map[Lang, UniqeLabels]](Long.MaxValue, targetMock.targetMethod, false)
     when(readService.getAllLabelsMap).thenReturn(memoizedTarget)
   }
 
@@ -144,8 +135,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     service.updateCover(1, sampleApiUpdateCover).isFailure should be(true)
   }
 
-  test(
-    "mergeCovers should append a new language if language not already exists") {
+  test("mergeCovers should append a new language if language not already exists") {
     val toUpdate = sampleApiUpdateCover.copy(
       language = "en",
       title = "titl",
@@ -161,10 +151,8 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
       Some(10001),
       sampleCover.coverPhotoUrl,
       sampleCover.title ++ Seq(Title(toUpdate.title, toUpdate.language)),
-      sampleCover.description ++ Seq(
-        Description(toUpdate.description, toUpdate.language)),
-      sampleCover.labels ++ Seq(
-        LanguageLabels(Seq(domainLabel), toUpdate.language)),
+      sampleCover.description ++ Seq(Description(toUpdate.description, toUpdate.language)),
+      sampleCover.labels ++ Seq(LanguageLabels(Seq(domainLabel), toUpdate.language)),
       sampleCover.articleApiId,
       sampleCover.updatedBy,
       sampleCover.updated,
@@ -175,8 +163,7 @@ class WriteServiceTest extends UnitSuite with TestEnvironment {
     service.mergeCovers(sampleCover, toUpdate) should equal(expectedResult)
   }
 
-  test(
-    "mergeCovers overwrite a langauge if specified language already exist in cover") {
+  test("mergeCovers overwrite a langauge if specified language already exist in cover") {
     val toUpdate = sampleApiUpdateCover.copy(
       language = "nb",
       title = "titl",

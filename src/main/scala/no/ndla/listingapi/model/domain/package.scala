@@ -21,7 +21,6 @@ package object domain {
     def data: T
   }
 
-  def getByLanguage[U <: LanguageField[_]](fields: Seq[U],
-                                           language: String): Option[U] =
+  def getByLanguage[U <: LanguageField[_]](fields: Seq[U], language: String): Option[U] =
     fields.find(_.language == language)
 }

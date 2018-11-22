@@ -19,7 +19,9 @@ import scala.util.{Failure, Success}
 object ListingApiProperties extends LazyLogging {
   val Environment = propOrElse("NDLA_ENVIRONMENT", "local")
   val ApplicationName = "listing-api"
-  val Auth0LoginEndpoint = s"https://${AuthUser.getAuth0HostForEnv(Environment)}/authorize"
+
+  val Auth0LoginEndpoint =
+    s"https://${AuthUser.getAuth0HostForEnv(Environment)}/authorize"
 
   val RoleWithWriteAccess = "listing:write"
   val SecretsFile = "listing-api.secrets"

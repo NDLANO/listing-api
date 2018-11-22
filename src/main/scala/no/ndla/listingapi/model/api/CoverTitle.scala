@@ -13,8 +13,6 @@ import org.scalatra.swagger.runtime.annotations.ApiModelProperty
 import scala.annotation.meta.field
 
 @ApiModel(description = "Meta information for a cover")
-case class CoverTitle(@(ApiModelProperty @field)(
-                        description = "The title for this cover") title: String,
-                      @(ApiModelProperty @field)(description =
-                        "The language for this title") language: String,
+case class CoverTitle(@(ApiModelProperty @field)(description = "The title for this cover") title: String,
+                      @(ApiModelProperty @field)(description = "The language for this title") language: String,
 )

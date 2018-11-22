@@ -10,20 +10,11 @@ package no.ndla.listingapi
 
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.auth.{Client, Role}
-import no.ndla.listingapi.controller.{
-  HealthController,
-  InternController,
-  ListingController
-}
+import no.ndla.listingapi.controller.{HealthController, InternController, ListingController}
 import no.ndla.listingapi.integration._
 import no.ndla.listingapi.repository.ListingRepository
 import no.ndla.listingapi.service._
-import no.ndla.listingapi.service.search.{
-  IndexService,
-  SearchConverterService,
-  SearchIndexService,
-  SearchService
-}
+import no.ndla.listingapi.service.search.{IndexService, SearchConverterService, SearchIndexService, SearchService}
 import scalikejdbc.{ConnectionPool, DataSourceConnectionPool}
 
 object ComponentRegistry
@@ -44,6 +35,7 @@ object ComponentRegistry
     with Clock
     with Role
     with Client {
+
   def connectToDatabase(): Unit =
     ConnectionPool.singleton(new DataSourceConnectionPool(dataSource))
 

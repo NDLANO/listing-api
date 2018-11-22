@@ -23,8 +23,7 @@ trait Client {
 
     def assertHasClientId(): Unit = {
       if (AuthUser.getClientId.isEmpty || AuthUser.getClientId.get.isEmpty) {
-        throw new AccessDeniedException(
-          "Client id required to perform this operation")
+        throw new AccessDeniedException("Client id required to perform this operation")
       }
     }
 

@@ -23,9 +23,7 @@ class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
       "",
       Seq(V2_Title("Tittel", None)),
       Seq(V2_Description("Description", None)),
-      Seq(
-        V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))),
-                          None)),
+      Seq(V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))), None)),
       1,
       "",
       new Date(),
@@ -47,9 +45,7 @@ class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
       "",
       Seq(V2_Title("Tittel", Some(""))),
       Seq(V2_Description("Description", Some(""))),
-      Seq(
-        V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))),
-                          Some(""))),
+      Seq(V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))), Some(""))),
       1,
       "",
       new Date(),
@@ -70,9 +66,7 @@ class V2__AddLanguageToAllTest extends UnitSuite with TestEnvironment {
       "",
       Seq(V2_Title("Tittel", Some("nb"))),
       Seq(V2_Description("Description", Some("de"))),
-      Seq(
-        V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))),
-                          Some("fr"))),
+      Seq(V2_LanguageLabels(Seq(V2_Label(Some("cateogry"), Seq("betongfaget"))), Some("fr"))),
       1,
       "",
       new Date(),

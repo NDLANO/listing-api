@@ -32,8 +32,7 @@ trait IndexService {
   class IndexService extends LazyLogging {
     val labelAnalyzer = CustomAnalyzer("lowercaseKeyword")
 
-    private def createIndexRequest(card: Cover,
-                                   indexName: String): IndexRequest = {
+    private def createIndexRequest(card: Cover, indexName: String): IndexRequest = {
       implicit val formats = SearchableLanguageFormats.JSonFormats
       val source = write(searchConverterService.asSearchableCover(card))
       indexInto(indexName / ListingApiProperties.SearchDocument)
@@ -62,8 +61,7 @@ trait IndexService {
 
         response match {
           case Success(res) =>
-            logger.info(
-              s"Indexed ${covers.size} documents. No of failed items: ${res.result.failures.size}")
+            logger.info(s"Indexed ${covers.size} documents. No of failed items: ${res.result.failures.size}")
             Success(covers.size)
           case Failure(ex) => Failure(ex)
         }
@@ -75,13 +73,11 @@ trait IndexService {
         _ <- aliasTarget.map {
           case Some(index) => Success(index)
           case None =>
-            createIndexWithGeneratedName.map(newIndex =>
-              updateAliasTarget(None, newIndex))
+            createIndexWithGeneratedName.map(newIndex => updateAliasTarget(None, newIndex))
         }
         deleted <- {
           e4sClient.execute {
-            delete(s"$coverId").from(
-              ListingApiProperties.SearchIndex / ListingApiProperties.SearchDocument)
+            delete(s"$coverId").from(ListingApiProperties.SearchIndex / ListingApiProperties.SearchDocument)
           }
         }
       } yield deleted
@@ -143,8 +139,7 @@ trait IndexService {
       nestedField(fieldName).fields(languageMappings)
     }
 
-    private def languageSupportedField(fieldName: String,
-                                       keepRaw: Boolean = false) = {
+    private def languageSupportedField(fieldName: String, keepRaw: Boolean = false) = {
       NestedField(fieldName).fields(
         keepRaw match {
           case true =>
@@ -177,15 +172,13 @@ trait IndexService {
       }
     }
 
-    def updateAliasTarget(oldIndexName: Option[String],
-                          newIndexName: String): Try[Any] = {
+    def updateAliasTarget(oldIndexName: Option[String], newIndexName: String): Try[Any] = {
       if (!indexWithNameExists(newIndexName).getOrElse(false)) {
         Failure(new IllegalArgumentException(s"No such index: $newIndexName"))
       } else {
         oldIndexName match {
           case None =>
-            e4sClient.execute(
-              addAlias(ListingApiProperties.SearchIndex).on(newIndexName))
+            e4sClient.execute(addAlias(ListingApiProperties.SearchIndex).on(newIndexName))
           case Some(oldIndex) =>
             e4sClient.execute {
               removeAlias(ListingApiProperties.SearchIndex).on(oldIndex)

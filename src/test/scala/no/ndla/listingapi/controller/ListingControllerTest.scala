@@ -2,23 +2,14 @@ package no.ndla.listingapi.controller
 
 import no.ndla.listingapi.model.api.{NewCover, UpdateCover}
 import no.ndla.listingapi.model.domain.UniqeLabels
-import no.ndla.listingapi.{
-  ListingApiProperties,
-  ListingSwagger,
-  TestData,
-  TestEnvironment,
-  UnitSuite
-}
+import no.ndla.listingapi.{ListingApiProperties, ListingSwagger, TestData, TestEnvironment, UnitSuite}
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers._
 import org.scalatra.test.scalatest.ScalatraFunSuite
 
 import scala.util.Success
 
-class ListingControllerTest
-    extends UnitSuite
-    with TestEnvironment
-    with ScalatraFunSuite {
+class ListingControllerTest extends UnitSuite with TestEnvironment with ScalatraFunSuite {
   implicit val formats = org.json4s.DefaultFormats
   implicit val swagger = new ListingSwagger
 
@@ -29,10 +20,13 @@ class ListingControllerTest
 
   val authHeaderWithWriteRole =
     "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik9FSTFNVVU0T0RrNU56TTVNekkyTXpaRE9EazFOMFl3UXpkRE1EUXlPRFZDUXpRM1FUSTBNQSJ9.eyJodHRwczovL25kbGEubm8vY2xpZW50X2lkIjoieHh4eXl5IiwiaXNzIjoiaHR0cHM6Ly9uZGxhLmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJ4eHh5eXlAY2xpZW50cyIsImF1ZCI6Im5kbGFfc3lzdGVtIiwiaWF0IjoxNTEwMzA1NzczLCJleHAiOjE1MTAzOTIxNzMsInNjb3BlIjoibGlzdGluZy10ZXN0OndyaXRlIiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.kPdKx3VVtgjI4vDi1fiM28FFf7yAGV0d-ZxWf5JT-QtQNsTshfp7eh5JMxnmJj8Fkkih-GJHrFdvthhOt_RU7uWc-3xzhJbjWYw_4QIzjYM6Igx3DpvqEYGznbylLXoCiUt5G4bEBvbb0RqvJ9QtA_LmMtmuNu-CCgNvVjCBrxo"
+
   val authHeaderWithoutAnyRoles =
     "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik9FSTFNVVU0T0RrNU56TTVNekkyTXpaRE9EazFOMFl3UXpkRE1EUXlPRFZDUXpRM1FUSTBNQSJ9.eyJodHRwczovL25kbGEubm8vY2xpZW50X2lkIjoieHh4eXl5IiwiaXNzIjoiaHR0cHM6Ly9uZGxhLmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJ4eHh5eXlAY2xpZW50cyIsImF1ZCI6Im5kbGFfc3lzdGVtIiwiaWF0IjoxNTEwMzA1NzczLCJleHAiOjE1MTAzOTIxNzMsInNjb3BlIjoiIiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.fb9eTuBwIlbGDgDKBQ5FVpuSUdgDVBZjCenkOrWLzUByVCcaFhbFU8CVTWWKhKJqt6u-09-99hh86szURLqwl3F5rxSX9PrnbyhI9LsPut_3fr6vezs6592jPJRbdBz3-xLN0XY5HIiJElJD3Wb52obTqJCrMAKLZ5x_GLKGhcY"
+
   val authHeaderWithEmptyClientId =
     "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik9FSTFNVVU0T0RrNU56TTVNekkyTXpaRE9EazFOMFl3UXpkRE1EUXlPRFZDUXpRM1FUSTBNQSJ9.eyJodHRwczovL25kbGEubm8vY2xpZW50X2lkIjoiIiwiaXNzIjoiaHR0cHM6Ly9uZGxhLmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJ4eHh5eXlAY2xpZW50cyIsImF1ZCI6Im5kbGFfc3lzdGVtIiwiaWF0IjoxNTEwMzA1NzczLCJleHAiOjE1MTAzOTIxNzMsInNjb3BlIjoibGlzdGluZzp3cml0ZSIsImd0eSI6ImNsaWVudC1jcmVkZW50aWFscyJ9.BsgFgHkdKIxH1Ew7_kQAF3y7dBHEdH_cdlpGHDamp1sj2ixns-bCOknlo2e4-ZpxZttgV2IhURr0l3MyPLMhAE_gZNagPORRB8zdBnnet_GrNNlqw01Gd_Vj34hPfB8GQ53sE36CniCetIqqI31ahUw2KH3MT82Y6sLu7cnMGRY"
+
   val authHeaderWithWrongRole =
     "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik9FSTFNVVU0T0RrNU56TTVNekkyTXpaRE9EazFOMFl3UXpkRE1EUXlPRFZDUXpRM1FUSTBNQSJ9.eyJodHRwczovL25kbGEubm8vY2xpZW50X2lkIjoieHh4eXl5IiwiaXNzIjoiaHR0cHM6Ly9uZGxhLmV1LmF1dGgwLmNvbS8iLCJzdWIiOiJ4eHh5eXlAY2xpZW50cyIsImF1ZCI6Im5kbGFfc3lzdGVtIiwiaWF0IjoxNTEwMzA1NzczLCJleHAiOjE1MTAzOTIxNzMsInNjb3BlIjoiYXJ0aWNsZXM6d3JpdGUiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMifQ.kh82qM84FZgoo3odWbHTLWy-N049m7SyQw4gdatDMk43H2nWHA6gjsbJoiBIZ7BcbSfHElEZH0tP94vRy-kjgA3hflhOBbsD73DIxRvnbH1kSXlBnl6ISbgtHnzv1wQ7ShykMAcBsoWQ6J16ixK_p-msW42kcEqK1LanzPy-_qI"
 
@@ -103,8 +97,7 @@ class ListingControllerTest
     }
   }
 
-  test(
-    "That GET /theme/:theme returns 200 and sequence of covers of that theme") {
+  test("That GET /theme/:theme returns 200 and sequence of covers of that theme") {
     get("/test/theme/verktoy") {
       status should equal(200)
     }
@@ -117,9 +110,7 @@ class ListingControllerTest
   }
 
   test("POST / should return 400 on failure to validate request") {
-    post("/test/",
-         "{}",
-         headers = Map("Authorization" -> authHeaderWithWriteRole)) {
+    post("/test/", "{}", headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(400)
     }
   }
@@ -127,17 +118,13 @@ class ListingControllerTest
   test("POST / should return 200 on success") {
     when(writeService.newCover(any[NewCover]))
       .thenReturn(Success(TestData.sampleApiCover))
-    post("/test/",
-         requestBody,
-         headers = Map("Authorization" -> authHeaderWithWriteRole)) {
+    post("/test/", requestBody, headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(200)
     }
   }
 
   test("PUT /:coverid should return 400 on failure to validate request") {
-    put("/test/1",
-        "{}",
-        headers = Map("Authorization" -> authHeaderWithWriteRole)) {
+    put("/test/1", "{}", headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(400)
     }
   }
@@ -145,9 +132,7 @@ class ListingControllerTest
   test("PUT /:coverid should return 200 on success") {
     when(writeService.updateCover(any[Long], any[UpdateCover]))
       .thenReturn(Success(TestData.sampleApiCover))
-    put("/test/1",
-        requestBody,
-        headers = Map("Authorization" -> authHeaderWithWriteRole)) {
+    put("/test/1", requestBody, headers = Map("Authorization" -> authHeaderWithWriteRole)) {
       status should equal(200)
     }
   }
@@ -165,22 +150,18 @@ class ListingControllerTest
   }
 
   test("That POST / returns 403 if auth header does not have valid client_id") {
-    post("/test/",
-         headers = Map("Authorization" -> authHeaderWithEmptyClientId)) {
+    post("/test/", headers = Map("Authorization" -> authHeaderWithEmptyClientId)) {
       status should equal(403)
     }
   }
 
-  test(
-    "That PUT /:coverid returns 403 if auth header does not have valid client_id") {
-    put("/test/1",
-        headers = Map("Authorization" -> authHeaderWithEmptyClientId)) {
+  test("That PUT /:coverid returns 403 if auth header does not have valid client_id") {
+    put("/test/1", headers = Map("Authorization" -> authHeaderWithEmptyClientId)) {
       status should equal(403)
     }
   }
 
-  test(
-    "That PUT /:coverid returns 403 if auth header does not have expected role") {
+  test("That PUT /:coverid returns 403 if auth header does not have expected role") {
     put("/test/1", headers = Map("Authorization" -> authHeaderWithWrongRole)) {
       status should equal(403)
     }

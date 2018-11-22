@@ -37,6 +37,7 @@ object Cover extends SQLSyntaxSupport[Cover] {
   implicit val formats = org.json4s.DefaultFormats
   override val tableName = "covers"
   override val schemaName = Some(ListingApiProperties.MetaSchema)
+
   val JSonSerializer = FieldSerializer[Cover](
     ignore("id") orElse
       ignore("revision")

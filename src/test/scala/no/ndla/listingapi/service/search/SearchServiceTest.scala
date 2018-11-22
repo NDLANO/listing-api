@@ -11,18 +11,10 @@ package no.ndla.listingapi.service.search
 import java.nio.file.{Files, Path}
 
 import com.sksamuel.elastic4s.embedded.{InternalLocalNode, LocalNode}
-import no.ndla.listingapi.ListingApiProperties.{
-  DefaultLanguage,
-  DefaultPageSize
-}
+import no.ndla.listingapi.ListingApiProperties.{DefaultLanguage, DefaultPageSize}
 import no.ndla.listingapi.integration.{Elastic4sClientFactory, NdlaE4sClient}
 import no.ndla.listingapi.model.domain.search.Sort
-import no.ndla.listingapi.model.domain.{
-  Description,
-  Label,
-  LanguageLabels,
-  Title
-}
+import no.ndla.listingapi.model.domain.{Description, Label, LanguageLabels, Title}
 import no.ndla.listingapi._
 import no.ndla.tag.IntegrationTest
 import org.joda.time.{DateTime, DateTimeZone}
@@ -31,6 +23,7 @@ import scala.util.{Failure, Success, Try}
 
 class SearchServiceTest extends IntegrationSuite with TestEnvironment {
   val tmpDir: Path = Files.createTempDirectory(this.getClass.getName)
+
   val localNodeSettings: Map[String, String] =
     LocalNode.requiredSettings(this.getClass.getName, tmpDir.toString)
   val localNode: InternalLocalNode = LocalNode(localNodeSettings)
@@ -51,8 +44,7 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
     id = Some(1),
     description = Seq(Description("stop. hammer time", "nb")),
     title = Seq(Title("hammer", "nb")),
-    labels = Seq(
-      LanguageLabels(Seq(Label(None, Seq("hammer", "time", "stop"))), "nb")),
+    labels = Seq(LanguageLabels(Seq(Label(None, Seq("hammer", "time", "stop"))), "nb")),
     updated = date4,
     articleApiId = 1321
   )
@@ -61,9 +53,7 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
     id = Some(2),
     description = Seq(Description("forsiktig med saga", "nb")),
     title = Seq(Title("sag", "nb")),
-    labels = Seq(
-      LanguageLabels(Seq(Label(None, Seq("sag", "forsiktig", "farlig"))),
-                     "nb")),
+    labels = Seq(LanguageLabels(Seq(Label(None, Seq("sag", "forsiktig", "farlig"))), "nb")),
     updated = date2,
     articleApiId = 432
   )
@@ -72,22 +62,17 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
     id = Some(3),
     description = Seq(Description("her er døden selv", "nb")),
     title = Seq(Title("mannen med ljåen", "nb")),
-    labels = Seq(
-      LanguageLabels(
-        Seq(Label(None,
-                  Seq("ljå", "mann", "huff", "farlig", "personlig verktøy"))),
-        "nb")),
+    labels = Seq(LanguageLabels(Seq(Label(None, Seq("ljå", "mann", "huff", "farlig", "personlig verktøy"))), "nb")),
     updated = date1,
     articleApiId = 896
   )
 
   val cover4 = TestData.sampleCover.copy(
     id = Some(4),
-    description =
-      Seq(Description("unrelated", "en"), Description("urelatert", "nb")),
+    description = Seq(Description("unrelated", "en"), Description("urelatert", "nb")),
     title = Seq(Title("unrelated", "en"), Title("urelatert", "nb")),
-    labels = Seq(LanguageLabels(Seq(Label(None, Seq("pilt"))), "en"),
-                 LanguageLabels(Seq(Label(None, Seq("pompel"))), "nb")),
+    labels =
+      Seq(LanguageLabels(Seq(Label(None, Seq("pilt"))), "en"), LanguageLabels(Seq(Label(None, Seq("pompel"))), "nb")),
     updated = date5,
     articleApiId = 512
   )
@@ -126,8 +111,7 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
     throw new IllegalArgumentException("Failed waiting for predicate")
   }
 
-  test(
-    "matchingQuery should return only covers with labels contained in the filter") {
+  test("matchingQuery should return only covers with labels contained in the filter") {
     searchService
       .matchingQuery(Seq("hammer"), "nb", 1, 10, Sort.ByIdAsc)
       .results
@@ -141,19 +125,11 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
       .results
       .map(_.id) should equal(Seq(3))
     searchService
-      .matchingQuery(Seq("FARLIG", "hUFf", "personlig verktøy"),
-                     "nb",
-                     1,
-                     10,
-                     Sort.ByIdAsc)
+      .matchingQuery(Seq("FARLIG", "hUFf", "personlig verktøy"), "nb", 1, 10, Sort.ByIdAsc)
       .results
       .map(_.id) should equal(Seq(3))
     searchService
-      .matchingQuery(Seq("FARLIG", "hUFf", "personlig"),
-                     "nb",
-                     1,
-                     10,
-                     Sort.ByIdAsc)
+      .matchingQuery(Seq("FARLIG", "hUFf", "personlig"), "nb", 1, 10, Sort.ByIdAsc)
       .results
       .map(_.id) should equal(Seq())
     searchService
@@ -162,26 +138,21 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
       .map(_.id) should equal(Seq())
   }
 
-  test(
-    "That getStartAtAndNumResults returns SEARCH_MAX_PAGE_SIZE for value greater than SEARCH_MAX_PAGE_SIZE") {
-    searchService.getStartAtAndNumResults(0, 1000) should equal(
-      (0, ListingApiProperties.MaxPageSize))
+  test("That getStartAtAndNumResults returns SEARCH_MAX_PAGE_SIZE for value greater than SEARCH_MAX_PAGE_SIZE") {
+    searchService.getStartAtAndNumResults(0, 1000) should equal((0, ListingApiProperties.MaxPageSize))
   }
 
   test(
     "That getStartAtAndNumResults returns the correct calculated start at for page and page-size with default page-size") {
     val page = 74
     val expectedStartAt = (page - 1) * DefaultPageSize
-    searchService.getStartAtAndNumResults(page, DefaultPageSize) should equal(
-      (expectedStartAt, DefaultPageSize))
+    searchService.getStartAtAndNumResults(page, DefaultPageSize) should equal((expectedStartAt, DefaultPageSize))
   }
 
-  test(
-    "That getStartAtAndNumResults returns the correct calculated start at for page and page-size") {
+  test("That getStartAtAndNumResults returns the correct calculated start at for page and page-size") {
     val page = 123
     val expectedStartAt = (page - 1) * DefaultPageSize
-    searchService.getStartAtAndNumResults(page, DefaultPageSize) should equal(
-      (expectedStartAt, DefaultPageSize))
+    searchService.getStartAtAndNumResults(page, DefaultPageSize) should equal((expectedStartAt, DefaultPageSize))
   }
 
   test("That all returns all documents ordered by id ascending") {
@@ -202,8 +173,7 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
     results.results.last.id should be(1)
   }
 
-  test(
-    "That paging returns only hits on current page and not more than page-size") {
+  test("That paging returns only hits on current page and not more than page-size") {
     val page1 = searchService.all(DefaultLanguage, 1, 2, Sort.ByIdAsc)
     val page2 = searchService.all(DefaultLanguage, 2, 2, Sort.ByIdAsc)
     page1.totalCount should be(4)
@@ -246,8 +216,7 @@ class SearchServiceTest extends IntegrationSuite with TestEnvironment {
     results.results.map(_.id) should be(Seq(4, 1, 5, 2, 3))
   }
 
-  test(
-    "That search returns matched language when filtering and searching for all languages") {
+  test("That search returns matched language when filtering and searching for all languages") {
     val resultsEn =
       searchService.matchingQuery(Seq("pilt"), "all", 1, 10, Sort.ByIdAsc)
     val resultsNb =

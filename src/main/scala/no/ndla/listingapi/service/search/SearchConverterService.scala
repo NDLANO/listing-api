@@ -33,15 +33,12 @@ trait SearchConverterService {
       SearchableCover(
         id = card.id.get,
         revision = card.revision.get,
-        title = SearchableLanguageValues(
-          card.title.map(title => LanguageValue(title.language, title.title))),
-        description =
-          SearchableLanguageValues(card.description.map(description =>
-            LanguageValue(description.language, description.description))),
+        title = SearchableLanguageValues(card.title.map(title => LanguageValue(title.language, title.title))),
+        description = SearchableLanguageValues(
+          card.description.map(description => LanguageValue(description.language, description.description))),
         card.articleApiId,
         card.coverPhotoUrl,
-        SearchableLanguageList(card.labels.map(label =>
-          LanguageValue(label.language, label.labels))),
+        SearchableLanguageList(card.labels.map(label => LanguageValue(label.language, label.labels))),
         defaultTitle.map(_.title),
         card.supportedLanguages,
         card.updatedBy,

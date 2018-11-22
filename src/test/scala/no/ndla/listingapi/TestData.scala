@@ -15,9 +15,7 @@ object TestData {
     Seq(domain.Title("hammer", "nb")),
     Seq(domain.Description("En hammer er et nyttig verktøy", "nb")),
     Seq(
-      LanguageLabels(Seq(Label(Some("kategori"),
-                               Seq("personlig verktøy", "bygg verktøy")),
-                         Label(None, Seq("bygg"))),
+      LanguageLabels(Seq(Label(Some("kategori"), Seq("personlig verktøy", "bygg verktøy")), Label(None, Seq("bygg"))),
                      "nb")),
     1122,
     "content-import-client",
@@ -33,16 +31,10 @@ object TestData {
     Seq(domain.Title("hammer2", "nb")),
     Seq(domain.Description("En hammer2 er et nyttig verktøy", "nb")),
     Seq(
-      LanguageLabels(Seq(Label(Some("kategori"),
-                               Seq("jobbe verktøy", "mer label")),
-                         Label(None, Seq("byggherrer"))),
+      LanguageLabels(Seq(Label(Some("kategori"), Seq("jobbe verktøy", "mer label")), Label(None, Seq("byggherrer"))),
                      "nb"),
-      LanguageLabels(Seq(Label(Some("kategori"), Seq("arbeids verktøy")),
-                         Label(None, Seq("byggkarer"))),
-                     "nn"),
-      LanguageLabels(Seq(Label(Some("category"), Seq("work tools")),
-                         Label(None, Seq("workmen"))),
-                     "en")
+      LanguageLabels(Seq(Label(Some("kategori"), Seq("arbeids verktøy")), Label(None, Seq("byggkarer"))), "nn"),
+      LanguageLabels(Seq(Label(Some("category"), Seq("work tools")), Label(None, Seq("workmen"))), "en")
     ),
     1122,
     "content-import-client",
@@ -57,9 +49,7 @@ object TestData {
     api.CoverTitle("hammer", "nb"),
     api.CoverDescription("En hammer er et nyttig verktøy", "nb"),
     1122,
-    api.CoverLabels(Seq(api.Label(Some("kategori"), Seq("personlig verktøy")),
-                        api.Label(None, Seq("bygg"))),
-                    "nb"),
+    api.CoverLabels(Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))), "nb"),
     Set("nb"),
     "content-import-client",
     updated,
@@ -74,8 +64,7 @@ object TestData {
     "En hammer er et nyttig verktøy",
     1122,
     None,
-    Seq(api.Label(Some("kategori"), Seq("personlig verktøy")),
-        api.Label(None, Seq("bygg"))),
+    Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))),
     "verktoy"
   )
 
@@ -86,8 +75,7 @@ object TestData {
     None,
     "hammer",
     "En hammer er et nyttig verktøy",
-    Seq(api.Label(Some("kategori"), Seq("personlig verktøy")),
-        api.Label(None, Seq("bygg"))),
+    Seq(api.Label(Some("kategori"), Seq("personlig verktøy")), api.Label(None, Seq("bygg"))),
     "verktoy"
   )
 
