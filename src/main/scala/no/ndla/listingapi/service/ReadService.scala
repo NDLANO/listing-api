@@ -12,7 +12,7 @@ trait ReadService {
   val readService: ReadService
 
   class ReadService extends LazyLogging {
-    val getAllLabelsMap = MemoizeAutoRenew(listingRepository.allLabelsMap)
+    val getAllLabelsMap = MemoizeAutoRenew(listingRepository.allLabelsMap _)
 
     def coverWithId(id: Long, language: String): Option[api.Cover] =
       listingRepository
