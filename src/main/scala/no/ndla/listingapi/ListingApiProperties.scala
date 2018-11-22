@@ -9,7 +9,7 @@
 package no.ndla.listingapi
 
 import com.typesafe.scalalogging.LazyLogging
-import no.ndla.network.Domains
+import no.ndla.network.{AuthUser, Domains}
 import no.ndla.network.secrets.PropertyKeys
 import no.ndla.network.secrets.Secrets.readSecrets
 
@@ -17,20 +17,21 @@ import scala.util.Properties._
 import scala.util.{Failure, Success}
 
 object ListingApiProperties extends LazyLogging {
+  val Environment = propOrElse("NDLA_ENVIRONMENT", "local")
   val ApplicationName = "listing-api"
-  val Auth0LoginEndpoint = "https://ndla.eu.auth0.com/authorize"
+  val Auth0LoginEndpoint = s"https://${AuthUser.getAuth0HostForEnv(Environment)}/authorize"
 
   val RoleWithWriteAccess = "listing:write"
   val SecretsFile = "listing-api.secrets"
 
   val ApplicationPort = propOrElse("APPLICATION_PORT", "80").toInt
   val ContactEmail = "christergundersen@ndla.no"
-  val Environment = propOrElse("NDLA_ENVIRONMENT", "local")
   lazy val Domain: String = Domains.get(Environment)
 
   val SearchServer =
     propOrElse("SEARCH_SERVER", "http://search-listing-api.ndla-local")
   val SearchRegion = propOrElse("SEARCH_REGION", "eu-central-1")
+
   val RunWithSignedSearchRequests =
     propOrElse("RUN_WITH_SIGNED_SEARCH_REQUESTS", "true").toBoolean
   val SearchIndex = propOrElse("SEARCH_INDEX_NAME", "listings")
@@ -59,9 +60,7 @@ object ListingApiProperties extends LazyLogging {
   lazy val secrets = readSecrets(SecretsFile) match {
     case Success(values) => values
     case Failure(exception) =>
-      throw new RuntimeException(
-        s"Unable to load remote secrets from $SecretsFile",
-        exception)
+      throw new RuntimeException(s"Unable to load remote secrets from $SecretsFile", exception)
   }
 
   def booleanProp(key: String) = prop(key).toBoolean
