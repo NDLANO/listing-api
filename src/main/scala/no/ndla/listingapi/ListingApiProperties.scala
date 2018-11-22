@@ -24,7 +24,6 @@ object ListingApiProperties extends LazyLogging {
     s"https://${AuthUser.getAuth0HostForEnv(Environment)}/authorize"
 
   val RoleWithWriteAccess = "listing:write"
-  val SecretsFile = "listing-api.secrets"
 
   val ApplicationPort = propOrElse("APPLICATION_PORT", "80").toInt
   val ContactEmail = "christergundersen@ndla.no"
@@ -59,10 +58,13 @@ object ListingApiProperties extends LazyLogging {
   val ApiClientsCacheAgeInMs: Long = 1000 * 60 * 60 // 1 hour caching
   val ElasticSearchIndexMaxResultWindow = 10000
 
-  lazy val secrets = readSecrets(SecretsFile) match {
-    case Success(values) => values
-    case Failure(exception) =>
-      throw new RuntimeException(s"Unable to load remote secrets from $SecretsFile", exception)
+  lazy val secrets = {
+    val SecretsFile = "listing-api.secrets"
+    readSecrets(SecretsFile) match {
+      case Success(values) => values
+      case Failure(exception) =>
+        throw new RuntimeException(s"Unable to load remote secrets from $SecretsFile", exception)
+    }
   }
 
   def booleanProp(key: String) = prop(key).toBoolean
