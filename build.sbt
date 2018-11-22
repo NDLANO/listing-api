@@ -34,7 +34,7 @@ lazy val listing_api = (project in file("."))
     javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
     scalacOptions := Seq("-target:jvm-1.8", "-deprecation"),
     libraryDependencies ++= Seq(
-      "ndla" %% "network" % "0.35",
+      "ndla" %% "network" % "0.36",
       "ndla" %% "mapping" % "0.10",
       "com.typesafe.scala-logging" %% "scala-logging" % ScalaLoggingVersion,
       "org.apache.logging.log4j" % "log4j-api" % Log4JVersion,
@@ -123,10 +123,7 @@ docker / dockerfile := {
     from("openjdk:8-jre-alpine")
     run("apk", "--no-cache", "add", "ttf-dejavu")
     add(artifact, artifactTargetPath)
-    entryPoint("java",
-               "-Dorg.scalatra.environment=production",
-               "-jar",
-               artifactTargetPath)
+    entryPoint("java", "-Dorg.scalatra.environment=production", "-jar", artifactTargetPath)
   }
 }
 

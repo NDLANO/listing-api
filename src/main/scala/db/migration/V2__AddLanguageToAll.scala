@@ -18,8 +18,7 @@ import org.postgresql.util.PGobject
 import scalikejdbc.{DB, DBSession, _}
 
 class V2__AddLanguageToAll extends BaseJavaMigration {
-  implicit val formats = org.json4s.DefaultFormats + FieldSerializer[V2_Cover](
-    ignore("id"))
+  implicit val formats = org.json4s.DefaultFormats + FieldSerializer[V2_Cover](ignore("id"))
 
   override def migrate(context: Context): Unit = {
     val db = DB(context.getConnection)
@@ -32,16 +31,10 @@ class V2__AddLanguageToAll extends BaseJavaMigration {
 
   def updateCoverLanguage(cover: V2_Cover): V2_Cover = {
     cover.copy(
-      title = cover.title.map(t =>
-        V2_Title(t.title, Some(Language.languageOrUnknown(t.language)))),
-      description = cover.description.map(
-        t =>
-          V2_Description(t.description,
-                         Some(Language.languageOrUnknown(t.language)))),
-      labels = cover.labels.map(
-        t =>
-          V2_LanguageLabels(t.labels,
-                            Some(Language.languageOrUnknown(t.language))))
+      title = cover.title.map(t => V2_Title(t.title, Some(Language.languageOrUnknown(t.language)))),
+      description =
+        cover.description.map(t => V2_Description(t.description, Some(Language.languageOrUnknown(t.language)))),
+      labels = cover.labels.map(t => V2_LanguageLabels(t.labels, Some(Language.languageOrUnknown(t.language))))
     )
   }
 

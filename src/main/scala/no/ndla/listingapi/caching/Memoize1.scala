@@ -13,9 +13,7 @@ import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
 import com.typesafe.scalalogging.LazyLogging
 import no.ndla.listingapi.ListingApiProperties.ApiClientsCacheAgeInMs
 
-class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean)
-    extends (() => R)
-    with LazyLogging {
+class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean) extends (() => R) with LazyLogging {
 
   private[this] var cache: Option[CacheValue] = None
 
@@ -43,6 +41,7 @@ class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean)
   }
 
   case class CacheValue(value: R, lastUpdated: Long) {
+
     def isExpired: Boolean =
       lastUpdated + maxCacheAgeMs <= System.currentTimeMillis()
   }
@@ -50,11 +49,13 @@ class Memoize[R](maxCacheAgeMs: Long, f: () => R, autoRefreshCache: Boolean)
 }
 
 object Memoize {
+
   def apply[R](f: () => R) =
     new Memoize(ApiClientsCacheAgeInMs, f, autoRefreshCache = false)
 }
 
 object MemoizeAutoRenew {
+
   def apply[R](f: () => R) =
     new Memoize(ApiClientsCacheAgeInMs, f, autoRefreshCache = true)
 }

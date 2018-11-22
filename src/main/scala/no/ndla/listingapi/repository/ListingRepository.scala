@@ -17,8 +17,7 @@ trait ListingRepository {
   class ListingRepository extends LazyLogging {
     implicit val formats = org.json4s.DefaultFormats + Cover.JSonSerializer
 
-    def insertCover(cover: Cover)(
-        implicit session: DBSession = AutoSession): Cover = {
+    def insertCover(cover: Cover)(implicit session: DBSession = AutoSession): Cover = {
       val dataObject = new PGobject()
       dataObject.setType("jsonb")
       dataObject.setValue(write(cover))
@@ -29,8 +28,7 @@ trait ListingRepository {
       cover.copy(id = Some(coverId), revision = Some(startRevision))
     }
 
-    def updateCover(cover: Cover)(
-        implicit session: DBSession = AutoSession): Try[Cover] = {
+    def updateCover(cover: Cover)(implicit session: DBSession = AutoSession): Try[Cover] = {
       val dataObject = new PGobject()
       dataObject.setType("jsonb")
       dataObject.setValue(write(cover))
@@ -50,18 +48,15 @@ trait ListingRepository {
       }
     }
 
-    def getCover(coverId: Long)(implicit session: DBSession =
-                                  ReadOnlyAutoSession): Option[Cover] = {
+    def getCover(coverId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
       coverWhere(sqls"c.id = $coverId")
     }
 
-    def getCoverWithOldNodeId(oldNodeId: Long)(
-        implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
+    def getCoverWithOldNodeId(oldNodeId: Long)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
       coverWhere(sqls"c.document->>'oldNodeId' = ${oldNodeId.toString}")
     }
 
-    private def coverWhere(whereClause: SQLSyntax)(
-        implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
+    private def coverWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Option[Cover] = {
       val c = Cover.syntax("c")
       sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause"
         .map(Cover(c))
@@ -72,8 +67,7 @@ trait ListingRepository {
     def cardsWithIdBetween(min: Long, max: Long): List[Cover] =
       coversWhere(sqls"c.id between $min and $max").toList
 
-    private def coversWhere(whereClause: SQLSyntax)(
-        implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
+    private def coversWhere(whereClause: SQLSyntax)(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
       val c = Cover.syntax("c")
       sql"select ${c.result.*} from ${Cover.as(c)} where $whereClause"
         .map(Cover(c))
@@ -93,8 +87,7 @@ trait ListingRepository {
       }
     }
 
-    def deleteCover(coverId: Long)(
-        implicit session: DBSession = AutoSession) = {
+    def deleteCover(coverId: Long)(implicit session: DBSession = AutoSession) = {
       sql"delete from ${Cover.table} where id = $coverId".update.apply
     }
 
@@ -152,13 +145,11 @@ trait ListingRepository {
         uniqeLabels
       })
 
-      logger.debug(
-        s"Done aggregating labels - tok ${System.currentTimeMillis() - starttime} ms")
+      logger.debug(s"Done aggregating labels - tok ${System.currentTimeMillis() - starttime} ms")
       uniqeLanguageLabels
     }
 
-    def allCovers()(
-        implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
+    def allCovers()(implicit session: DBSession = ReadOnlyAutoSession): Seq[Cover] = {
       val c = Cover.syntax("c")
       sql"select ${c.result.*} from ${Cover.as(c)}".map(Cover(c)).list.apply
     }

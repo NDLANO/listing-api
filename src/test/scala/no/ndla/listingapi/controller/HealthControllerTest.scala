@@ -11,10 +11,7 @@ package no.ndla.listingapi.controller
 import no.ndla.listingapi.{TestEnvironment, UnitSuite}
 import org.scalatra.test.scalatest.ScalatraFunSuite
 
-class HealthControllerTest
-    extends UnitSuite
-    with TestEnvironment
-    with ScalatraFunSuite {
+class HealthControllerTest extends UnitSuite with TestEnvironment with ScalatraFunSuite {
 
   lazy val controller = new HealthController
   addServlet(controller, "/")

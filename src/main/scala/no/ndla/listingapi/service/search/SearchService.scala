@@ -18,10 +18,7 @@ import no.ndla.listingapi.ListingApiProperties
 import no.ndla.listingapi.ListingApiProperties.{MaxPageSize, SearchIndex}
 import no.ndla.listingapi.integration.Elastic4sClient
 import no.ndla.listingapi.model.{api, domain}
-import no.ndla.listingapi.model.api.{
-  NdlaSearchException,
-  ResultWindowTooLargeException
-}
+import no.ndla.listingapi.model.api.{NdlaSearchException, ResultWindowTooLargeException}
 import no.ndla.listingapi.model.domain.search._
 import no.ndla.listingapi.service.{Clock, ConverterService, createOembedUrl}
 import org.elasticsearch.ElasticsearchException
@@ -35,11 +32,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait SearchService {
-  this: Elastic4sClient
-    with SearchIndexService
-    with SearchConverterService
-    with ConverterService
-    with Clock =>
+  this: Elastic4sClient with SearchIndexService with SearchConverterService with ConverterService with Clock =>
   val searchService: SearchService
 
   class SearchService extends LazyLogging {
@@ -48,10 +41,7 @@ trait SearchService {
     private val noCopyright =
       boolQuery().not(termQuery("license", "copyrighted"))
 
-    def all(language: String,
-            page: Int,
-            pageSize: Int,
-            sort: Sort.Value): api.SearchResult = {
+    def all(language: String, page: Int, pageSize: Int, sort: Sort.Value): api.SearchResult = {
       executeSearch(
         language,
         sort,
@@ -166,8 +156,7 @@ trait SearchService {
         .map(labels => {
           val apiLabels = labels.labels.map(converterService.toApiCoverLabel)
 
-          val titles = searchableCover.title.languageValues.map(lv =>
-            domain.Title(lv.value, lv.lang))
+          val titles = searchableCover.title.languageValues.map(lv => domain.Title(lv.value, lv.lang))
           val descriptions = searchableCover.description.languageValues
             .map(lv => domain.Description(lv.value, lv.lang))
 
@@ -242,17 +231,13 @@ trait SearchService {
         case Failure(e: NdlaSearchException) => {
           e.rf.status match {
             case notFound: Int if notFound == 404 => {
-              logger.error(
-                s"Index $SearchIndex not found. Scheduling a reindex.")
+              logger.error(s"Index $SearchIndex not found. Scheduling a reindex.")
               scheduleIndexDocuments()
-              throw new IndexNotFoundException(
-                s"Index $SearchIndex not found. Scheduling a reindex")
+              throw new IndexNotFoundException(s"Index $SearchIndex not found. Scheduling a reindex")
             }
             case _ => {
               logger.error(e.getMessage)
-              throw new ElasticsearchException(
-                s"Unable to execute search in $SearchIndex",
-                e.getMessage)
+              throw new ElasticsearchException(s"Unable to execute search in $SearchIndex", e.getMessage)
             }
           }
 
@@ -266,8 +251,7 @@ trait SearchService {
         searchIndexService.indexDocuments
       }
 
-      f.failed.foreach(t =>
-        logger.warn("unable to create index: " + t.getMessage, t))
+      f.failed.foreach(t => logger.warn("unable to create index: " + t.getMessage, t))
       f.foreach {
         case Success(reindexResult) =>
           logger.info(

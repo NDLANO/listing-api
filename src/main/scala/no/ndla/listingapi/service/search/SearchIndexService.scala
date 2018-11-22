@@ -27,8 +27,7 @@ trait SearchIndexService {
         _ <- indexService.aliasTarget.map {
           case Some(index) => Success(index)
           case None =>
-            indexService.createIndexWithGeneratedName.map(newIndex =>
-              indexService.updateAliasTarget(None, newIndex))
+            indexService.createIndexWithGeneratedName.map(newIndex => indexService.updateAliasTarget(None, newIndex))
         }
         imported <- indexService.indexDocument(cover)
       } yield imported
@@ -51,8 +50,7 @@ trait SearchIndexService {
               Failure(f)
             }
             case Success(totalIndexed) => {
-              Success(
-                ReindexResult(totalIndexed, System.currentTimeMillis() - start))
+              Success(ReindexResult(totalIndexed, System.currentTimeMillis() - start))
             }
           }
         })
@@ -63,9 +61,8 @@ trait SearchIndexService {
       var numIndexed = 0
       getRanges.map(ranges => {
         ranges.foreach(range => {
-          val numberInBulk = indexService.indexDocuments(
-            listingRepository.cardsWithIdBetween(range._1, range._2),
-            indexName)
+          val numberInBulk =
+            indexService.indexDocuments(listingRepository.cardsWithIdBetween(range._1, range._2), indexName)
           numberInBulk match {
             case Success(num) => numIndexed += num
             case Failure(f)   => return Failure(f)

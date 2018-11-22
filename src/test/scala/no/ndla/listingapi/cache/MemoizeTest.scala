@@ -21,7 +21,7 @@ class MemoizeTest extends UnitSuite {
   test("That an uncached value will do an actual call") {
     val targetMock = mock[Target]
     val memoizedTarget =
-      new Memoize[String](Long.MaxValue, targetMock.targetMethod, false)
+      new Memoize[String](Long.MaxValue, targetMock.targetMethod _, false)
 
     when(targetMock.targetMethod()).thenReturn("Hello from mock")
     memoizedTarget() should equal("Hello from mock")

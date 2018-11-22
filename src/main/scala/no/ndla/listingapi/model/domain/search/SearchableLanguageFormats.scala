@@ -16,8 +16,7 @@ class SearchableLanguageValueSerializer
         case x: SearchableLanguageValues =>
           JObject(
             x.languageValues
-              .map(languageValue =>
-                JField(languageValue.lang, JString(languageValue.value)))
+              .map(languageValue => JField(languageValue.lang, JString(languageValue.value)))
               .toList)
       }))
 
@@ -31,13 +30,11 @@ class SearchableLanguageListSerializer
                 name,
                 fieldItems
                   .map {
-                    case JObject(Seq(JField("type", JString(type_)),
-                                     JField("labels", JArray(x)))) =>
+                    case JObject(Seq(JField("type", JString(type_)), JField("labels", JArray(x)))) =>
                       val labels = x.map {
                         case JString(label) => label
                         case unknownType =>
-                          throw new MappingException(
-                            s"Cannot convert $unknownType to Label")
+                          throw new MappingException(s"Cannot convert $unknownType to Label")
                       }
 
                       Label(Some(type_), labels)
@@ -45,14 +42,12 @@ class SearchableLanguageListSerializer
                       val labels = x.map {
                         case JString(label) => label
                         case unknownType =>
-                          throw new MappingException(
-                            s"Cannot convert $unknownType to Label")
+                          throw new MappingException(s"Cannot convert $unknownType to Label")
                       }
 
                       Label(None, labels)
                     case x =>
-                      throw new MappingException(
-                        s"Cannot convert $x to SearchableLanguageList")
+                      throw new MappingException(s"Cannot convert $x to SearchableLanguageList")
                   }
                   .to[Seq]
               )
@@ -71,16 +66,10 @@ class SearchableLanguageListSerializer
                     .map(lv => {
                       lv.`type` match {
                         case Some(typ) =>
-                          JObject(
-                            JField("type", JString(typ)),
-                            JField(
-                              "labels",
-                              JArray(lv.labels.map(l => JString(l)).toList)))
+                          JObject(JField("type", JString(typ)),
+                                  JField("labels", JArray(lv.labels.map(l => JString(l)).toList)))
                         case None =>
-                          JObject(
-                            JField(
-                              "labels",
-                              JArray(lv.labels.map(l => JString(l)).toList)))
+                          JObject(JField("labels", JArray(lv.labels.map(l => JString(l)).toList)))
                       }
                     })
                     .toList)

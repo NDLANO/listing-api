@@ -19,10 +19,8 @@ object LanguageValue {
     LanguageValue(lang, value)
 }
 
-case class SearchableLanguageValues(
-    languageValues: Seq[LanguageValue.LanguageValue[String]])
-case class SearchableLanguageList(
-    languageValues: Seq[LanguageValue.LanguageValue[Seq[Label]]])
+case class SearchableLanguageValues(languageValues: Seq[LanguageValue.LanguageValue[String]])
+case class SearchableLanguageList(languageValues: Seq[LanguageValue.LanguageValue[Seq[Label]]])
 
 case class SearchableCover(
     id: Long,

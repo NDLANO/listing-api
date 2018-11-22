@@ -1,10 +1,7 @@
 package no.ndla.listingapi.service
 
 import no.ndla.listingapi.auth.Client
-import no.ndla.listingapi.model.api.{
-  CoverAlreadyExistsException,
-  NotFoundException
-}
+import no.ndla.listingapi.model.api.{CoverAlreadyExistsException, NotFoundException}
 import no.ndla.listingapi.model.domain._
 import no.ndla.listingapi.model.{api, domain}
 import no.ndla.listingapi.repository.ListingRepository
@@ -23,6 +20,7 @@ trait WriteService {
   val writeService: WriteService
 
   class WriteService {
+
     def newCover(cover: api.NewCover): Try[api.Cover] = {
       cover.oldNodeId.flatMap(listingRepository.getCoverWithOldNodeId) match {
         case Some(existingCover) =>
@@ -34,8 +32,7 @@ trait WriteService {
         .validate(converterService.toDomainCover(cover))
         .flatMap(domainCover => Try(listingRepository.insertCover(domainCover)))
         .flatMap(indexService.indexDocument)
-        .map(insertedCover =>
-          converterService.toApiCover(insertedCover, cover.language))
+        .map(insertedCover => converterService.toApiCover(insertedCover, cover.language))
 
       readService.getAllLabelsMap.renewCache
       validCover
@@ -52,15 +49,13 @@ trait WriteService {
         .flatMap(coverValidator.validate)
         .flatMap(listingRepository.updateCover)
         .flatMap(indexService.indexDocument)
-        .map(updatedCover =>
-          converterService.toApiCover(updatedCover, cover.language))
+        .map(updatedCover => converterService.toApiCover(updatedCover, cover.language))
 
       readService.getAllLabelsMap.renewCache
       updatedCover
     }
 
-    private[service] def mergeCovers(existing: domain.Cover,
-                                     toMerge: api.UpdateCover): domain.Cover = {
+    private[service] def mergeCovers(existing: domain.Cover, toMerge: api.UpdateCover): domain.Cover = {
       val id = authClient.client_id()
       val now = clock.now()
 
@@ -68,26 +63,20 @@ trait WriteService {
         articleApiId = toMerge.articleApiId.getOrElse(existing.articleApiId),
         revision = Some(toMerge.revision),
         coverPhotoUrl = toMerge.coverPhotoUrl.getOrElse(existing.coverPhotoUrl),
-        title = mergeLanguageField[String, Title](
-          existing.title,
-          domain.Title(toMerge.title, toMerge.language)),
-        description = mergeLanguageField[String, Description](
-          existing.description,
-          domain.Description(toMerge.description, toMerge.language)),
+        title = mergeLanguageField[String, Title](existing.title, domain.Title(toMerge.title, toMerge.language)),
+        description =
+          mergeLanguageField[String, Description](existing.description,
+                                                  domain.Description(toMerge.description, toMerge.language)),
         labels = mergeLanguageField[Seq[Label], LanguageLabels](
           existing.labels,
-          domain.LanguageLabels(
-            toMerge.labels.map(converterService.toDomainLabel),
-            toMerge.language)),
+          domain.LanguageLabels(toMerge.labels.map(converterService.toDomainLabel), toMerge.language)),
         updatedBy = id,
         updated = now,
         theme = toMerge.theme
       )
     }
 
-    private def mergeLanguageField[T, Y <: LanguageField[T]](
-        field: Seq[Y],
-        toMerge: Y): Seq[Y] = {
+    private def mergeLanguageField[T, Y <: LanguageField[T]](field: Seq[Y], toMerge: Y): Seq[Y] = {
       field.indexWhere(_.language == toMerge.language) match {
         case idx if idx >= 0 => field.patch(idx, Seq(toMerge), 1)
         case _               => field ++ Seq(toMerge)
