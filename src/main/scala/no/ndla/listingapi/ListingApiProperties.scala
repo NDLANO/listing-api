@@ -51,8 +51,7 @@ object ListingApiProperties extends LazyLogging {
   lazy val MetaServer = prop(PropertyKeys.MetaServerKey)
   lazy val MetaPort = prop(PropertyKeys.MetaPortKey).toInt
   lazy val MetaSchema = prop(PropertyKeys.MetaSchemaKey)
-  val MetaInitialConnections = 3
-  val MetaMaxConnections = 20
+  val MetaMaxConnections = 10
 
   val CorrelationIdKey = "correlationID"
   val CorrelationIdHeader = "X-Correlation-ID"
