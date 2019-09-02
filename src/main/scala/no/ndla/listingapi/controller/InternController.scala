@@ -8,14 +8,14 @@
 
 package no.ndla.listingapi.controller
 
-import no.ndla.listingapi.service.WriteService
+import no.ndla.listingapi.service.{ReadService, WriteService}
 import no.ndla.listingapi.service.search.SearchIndexService
 import org.scalatra.{InternalServerError, Ok}
 
 import scala.util.{Failure, Success}
 
 trait InternController {
-  this: SearchIndexService with WriteService =>
+  this: SearchIndexService with WriteService with ReadService =>
   val internController: InternController
 
   class InternController extends NdlaController {
@@ -33,6 +33,10 @@ trait InternController {
           InternalServerError(f.getMessage)
         }
       }
+    }
+
+    get("/dump/cover") {
+      readService.getCoverDump()
     }
 
   }
