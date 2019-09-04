@@ -7,6 +7,8 @@ import no.ndla.listingapi.model.api.ThemeResult
 import no.ndla.listingapi.model.domain.{Lang, ThemeName, UniqeLabels}
 import no.ndla.listingapi.repository.ListingRepository
 
+import scala.math.max
+
 trait ReadService {
   this: ListingRepository with ConverterService =>
   val readService: ReadService
@@ -28,6 +30,12 @@ trait ReadService {
         .getTheme(theme)
         .map(t => converterService.toApiCover(t, language))
       ThemeResult(covers.length, covers)
+    }
+
+    def getCoverDump(): api.CoverDomainDump = {
+      val results = listingRepository.allCovers()
+
+      api.CoverDomainDump(results.size, results)
     }
 
   }
