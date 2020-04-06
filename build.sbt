@@ -35,7 +35,7 @@ lazy val listing_api = (project in file("."))
     scalacOptions := Seq("-target:jvm-1.8", "-deprecation"),
     libraryDependencies ++= Seq(
       "ndla" %% "network" % "0.42",
-      "ndla" %% "mapping" % "0.10",
+      "ndla" %% "mapping" % "0.14",
       "com.typesafe.scala-logging" %% "scala-logging" % ScalaLoggingVersion,
       "org.apache.logging.log4j" % "log4j-api" % Log4JVersion,
       "org.apache.logging.log4j" % "log4j-core" % Log4JVersion,
